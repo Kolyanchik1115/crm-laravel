@@ -4,8 +4,11 @@
 
 @section('content')
     <div class="card">
-        <div class="card-header">
-            <h2>Клієнти CRM</h2>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Клієнти CRM</h2>
+            <a href="{{ route('clients.create') }}" class="btn btn-success">
+                + Додати клієнта
+            </a>
         </div>
         <div class="card-body">
             @if($clients->isEmpty())

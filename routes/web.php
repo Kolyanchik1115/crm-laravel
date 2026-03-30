@@ -52,6 +52,8 @@ Route::get('/test-account/{id}', function ($id) {
 // Clients
 Route::group(['prefix' => 'clients'], function () {
     Route::get('/', [ClientController::class, 'index'])->name('clients.index');
+    Route::get('/create', [ClientController::class, 'create'])->name('clients.create');
+    Route::post('/', [ClientController::class, 'store'])->name('clients.store');
     Route::get('/{id}', [ClientController::class, 'show'])->name('clients.show');
 });
 

@@ -2,19 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Account;
+use App\Services\AccountService;
 use Illuminate\View\View;
 
 class AccountController extends Controller
 {
+    protected AccountService $accountService;
+
+    public function __construct(AccountService $accountService)
+    {
+        $this->accountService = $accountService;
+    }
+
     /**
      * Display a listing of accounts
      */
     public function index(): View
     {
-        $accounts = Account::with('client')
-            ->orderBy('account_number')
-            ->get();
+        $accounts = $this->accountService->getAllAccounts();
 
         return view('accounts.index', ['accounts' => $accounts]);
     }
@@ -24,7 +29,7 @@ class AccountController extends Controller
      */
     public function show(int $id): View
     {
-        $account = Account::with('client')->findOrFail($id);
+        $account = $this->accountService->getAccountById($id);
 
         return view('accounts.show', ['account' => $account]);
     }

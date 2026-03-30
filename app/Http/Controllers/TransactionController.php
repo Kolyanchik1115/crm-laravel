@@ -2,19 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Transaction;
+use App\Services\TransactionService;
 use Illuminate\View\View;
 
 class TransactionController extends Controller
 {
+    protected TransactionService $transactionService;
+
+    public function __construct(TransactionService $transactionService)
+    {
+        $this->transactionService = $transactionService;
+    }
+
     /**
      * Display a listing of transactions
      */
     public function index(): View
     {
-        $transactions = Transaction::with('account.client')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $transactions = $this->transactionService->getAllTransactions();
 
         return view('transactions.index', ['transactions' => $transactions]);
     }
