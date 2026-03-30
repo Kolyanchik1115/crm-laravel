@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ClientController;
 use App\Models\Client;
 use App\Models\Account;
@@ -16,11 +17,6 @@ Route::get('/crm-settings', function () {
         'min_transfer' => config('crm.min_transfer'),
         'max_transfer' => config('crm.max_transfer'),
     ];
-});
-
-// CRM routes
-Route::get('/clients', function () {
-    return 'Сторінка клієнтів (буде реалізовано)';
 });
 
 Route::get('/accounts', function () {
@@ -49,4 +45,10 @@ Route::get('/test-account/{id}', function ($id) {
 Route::group(['prefix' => 'clients'], function () {
     Route::get('/', [ClientController::class, 'index'])->name('clients.index');
     Route::get('/{id}', [ClientController::class, 'show'])->name('clients.show');
+});
+
+// Accounts
+Route::group(['prefix' => 'accounts'], function () {
+    Route::get('/', [AccountController::class, 'index'])->name('accounts.index');
+    Route::get('/{id}', [AccountController::class, 'show'])->name('accounts.show');
 });
