@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\TransactionController;
 use App\Models\Client;
 use App\Models\Account;
 use Illuminate\Support\Facades\Route;
@@ -19,17 +20,24 @@ Route::get('/crm-settings', function () {
     ];
 });
 
-Route::get('/accounts', function () {
-    return 'Сторінка рахунків (буде реалізовано)';
+// Just for show bad variant (N+1)
+Route::get('/clients-slow', function () {
+    DB::enableQueryLog();
+
+    $clients = Client::all(); // without with()
+
+    foreach ($clients as $client) {
+        $client->accounts->count(); // N+1 problem
+    }
+
+    $queries = DB::getQueryLog();
+    $queriesCount = count($queries);
+
+    return "Кількість запитів: " . $queriesCount . " (N+1 проблема)";
 });
 
-Route::get('/transactions', function () {
-    return 'Сторінка транзакцій (буде реалізовано)';
-});
-
-Route::get('/invoices', function () {
-    return 'Сторінка рахунків-фактур (буде реалізовано)';
-});
+// The right one is already exist /clients
+// Route::get('/clients', [ClientController::class, 'index']);
 
 // test get client route
 Route::get('/test-client', function () {
@@ -52,3 +60,6 @@ Route::group(['prefix' => 'accounts'], function () {
     Route::get('/', [AccountController::class, 'index'])->name('accounts.index');
     Route::get('/{id}', [AccountController::class, 'show'])->name('accounts.show');
 });
+
+//Transactions
+Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');

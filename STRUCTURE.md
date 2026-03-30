@@ -119,3 +119,36 @@ Route::get('/invoices', [InvoiceController::class, 'index']);
 5. **Eloquent ORM**: Замість ручних PDO-запитів - об'єктно-орієнтована робота з БД.
 
 6. **Blade**: Шаблонізатор з наслідуванням та компонентами (замість чистого PHP у шаблонах).
+
+## Eager Loading у CRM
+
+### Проблема N+1
+
+Коли ми отримуємо список клієнтів без `with('accounts')`:
+
+```php
+$clients = Client::all();
+foreach ($clients as $client) {
+    $count = $client->accounts->count(); // окремий запит для кожного клієнта
+}
+```
+
+Якщо у нас 100 клієнтів:
+- 1 запит на отримання клієнтів
+- 100 запитів на отримання рахунків кожного клієнта
+- **Всього: 101 запит!** (N+1 проблема)
+
+### Рішення: Eager Loading
+
+Використовуємо `with()` для попереднього завантаження зв'язків:
+
+```php
+$clients = Client::with('accounts')->get();
+foreach ($clients as $client) {
+    $count = $client->accounts->count(); // дані вже завантажені
+}
+```
+### Перевірка
+
+- `/clients-slow` - поганий варіант (N+1 запитів)
+- `/clients` - хороший варіант (2 запити)

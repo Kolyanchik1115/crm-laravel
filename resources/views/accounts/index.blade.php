@@ -27,7 +27,7 @@
                             <tr>
                                 <td class="font-monospace">{{ $account->account_number }}</td>
                                 <td class="text-end">{{ number_format($account->balance, 2) }}</td>
-                                <td>{{ $account->currency }}</td>
+                                <td class="text-center">{{ $account->currency }}</td>
                                 <td>{{ $account->client->full_name }}</td>
                                 <td class="text-center">
                                     <a href="{{ route('accounts.show', $account->id) }}" class="btn btn-sm btn-success">

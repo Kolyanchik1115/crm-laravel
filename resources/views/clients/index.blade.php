@@ -28,8 +28,8 @@
                             <tr>
                                 <td>{{ $client->full_name }}</td>
                                 <td>{{ $client->email }}</td>
-                                <td class="text-end">{{ number_format($client->balance, 2) }}</td>
-                                <td>{{ $client->currency }}</td>
+                                <td class="text-center">{{ number_format($client->balance, 2) }}</td>
+                                <td class="text-center">{{ $client->currency }}</td>
                                 <td class="text-center">
                                     <span class="badge bg-info">{{ $client->accounts->count() }}</span>
                                 </td>

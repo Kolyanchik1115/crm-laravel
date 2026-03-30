@@ -22,10 +22,10 @@
                     <a class="nav-link" href="{{ route('clients.index') }}">Клієнти</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/accounts">Рахунки</a>
+                    <a class="nav-link" href="{{ route('accounts.index') }}">Рахунки</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/invoices">Інвойси</a>
+                    <a class="nav-link" href="{{ route('transactions.index') }}">Транзакції</a>
                 </li>
             </ul>
         </div>

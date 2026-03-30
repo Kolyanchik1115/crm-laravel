@@ -50,23 +50,35 @@ DB_USERNAME=crm_user
 DB_PASSWORD=crm_password
 ```
 ---
+## 🗄️ Міграції та сидери
 
-## 🗄️ Виконання міграцій
+### Створення таблиць (міграції)
+
+Міграції створюють структуру таблиць в базі даних:
 
 ```bash
+# Виконати всі міграції
 php artisan migrate
+
+# Очистити базу і виконати всі міграції заново
+php artisan migrate:fresh
 ```
 
-Це створить стандартні таблиці Laravel:
-- users
-- password_reset_tokens
-- failed_jobs
-- jobs
-- cache
-- sessions
-- personal_access_tokens
+### Заповнення даними (сидери)
 
----
+Сидери наповнюють таблиці тестовими даними:
+
+```bash
+# Виконати всі сидери
+php artisan db:seed
+
+# Виконати конкретний сидер
+php artisan db:seed --class=ClientsTableSeeder
+
+# Очистити базу, виконати міграції та сидери (все разом)
+php artisan migrate:fresh --seed
+```
+
 
 ## 🏃 Як запустити проект
 
@@ -113,7 +125,6 @@ php artisan route:list
 | `routes/` | Визначення маршрутів |
 | `storage/` | Логи, кеш, завантажені файли |
 | `tests/` | Тести |
-
 
 ---
 

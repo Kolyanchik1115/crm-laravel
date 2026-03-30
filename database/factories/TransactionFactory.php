@@ -12,7 +12,7 @@ class TransactionFactory extends Factory
 
     public function definition(): array
     {
-        $types = ['deposit', 'withdrawal', 'transfer', 'payment', 'refund'];
+        $types = ['deposit', 'withdrawal', 'transfer', 'payment'];
         $statuses = ['completed', 'pending', 'failed', 'cancelled'];
 
         return [
