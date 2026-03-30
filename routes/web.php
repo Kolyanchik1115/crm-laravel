@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ClientController;
 use App\Models\Client;
 use App\Models\Account;
 use Illuminate\Support\Facades\Route;
@@ -42,4 +43,10 @@ Route::get('/test-client', function () {
 // test get account by id route
 Route::get('/test-account/{id}', function ($id) {
     return Account::with('client')->find($id);
+});
+
+// Clients
+Route::group(['prefix' => 'clients'], function () {
+    Route::get('/', [ClientController::class, 'index'])->name('clients.index');
+    Route::get('/{id}', [ClientController::class, 'show'])->name('clients.show');
 });
