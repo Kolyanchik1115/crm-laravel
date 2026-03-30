@@ -15,11 +15,20 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        //TODO: when you need this user table, uncommit below
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // User::factory(10)->create();
+        // User::factory()->create([
+        // 'name' => 'Test User',
+        // 'email' => 'test@example.com', ]);
+
+        $this->call([
+            ClientsTableSeeder::class,
+            AccountsTableSeeder::class,
+            ServicesTableSeeder::class,
+            InvoicesTableSeeder::class,
+            InvoiceItemsTableSeeder::class,
+            TransactionsTableSeeder::class,
         ]);
     }
 }

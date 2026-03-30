@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Client;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -30,4 +31,9 @@ Route::get('/transactions', function () {
 
 Route::get('/invoices', function () {
     return 'Сторінка рахунків-фактур (буде реалізовано)';
+});
+
+//TODO: Temporary get client route
+Route::get('/test-client', function () {
+    return 'Кiлькiсть клiєнтiв: ' . Client::count();
 });
