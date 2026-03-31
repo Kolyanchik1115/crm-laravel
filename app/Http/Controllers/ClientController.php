@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Services\ClientService;
-use App\Http\Requests\ClientRequest;
+use App\Http\Requests\StoreClientRequest;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 
@@ -42,7 +42,7 @@ class ClientController extends Controller
         return view('clients.create');
     }
 
-    public function store(ClientRequest $request): RedirectResponse
+    public function store(StoreClientRequest $request): RedirectResponse
     {
 
         $this->clientService->createClient($request->validated());

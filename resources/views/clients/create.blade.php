@@ -8,7 +8,8 @@
             <h2>Додати нового клієнта</h2>
         </div>
         <div class="card-body">
-            <form action="{{ route('clients.store') }}" method="POST">
+            {{--Added novalidate parametr to check custom excetions--}}
+            <form action="{{ route('clients.store') }}" method="POST" novalidate>
                 @csrf
 
                 <div class="mb-3">
@@ -17,8 +18,8 @@
                            class="form-control @error('full_name') is-invalid @enderror"
                            id="full_name"
                            name="full_name"
-                           value="{{ old('full_name') }}"
-                           required>
+                           value="{{ old('full_name') }}">
+                        {{-- required> --}}}
                     @error('full_name')
                     <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -30,8 +31,8 @@
                            class="form-control @error('email') is-invalid @enderror"
                            id="email"
                            name="email"
-                           value="{{ old('email') }}"
-                           required>
+                           value="{{ old('email') }}">
+                        {{-- required> --}}}
                     @error('email')
                     <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
