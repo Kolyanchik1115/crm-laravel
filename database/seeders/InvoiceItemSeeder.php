@@ -7,7 +7,7 @@ use App\Models\Invoice;
 use App\Models\Service;
 use Illuminate\Database\Seeder;
 
-class InvoiceItemsTableSeeder extends Seeder
+class InvoiceItemSeeder extends Seeder
 {
     public function run(): void
     {

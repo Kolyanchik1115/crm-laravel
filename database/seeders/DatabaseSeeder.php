@@ -24,12 +24,12 @@ class DatabaseSeeder extends Seeder
         // 'email' => 'test@example.com', ]);
 
         $this->call([
-            ClientsTableSeeder::class,
-            AccountsTableSeeder::class,
-            ServicesTableSeeder::class,
-            InvoicesTableSeeder::class,
-            InvoiceItemsTableSeeder::class,
-            TransactionsTableSeeder::class,
+            ClientSeeder::class,
+            AccountSeeder::class,
+            ServiceSeeder::class,
+            InvoiceSeeder::class,
+            InvoiceItemSeeder::class,
+            TransactionSeeder::class,
         ]);
     }
 }

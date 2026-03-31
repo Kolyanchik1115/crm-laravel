@@ -6,7 +6,7 @@ namespace Database\Seeders;
 use App\Models\Client;
 use Illuminate\Database\Seeder;
 
-class ClientsTableSeeder extends Seeder
+class ClientSeeder extends Seeder
 {
     public function run(): void
     {
