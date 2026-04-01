@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TransactionController;
 use App\Models\Client;
 use App\Models\Account;
@@ -69,3 +70,6 @@ Route::group(['prefix' => 'accounts'], function () {
 
 //Transactions
 Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+
+//Dashboard
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

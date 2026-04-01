@@ -17,6 +17,9 @@ use App\Http\Controllers\Api\InvoiceController;
 |--------------------------------------------------------------------------
 */
 
+// API versioning (v1 = first version, allows backward compatibility)
+// v1 is added to support API versioning. When changes are needed, we can create v2
+// while keeping v1 for existing clients. This is a standard API development practice.
 Route::prefix('v1')->group(function () {
     // Clients
     Route::get('/clients', [ClientController::class, 'index']);
