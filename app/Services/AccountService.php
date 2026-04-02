@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\Account;
 use App\Repositories\AccountRepository;
 use Illuminate\Database\Eloquent\Collection;
 
