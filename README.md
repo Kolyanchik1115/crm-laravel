@@ -31,6 +31,7 @@ php artisan key:generate
 Відкрийте файл `.env` та заповніть параметри для бази даних:
 
 #### Для локальної MySQL:
+
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -41,6 +42,7 @@ DB_PASSWORD=
 ```
 
 #### Для Docker MySQL:
+
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -49,7 +51,9 @@ DB_DATABASE=crm_db
 DB_USERNAME=crm_user
 DB_PASSWORD=crm_password
 ```
+
 ---
+
 ## 🗄️ Міграції та сидери
 
 ### Створення таблиць (міграції)
@@ -79,7 +83,6 @@ php artisan db:seed --class=ClientsTableSeeder
 php artisan migrate:fresh --seed
 ```
 
-
 ## 🏃 Як запустити проект
 
 ```bash
@@ -94,18 +97,19 @@ php artisan serve
 
 ## 🌐 Маршрути проекту
 
-| URL | Опис |
-|-----|------|
-| `/` | Головна сторінка (Laravel welcome) |
-| `/clients` | Сторінка клієнтів (заглушка) |
-| `/accounts` | Сторінка рахунків (заглушка) |
-| `/transactions` | Сторінка транзакцій (заглушка) |
-| `/invoices` | Сторінка рахунків-фактур (заглушка) |
-| `/crm-settings` | Перевірка CRM налаштувань (JSON) |
+| URL             | Опис                                |
+|-----------------|-------------------------------------|
+| `/`             | Головна сторінка (Laravel welcome)  |
+| `/clients`      | Сторінка клієнтів (заглушка)        |
+| `/accounts`     | Сторінка рахунків (заглушка)        |
+| `/transactions` | Сторінка транзакцій (заглушка)      |
+| `/invoices`     | Сторінка рахунків-фактур (заглушка) |
+| `/crm-settings` | Перевірка CRM налаштувань (JSON)    |
 
 ---
 
 ### Перевірка маршрутів:
+
 ```bash
 php artisan route:list
 ```
@@ -114,17 +118,17 @@ php artisan route:list
 
 ## 📁 Структура проекту
 
-| Папка | Призначення |
-|-------|-------------|
-| `app/` | Ядро додатку (контролери, моделі, middleware) |
-| `bootstrap/` | Завантажувач фреймворку |
-| `config/` | Конфігураційні файли |
-| `database/` | Міграції, сіди, фабрики |
-| `public/` | Точка входу (index.php) |
-| `resources/` | Шаблони (Blade), мови, assets |
-| `routes/` | Визначення маршрутів |
-| `storage/` | Логи, кеш, завантажені файли |
-| `tests/` | Тести |
+| Папка        | Призначення                                   |
+|--------------|-----------------------------------------------|
+| `app/`       | Ядро додатку (контролери, моделі, middleware) |
+| `bootstrap/` | Завантажувач фреймворку                       |
+| `config/`    | Конфігураційні файли                          |
+| `database/`  | Міграції, сіди, фабрики                       |
+| `public/`    | Точка входу (index.php)                       |
+| `resources/` | Шаблони (Blade), мови, assets                 |
+| `routes/`    | Визначення маршрутів                          |
+| `storage/`   | Логи, кеш, завантажені файли                  |
+| `tests/`     | Тести                                         |
 
 ---
 
@@ -133,3 +137,44 @@ php artisan route:list
 - [STRUCTURE.md](STRUCTURE.md) - детальний опис структури проекту
 - [LIFECYCLE.md](LIFECYCLE.md) - життєвий цикл HTTP-запиту в Laravel
 - [SYMFONY_VS_LARAVEL.md](SYMFONY_VS_LARAVEL.md) - порівняння Laravel та Symfony
+
+## 🐳 Docker
+
+### Запуск контейнерів
+
+```bash
+# Запустити всі сервіси (MySQL, Redis, Laravel, Queue)
+docker compose up -d
+```
+
+### Виконання міграцій в Docker
+
+```bash
+docker compose exec app php artisan migrate
+```
+
+### Запуск worker (обробка черг)
+
+```bash
+docker compose exec app php artisan queue:work redis --sleep=3 --tries=3
+```
+
+### Перевірка Redis
+
+```bash
+docker compose exec redis redis-cli PING
+# Відповідь: PONG
+```
+
+### Зупинка контейнерів
+
+```bash
+docker compose down
+```
+
+### Перегляд логів
+
+```bash
+docker compose logs app
+docker compose logs queue
+docker compose logs redis
