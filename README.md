@@ -180,9 +180,9 @@ docker compose logs redis
 
 ### Архітектура та структура
 
-- [docs/STRUCTURE.md](STRUCTURE.md) - детальний опис структури проекту
-- [docs/LIFECYCLE.md](LIFECYCLE.md) - життєвий цикл HTTP-запиту в Laravel
-- [docs/SYMFONY_VS_LARAVEL.md](SYMFONY_VS_LARAVEL.md) - порівняння Laravel та Symfony
+- [docs/STRUCTURE.md](docs/STRUCTURE.md) - детальний опис структури проекту
+- [docs/LIFECYCLE.md](docs/LIFECYCLE.md) - життєвий цикл HTTP-запиту в Laravel
+- [docs/SYMFONY_VS_LARAVEL.md](docs/SYMFONY_VS_LARAVEL.md) - порівняння Laravel та Symfony
 
 ### Черги (Queues)
 
