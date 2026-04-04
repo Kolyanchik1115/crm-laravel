@@ -178,16 +178,14 @@ docker compose logs redis
 
 ## 📚 Документація
 
-### Архітектура та структура
+### 🏗️ Архітектура
+- [📐 STRUCTURE.md](docs/STRUCTURE.md) - детальний опис структури проекту
+- [🔄 LIFECYCLE.md](docs/LIFECYCLE.md) - життєвий цикл HTTP-запиту в Laravel
+- [⚖️ SYMFONY_VS_LARAVEL.md](docs/SYMFONY_VS_LARAVEL.md) - порівняння Laravel та Symfony
 
-- [docs/STRUCTURE.md](docs/STRUCTURE.md) - детальний опис структури проекту
-- [docs/LIFECYCLE.md](docs/LIFECYCLE.md) - життєвий цикл HTTP-запиту в Laravel
-- [docs/SYMFONY_VS_LARAVEL.md](docs/SYMFONY_VS_LARAVEL.md) - порівняння Laravel та Symfony
-
-### Черги (Queues)
-
-- [docs/QUEUE_SCENARIOS.md](docs/QUEUE_SCENARIOS.md) - сценарії використання черг
-- [docs/QUEUE_SETUP.md](docs/QUEUE_SETUP.md) - налаштування черг у CRM
-- [docs/QUEUE_DRIVERS.md](docs/QUEUE_DRIVERS.md) - порівняння драйверів черг
-- [docs/QUEUE_ANTIPATTERNS.md](docs/QUEUE_ANTIPATTERNS.md) - коли НЕ використовувати черги
-- [docs/JOB_LIFECYCLE.md](docs/JOB_LIFECYCLE.md) - життєвий цикл Job у Laravel
+### 📨 Черги (Queues)
+- [📋 QUEUE_SCENARIOS.md](docs/QUEUE_SCENARIOS.md) - сценарії використання черг
+- [⚙️ QUEUE_SETUP.md](docs/QUEUE_SETUP.md) - налаштування черг у CRM
+- [🚀 QUEUE_DRIVERS.md](docs/QUEUE_DRIVERS.md) - порівняння драйверів черг
+- [⚠️ QUEUE_ANTIPATTERNS.md](docs/QUEUE_ANTIPATTERNS.md) - коли НЕ використовувати черги
+- [🔄 JOB_LIFECYCLE.md](docs/JOB_LIFECYCLE.md) - життєвий цикл Job у Laravel
