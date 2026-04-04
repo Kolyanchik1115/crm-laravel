@@ -132,12 +132,6 @@ php artisan route:list
 
 ---
 
-## 📚 Документація
-
-- [STRUCTURE.md](STRUCTURE.md) - детальний опис структури проекту
-- [LIFECYCLE.md](LIFECYCLE.md) - життєвий цикл HTTP-запиту в Laravel
-- [SYMFONY_VS_LARAVEL.md](SYMFONY_VS_LARAVEL.md) - порівняння Laravel та Symfony
-
 ## 🐳 Docker
 
 ### Запуск контейнерів
@@ -178,3 +172,22 @@ docker compose down
 docker compose logs app
 docker compose logs queue
 docker compose logs redis
+```
+
+---
+
+## 📚 Документація
+
+### Архітектура та структура
+
+- [docs/STRUCTURE.md](STRUCTURE.md) - детальний опис структури проекту
+- [docs/LIFECYCLE.md](LIFECYCLE.md) - життєвий цикл HTTP-запиту в Laravel
+- [docs/SYMFONY_VS_LARAVEL.md](SYMFONY_VS_LARAVEL.md) - порівняння Laravel та Symfony
+
+### Черги (Queues)
+
+- [docs/QUEUE_SCENARIOS.md](docs/QUEUE_SCENARIOS.md) - сценарії використання черг
+- [docs/QUEUE_SETUP.md](docs/QUEUE_SETUP.md) - налаштування черг у CRM
+- [docs/QUEUE_DRIVERS.md](docs/QUEUE_DRIVERS.md) - порівняння драйверів черг
+- [docs/QUEUE_ANTIPATTERNS.md](docs/QUEUE_ANTIPATTERNS.md) - коли НЕ використовувати черги
+- [docs/JOB_LIFECYCLE.md](docs/JOB_LIFECYCLE.md) - життєвий цикл Job у Laravel
