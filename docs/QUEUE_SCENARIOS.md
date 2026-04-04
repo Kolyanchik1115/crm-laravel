@@ -420,3 +420,99 @@ class SendInvoiceEmail implements ShouldQueue
 - **Синхронно:** тільки збереження в БД (критичні операції)
 - **Асинхронно:** генерація PDF, email, аудит, кеш (допоміжні I/O операції)
 - **Результат:** користувач отримує відповідь за 0.1 секунди замість 5.3 секунд
+
+## Сценарій для Уроку 5.2: Відправка email з підтвердженням переказу
+
+### Назва Job
+
+```php
+SendTransferConfirmationJob
+```
+
+### Вхідні дані (конструктор)
+
+```php
+public function __construct(
+    public int $transactionId,
+    public string $fromAccountNumber,
+    public string $toAccountNumber,
+    public float $amount,
+    public string $currency
+) {}
+```
+
+### Що робить handle() - псевдокод
+
+```php
+public function handle(): void
+{
+    // 1. Знайти транзакцію в БД
+    $transaction = Transaction::find($this->transactionId);
+    
+    // 2. Отримати дані відправника та отримувача
+    $fromAccount = Account::with('client')->find($transaction->from_account_id);
+    $toAccount = Account::with('client')->find($transaction->to_account_id);
+    
+    $sender = $fromAccount->client;
+    $receiver = $toAccount->client;
+    
+    // 3. Сформувати текст листа для відправника
+    $senderMessage = "Ваш переказ на суму {$this->amount} {$this->currency} 
+                      на рахунок {$this->toAccountNumber} успішно виконано.";
+    
+    // 4. Сформувати текст листа для отримувача
+    $receiverMessage = "На ваш рахунок {$this->toAccountNumber} 
+                        надійшло {$this->amount} {$this->currency} 
+                        від {$sender->full_name}.";
+    
+    // 5. Відправити email (логування)
+    Log::info("Email to sender: {$sender->email} - {$senderMessage}");
+    Log::info("Email to receiver: {$receiver->email} - {$receiverMessage}");
+    
+    // 6. (Опціонально) Зберегти факт відправки в БД
+    NotificationLog::create([
+        'transaction_id' => $this->transactionId,
+        'sender_email' => $sender->email,
+        'receiver_email' => $receiver->email,
+        'sent_at' => now(),
+    ]);
+}
+```
+
+### Чому цей сценарій підходить для черги
+
+| Характеристика | Чому в чергу |
+|----------------|--------------|
+| **Не критично для відповіді** | Користувач не чекає на email |
+| **I/O операція** | Відправка email (SMTP) - повільна |
+| **Може падати** | Email сервер може бути недоступний |
+| **Retry механізм** | При помилці можна повторити |
+
+### Де буде dispatch() в контролері
+
+```php
+class TransferController extends Controller
+{
+    public function store(TransferRequest $request): JsonResponse
+    {
+        // СИНХРОННО: збереження в БД (транзакція)
+        DB::transaction(function () use ($request, &$transaction, &$fromAccount, &$toAccount) {
+            // зняття коштів, поповнення, створення транзакцій...
+        });
+        
+        // АСИНХРОННО: відправка email (в чергу)
+        SendTransferConfirmationJob::dispatch(
+            transactionId: $transaction->id,
+            fromAccountNumber: $fromAccount->account_number,
+            toAccountNumber: $toAccount->account_number,
+            amount: $request->amount,
+            currency: $request->currency
+        );
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Переказ успішно виконано'
+        ]);
+    }
+}
+```
