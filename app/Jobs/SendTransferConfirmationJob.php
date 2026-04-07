@@ -30,6 +30,9 @@ class SendTransferConfirmationJob implements ShouldQueue
      */
     public function handle(): void
     {
+        // exception for testing
+        // throw new \RuntimeException('Simulated mail service failure');
+
         // Load transfer_out transaction
         $transactionOut = Transaction::with(['account.client'])
             ->where('type', 'transfer_out')
