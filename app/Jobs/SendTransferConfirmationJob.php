@@ -45,6 +45,15 @@ class SendTransferConfirmationJob implements ShouldQueue
             return;
         }
 
+        //check if not sent
+        if ($transactionOut->confirmation_sent_at) {
+            Log::info('SendTransferConfirmationJob: Skip - confirmation already sent', [
+                'transaction_out_id' => $this->transactionIdOut,
+                'sent_at' => $transactionOut->confirmation_sent_at,
+            ]);
+            return;
+        }
+
         // Looking for transaction transfer_in
         $transactionIn = Transaction::with(['account.client'])
             ->where('type', 'transfer_in')
@@ -82,7 +91,18 @@ class SendTransferConfirmationJob implements ShouldQueue
         ]);
 
         // Update transaction status
-        $transactionOut->update(['status' => 'notification_sent']);
-        $transactionIn->update(['status' => 'notification_sent']);
+        $transactionOut->update([
+            'status' => 'notification_sent',
+            'confirmation_sent_at' => now(),
+        ]);
+
+        $transactionIn->update([
+            'status' => 'notification_sent',
+        ]);
+
+        Log::info('SendTransferConfirmationJob: Confirmation sent and marked', [
+            'transaction_out_id' => $transactionOut->id,
+            'transaction_in_id' => $transactionIn->id,
+        ]);
     }
 }

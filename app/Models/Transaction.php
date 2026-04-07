@@ -19,11 +19,12 @@ class Transaction extends Model
         'type',
         'status',
         'description',
+        'confirmation_sent_at',
     ];
 
     protected $casts = [
         'amount' => 'float',
-        'created_at' => 'datetime',
+        'confirmation_sent_at' => 'datetime',
     ];
 
     public function account(): BelongsTo

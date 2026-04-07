@@ -41,15 +41,24 @@ class TransferRepository
         int     $accountId,
         float   $amount,
         string  $fromAccountNumber,
-        ?string $description = null
+        ?string $description = null,
+        ?int    $transactionOutId = null
     ): Transaction
     {
+
+        $desc = "Надходження з рахунку {$fromAccountNumber}. {$description}";
+
+        // added this id due to error with search transaction ( temporary solution for example )
+        if ($transactionOutId) {
+            $desc .= " (transfer_out_id: {$transactionOutId})";
+        }
+
         return Transaction::create([
             'account_id' => $accountId,
             'amount' => $amount,
             'type' => 'transfer_in',
             'status' => 'completed',
-            'description' => "Надходження з рахунку {$fromAccountNumber}. {$description}",
+            'description' => $desc,
         ]);
     }
 }
