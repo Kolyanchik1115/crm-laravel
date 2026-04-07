@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\TransferController;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use Illuminate\Support\Facades\Route;
@@ -129,5 +130,7 @@ Route::prefix('v1')->group(function () {
         }
     });
 
+    //Transfer
+    Route::post('/transfer', [TransferController::class, 'transfer']);
 });
 

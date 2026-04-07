@@ -1,0 +1,40 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class TransferRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'from_account_id' => 'required|exists:accounts,id',
+            'to_account_id' => 'required|exists:accounts,id|different:from_account_id',
+            'amount' => 'required|numeric|min:0.01',
+            'description' => 'nullable|string|max:500',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'from_account_id.required' => 'Рахунок відправника обов\'язковий',
+            'from_account_id.exists' => 'Рахунок відправника не існує',
+            'to_account_id.required' => 'Рахунок отримувача обов\'язковий',
+            'to_account_id.exists' => 'Рахунок отримувача не існує',
+            'to_account_id.different' => 'Рахунки мають бути різними',
+            'amount.required' => 'Сума переказу обов\'язкова',
+            'amount.numeric' => 'Сума має бути числом',
+            'amount.min' => 'Сума має бути не менше 0.01',
+            'description.max' => 'Опис не може перевищувати 500 символів',
+        ];
+    }
+}
