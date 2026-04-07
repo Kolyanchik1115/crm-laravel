@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Jobs\SendTransferConfirmationJob;
+use App\Jobs\UpdateDashboardCacheJob;
 use App\Repositories\TransferRepository;
 use Illuminate\Support\Facades\DB;
 
@@ -18,15 +19,17 @@ class TransferService
     }
 
     public function executeTransfer(
-        int $fromAccountId,
-        int $toAccountId,
-        float $amount,
+        int     $fromAccountId,
+        int     $toAccountId,
+        float   $amount,
         ?string $description = null
-    ): array {
+    ): array
+    {
         $transactionOut = null;
         $transactionIn = null;
 
-        DB::transaction(function () use ($fromAccountId, $toAccountId, $amount, $description, &$transactionOut, &$transactionIn) {
+        DB::transaction(function () use ($fromAccountId, $toAccountId, $amount, $description,
+            &$transactionOut, &$transactionIn) {
             $fromAccount = $this->repository->findAccountForUpdate($fromAccountId);
             $toAccount = $this->repository->findAccountForUpdate($toAccountId);
 
@@ -58,6 +61,9 @@ class TransferService
 
         // Dispatch Job after success transfer
         SendTransferConfirmationJob::dispatch($transactionOut->id);
+
+        // Cache update with 30 sec delay
+        UpdateDashboardCacheJob::dispatch()->delay(now()->addSeconds(30));
 
         return [
             'transaction_out_id' => $transactionOut->id,

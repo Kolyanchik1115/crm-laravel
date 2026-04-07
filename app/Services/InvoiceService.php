@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Jobs\LogInvoiceAuditJob;
+use App\Jobs\UpdateDashboardCacheJob;
 use App\Repositories\InvoiceRepository;
 use App\Repositories\InvoiceItemRepository;
 use Illuminate\Support\Facades\DB;
@@ -40,6 +41,9 @@ class InvoiceService
         // Async log writing
         LogInvoiceAuditJob::dispatch($invoice->id);
 
+        // Cache update with 30 sec delay
+        UpdateDashboardCacheJob::dispatch()->delay(now()->addSeconds(30));
+
         return [
             'invoice_id' => $invoice->id,
             'invoice_number' => $invoice->invoice_number,
@@ -53,6 +57,7 @@ class InvoiceService
         $lastNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, -4) : 0;
         $newNumber = $lastNumber + 1;
 
-        return 'INV-' . date('Ymd') . '-' . str_pad((string) $newNumber, 4, '0', STR_PAD_LEFT);
+        return 'INV-' . date('Ymd') . '-' . str_pad((string) $newNumber,
+                4, '0', STR_PAD_LEFT);
     }
 }

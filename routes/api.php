@@ -44,6 +44,22 @@ Route::prefix('v1')->group(function () {
     Route::get('/invoices/{id}', [InvoiceController::class, 'show']);
     Route::post('/invoices', [CreateInvoiceController::class, 'store']);
 
+    // test job controller
+    Route::get('/dashboard-stats', function () {
+        $stats = Cache::get('crm:dashboard:stats');
+
+        if (!$stats) {
+            return response()->json([
+                'status' => 'cache_miss',
+                'message' => 'Cache is empty, job not executed yet',
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'cache_hit',
+            'data' => $stats,
+        ]);
+    });
 
     // Success invoice create
     Route::post('/test/create-invoice', function () {
