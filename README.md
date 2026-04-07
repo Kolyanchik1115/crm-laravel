@@ -185,6 +185,7 @@ docker compose logs redis
 
 ### 📨 Черги (Queues)
 - [📋 QUEUE_SCENARIOS.md](docs/QUEUE_SCENARIOS.md) - сценарії використання черг
+- [📋 QUEUE_CHECKLIST.md](docs/QUEUE_SCENARIOS.md) - сценарії перед деплоєм
 - [⚙️ QUEUE_SETUP.md](docs/QUEUE_SETUP.md) - налаштування черг у CRM
 - [🚀 QUEUE_DRIVERS.md](docs/QUEUE_DRIVERS.md) - порівняння драйверів черг
 - [⚠️ QUEUE_ANTIPATTERNS.md](docs/QUEUE_ANTIPATTERNS.md) - коли НЕ використовувати черги
