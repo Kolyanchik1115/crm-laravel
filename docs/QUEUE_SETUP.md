@@ -158,3 +158,73 @@ php artisan queue:monitor default
 | **sync** | Просто, без залежностей | Задачі виконуються синхронно |
 | **database** | Не потребує Redis, легко | Менша продуктивність |
 | **redis** | Швидко, масштабується | Потребує Redis |
+
+
+# Черги та пріоритети
+
+## Як працює onQueue()
+
+Метод `onQueue()` дозволяє відправити Job в конкретну чергу:
+
+```php
+// Відправка в чергу notifications
+SendTransferConfirmationJob::dispatch($id)->onQueue('notifications');
+
+// Відправка в чергу audit
+LogInvoiceAuditJob::dispatch($id)->onQueue('audit');
+
+// Відправка в чергу low з затримкою
+UpdateDashboardCacheJob::dispatch()->onQueue('low')->delay(now()->addSeconds(30));
+```
+
+### Пріоритети черг в CRM
+
+| Черга | Пріоритет | Job | Чому |
+|-------|-----------|-----|------|
+| `notifications` | Високий | `SendTransferConfirmationJob` | Клієнт очікує email підтвердження |
+| `audit` | Середній | `LogInvoiceAuditJob` | Важливо для історії, але не терміново |
+| `default` | Середній | Інші Job | Стандартні задачі |
+| `low` | Низький | `UpdateDashboardCacheJob` | Не критично, можна зачекати |
+
+### Запуск worker з декількома чергами
+
+```bash
+# Docker
+docker compose exec app php artisan queue:work redis --queue=notifications,audit,default,low --sleep=3 --tries=3
+
+# Локально
+php artisan queue:work redis --queue=notifications,audit,default,low --sleep=3 --tries=3
+```
+
+Worker обробляє черги в заданому порядку:
+1. Спочатку всі задачі з `notifications`
+2. Потім з `audit`
+3. Потім з `default`
+4. В останню чергу з `low`
+
+### Перевірка черг в Redis
+
+```bash
+# Docker
+docker compose exec redis redis-cli KEYS "*queue*"
+docker compose exec redis redis-cli LLEN queues:notifications
+docker compose exec redis redis-cli LLEN queues:audit
+docker compose exec redis redis-cli LLEN queues:low
+
+# Локально
+redis-cli KEYS "*queue*"
+redis-cli LLEN queues:notifications
+```
+
+### Приклад порядку обробки
+
+1. Клієнт робить переказ → Job потрапляє в чергу `notifications`
+2. Worker бере Job з `notifications` → відправляє email
+3. Потім бере Job з `audit` → записує аудит
+4. Потім бере Job з `low` → оновлює кеш (через 30 секунд)
+
+### Переваги використання різних черг
+
+- **Пріоритезація** — важливі задачі виконуються першими
+- **Ізоляція** — помилка в одній черзі не блокує інші
+- **Масштабування** — можна запустити окремі worker для різних черг

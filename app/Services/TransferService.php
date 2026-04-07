@@ -28,8 +28,10 @@ class TransferService
         $transactionOut = null;
         $transactionIn = null;
 
-        DB::transaction(function () use ($fromAccountId, $toAccountId, $amount, $description,
-            &$transactionOut, &$transactionIn) {
+        DB::transaction(function () use (
+            $fromAccountId, $toAccountId, $amount, $description,
+            &$transactionOut, &$transactionIn
+        ) {
             $fromAccount = $this->repository->findAccountForUpdate($fromAccountId);
             $toAccount = $this->repository->findAccountForUpdate($toAccountId);
 
@@ -62,10 +64,13 @@ class TransferService
         });
 
         // Dispatch Job after success transfer
-        SendTransferConfirmationJob::dispatch($transactionOut->id);
+        SendTransferConfirmationJob::dispatch($transactionOut->id, $transactionIn->id)
+            ->onQueue('notifications');
 
         // Cache update with 30 sec delay
-        UpdateDashboardCacheJob::dispatch()->delay(now()->addSeconds(30));
+        UpdateDashboardCacheJob::dispatch()
+            ->onQueue('low')
+            ->delay(now()->addSeconds(30));
 
         return [
             'transaction_out_id' => $transactionOut->id,

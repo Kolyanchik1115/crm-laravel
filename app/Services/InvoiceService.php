@@ -39,10 +39,10 @@ class InvoiceService
         });
 
         // Async log writing
-        LogInvoiceAuditJob::dispatch($invoice->id);
+        LogInvoiceAuditJob::dispatch($invoice->id)->onQueue('audit');
 
         // Cache update with 30 sec delay
-        UpdateDashboardCacheJob::dispatch()->delay(now()->addSeconds(30));
+        UpdateDashboardCacheJob::dispatch()->onQueue('low')->delay(now()->addSeconds(30));
 
         return [
             'invoice_id' => $invoice->id,
