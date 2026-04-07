@@ -27,41 +27,54 @@ class LogInvoiceAuditJob implements ShouldQueue
 
     public function handle(): void
     {
-        // invoice with client and items
-        $invoice = Invoice::with(['client', 'items'])->find($this->invoiceId);
+        try {
 
-        if (!$invoice) {
-            Log::warning('LogInvoiceAuditJob: Invoice not found', [
+            // invoice with client and items
+            $invoice = Invoice::with(['client', 'items'])->find($this->invoiceId);
+
+            if (!$invoice) {
+                Log::warning('LogInvoiceAuditJob: Invoice not found', [
+                    'job' => self::class,
+                    'invoice_id' => $this->invoiceId,
+                ]);
+                return;
+            }
+
+            //  payload
+            $payload = [
+                'total_amount' => $invoice->total_amount,
+                'items_count' => $invoice->items->count(),
+                'client_name' => $invoice->client->full_name,
+            ];
+
+            AuditLog::updateOrCreate(
+                [
+                    'invoice_id' => $this->invoiceId,
+                    'event_type' => $this->eventType,
+                ],
+                [
+                    'entity_type' => 'invoice',
+                    'entity_id' => $invoice->id,
+                    'payload' => $payload,
+                    'user_id' => $this->userId,
+                ]
+            );
+
+            Log::info('LogInvoiceAuditJob: Audit record created', [
+                'job' => self::class,
                 'invoice_id' => $this->invoiceId,
+                'client_name' => $invoice->client->full_name,
+                'total_amount' => $invoice->total_amount,
+                'items_count' => $invoice->items->count(),
             ]);
-            return;
-        }
-
-        //  payload
-        $payload = [
-            'total_amount' => $invoice->total_amount,
-            'items_count' => $invoice->items->count(),
-            'client_name' => $invoice->client->full_name,
-        ];
-
-        AuditLog::updateOrCreate(
-            [
+        } catch (\Exception $e) {
+            Log::error('LogInvoiceAuditJob: Failed', [
+                'job' => self::class,
                 'invoice_id' => $this->invoiceId,
-                'event_type' => $this->eventType,
-            ],
-            [
-                'entity_type' => 'invoice',
-                'entity_id' => $invoice->id,
-                'payload' => $payload,
-                'user_id' => $this->userId,
-            ]
-        );
-
-        Log::info('LogInvoiceAuditJob: Audit record created', [
-            'invoice_id' => $this->invoiceId,
-            'client_name' => $invoice->client->full_name,
-            'total_amount' => $invoice->total_amount,
-            'items_count' => $invoice->items->count(),
-        ]);
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
+        }
     }
 }
