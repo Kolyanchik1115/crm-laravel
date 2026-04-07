@@ -2,15 +2,16 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\TransferController;
+use App\Http\Controllers\Api\AccountController;
+use App\Http\Controllers\Api\ClientController;
+use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\ServiceController;
+use App\Http\Controllers\Api\TransactionController;
+use App\Http\Controllers\Api\TransferController;
+use App\Http\Controllers\CreateInvoiceController;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\ClientController;
-use App\Http\Controllers\Api\AccountController;
-use App\Http\Controllers\Api\TransactionController;
-use App\Http\Controllers\Api\ServiceController;
-use App\Http\Controllers\Api\InvoiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +42,8 @@ Route::prefix('v1')->group(function () {
     // Invoices
     Route::get('/invoices', [InvoiceController::class, 'index']);
     Route::get('/invoices/{id}', [InvoiceController::class, 'show']);
+    Route::post('/invoices', [CreateInvoiceController::class, 'store']);
+
 
     // Success invoice create
     Route::post('/test/create-invoice', function () {
@@ -130,7 +133,7 @@ Route::prefix('v1')->group(function () {
         }
     });
 
-    //Transfer
+    //Transfers
     Route::post('/transfer', [TransferController::class, 'transfer']);
 });
 

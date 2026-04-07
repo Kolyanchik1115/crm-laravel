@@ -5,11 +5,8 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TransactionController;
-use App\Http\Controllers\TransferController;
-use App\Models\Client;
 use App\Models\Account;
-use App\Models\Invoice;
-use App\Models\InvoiceItem;
+use App\Models\Client;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
