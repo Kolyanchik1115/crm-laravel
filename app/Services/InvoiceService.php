@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Events\InvoiceCreated;
 use App\Jobs\LogInvoiceAuditJob;
 use App\Jobs\UpdateDashboardCacheJob;
 use App\Repositories\InvoiceRepository;
@@ -38,11 +39,19 @@ class InvoiceService
             $this->invoiceItemRepository->createMany($invoice->id, $items);
         });
 
-        // Async log writing
-        LogInvoiceAuditJob::dispatch($invoice->id)->onQueue('audit');
+        // event invoice created instead jobs
+        event(new InvoiceCreated(
+            invoiceId: $invoice->id,
+            clientId: $clientId,
+            totalAmount: (string)$invoice->total_amount,
+            currency: $invoice->client->currency ?? 'UAH',
+        ));
 
-        // Cache update with 30 sec delay
-        UpdateDashboardCacheJob::dispatch()->onQueue('low')->delay(now()->addSeconds(30));
+        // // Async log writing
+        // LogInvoiceAuditJob::dispatch($invoice->id)->onQueue('audit');
+        //
+        // // Cache update with 30 sec delay
+        // UpdateDashboardCacheJob::dispatch()->onQueue('low')->delay(now()->addSeconds(30));
 
         return [
             'invoice_id' => $invoice->id,
@@ -54,10 +63,10 @@ class InvoiceService
     private function generateInvoiceNumber(): string
     {
         $lastInvoice = $this->invoiceRepository->getAll()->first();
-        $lastNumber = $lastInvoice ? (int) substr($lastInvoice->invoice_number, -4) : 0;
+        $lastNumber = $lastInvoice ? (int)substr($lastInvoice->invoice_number, -4) : 0;
         $newNumber = $lastNumber + 1;
 
-        return 'INV-' . date('Ymd') . '-' . str_pad((string) $newNumber,
+        return 'INV-' . date('Ymd') . '-' . str_pad((string)$newNumber,
                 4, '0', STR_PAD_LEFT);
     }
 }

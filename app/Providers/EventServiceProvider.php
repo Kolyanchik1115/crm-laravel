@@ -1,12 +1,15 @@
 <?php
-declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Events\InvoiceCreated;
 use App\Events\TransferCompleted;
+use App\Listeners\LogInvoiceAuditListener;
 use App\Listeners\LogTransferToAudit;
+use App\Listeners\SendInvoiceCreatedNotificationListener;
 use App\Listeners\SendTransferConfirmationNotification;
 use App\Listeners\UpdateDashboardCacheListener;
+use App\Listeners\UpdateDashboardCacheOnInvoiceListener;
 use Illuminate\Support\ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -16,6 +19,11 @@ class EventServiceProvider extends ServiceProvider
             SendTransferConfirmationNotification::class,
             LogTransferToAudit::class,
             UpdateDashboardCacheListener::class,
+        ],
+        InvoiceCreated::class => [
+            LogInvoiceAuditListener::class,
+            UpdateDashboardCacheOnInvoiceListener::class,
+            SendInvoiceCreatedNotificationListener::class,
         ],
     ];
 
