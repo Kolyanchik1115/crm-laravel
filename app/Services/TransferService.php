@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Jobs\SendTransferConfirmationJob;
-use App\Jobs\UpdateDashboardCacheJob;
+use App\Events\TransferCompleted;
 use App\Repositories\TransferRepository;
 use Illuminate\Support\Facades\DB;
 
@@ -27,10 +26,12 @@ class TransferService
     {
         $transactionOut = null;
         $transactionIn = null;
+        $fromAccount = null;
+        $toAccount = null;
 
         DB::transaction(function () use (
             $fromAccountId, $toAccountId, $amount, $description,
-            &$transactionOut, &$transactionIn
+            &$transactionOut, &$transactionIn, &$fromAccount, &$toAccount
         ) {
             $fromAccount = $this->repository->findAccountForUpdate($fromAccountId);
             $toAccount = $this->repository->findAccountForUpdate($toAccountId);
@@ -58,19 +59,27 @@ class TransferService
                 $amount,
                 $fromAccount->account_number,
                 $description,
-                //temporary solution
                 $transactionOut->id
             );
         });
 
-        // Dispatch Job after success transfer
-        SendTransferConfirmationJob::dispatch($transactionOut->id, $transactionIn->id)
-            ->onQueue('notifications');
 
-        // Cache update with 30 sec delay
-        UpdateDashboardCacheJob::dispatch()
-            ->onQueue('low')
-            ->delay(now()->addSeconds(30));
+        // Action instead job
+        event(new TransferCompleted(
+            transactionOutId: $transactionOut->id,
+            accountFromId: $fromAccount->id,
+            accountToId: $toAccount->id,
+            amount: (string)$amount,
+            currency: $fromAccount->currency,
+        ));
+
+        //  Dispatch Job after success transfer
+        //  SendTransferConfirmationJob::dispatch($transactionOut->id, $transactionIn->id)
+        //    ->onQueue('notifications');
+        //  Cache update with 30 sec delay
+        //  UpdateDashboardCacheJob::dispatch()
+        //   ->onQueue('low')
+        //    ->delay(now()->addSeconds(30));
 
         return [
             'transaction_out_id' => $transactionOut->id,
@@ -79,3 +88,4 @@ class TransferService
         ];
     }
 }
+
