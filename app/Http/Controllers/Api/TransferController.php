@@ -21,15 +21,11 @@ class TransferController extends Controller
 
     public function transfer(TransferRequest $request): JsonResponse
     {
-        $validated = $request->validated();
-
         try {
-            $result = $this->transferService->executeTransfer(
-                fromAccountId: $validated['from_account_id'],
-                toAccountId: $validated['to_account_id'],
-                amount: $validated['amount'],
-                description: $validated['description'] ?? null
-            );
+
+            $dto = $request->toTransferDTO();
+
+            $result = $this->transferService->executeTransfer($dto);
 
             return response()->json([
                 'success' => true,
@@ -40,7 +36,6 @@ class TransferController extends Controller
         } catch (\Exception $e) {
             Log::error('Transfer failed', [
                 'error' => $e->getMessage(),
-                'data' => $validated,
             ]);
 
             return response()->json([

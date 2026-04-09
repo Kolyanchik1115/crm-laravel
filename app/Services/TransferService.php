@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTO\TransferDTO;
 use App\Events\TransferCompleted;
 use App\Repositories\TransferRepository;
 use Illuminate\Support\Facades\DB;
@@ -17,48 +18,43 @@ class TransferService
         $this->repository = $repository;
     }
 
-    public function executeTransfer(
-        int     $fromAccountId,
-        int     $toAccountId,
-        float   $amount,
-        ?string $description = null
-    ): array
+    public function executeTransfer(TransferDTO $dto): array
     {
         $transactionOut = null;
         $transactionIn = null;
         $fromAccount = null;
         $toAccount = null;
 
-        DB::transaction(function () use (
-            $fromAccountId, $toAccountId, $amount, $description,
-            &$transactionOut, &$transactionIn, &$fromAccount, &$toAccount
-        ) {
-            $fromAccount = $this->repository->findAccountForUpdate($fromAccountId);
-            $toAccount = $this->repository->findAccountForUpdate($toAccountId);
+        DB::transaction(function () use ($dto, &$transactionOut, &$transactionIn, &$fromAccount, &$toAccount) {
+            $fromAccount = $this->repository->findAccountForUpdate($dto->accountFromId);
+            $toAccount = $this->repository->findAccountForUpdate($dto->accountToId);
 
             if (!$fromAccount || !$toAccount) {
                 throw new \Exception('Рахунок не знайдено');
             }
 
-            if ($fromAccount->balance < $amount) {
+            $amountValue = $dto->amount->getValue();
+
+            if ($fromAccount->balance < $amountValue) {
                 throw new \Exception('Недостатньо коштів');
             }
 
-            $this->repository->updateAccountBalance($fromAccount, $fromAccount->balance - $amount);
-            $this->repository->updateAccountBalance($toAccount, $toAccount->balance + $amount);
+
+            $this->repository->updateAccountBalance($fromAccount, $fromAccount->balance - $amountValue);
+            $this->repository->updateAccountBalance($toAccount, $toAccount->balance + $amountValue);
 
             $transactionOut = $this->repository->createTransferOut(
                 $fromAccount->id,
-                $amount,
+                $amountValue,
                 $toAccount->account_number,
-                $description
+                $dto->description
             );
 
             $transactionIn = $this->repository->createTransferIn(
                 $toAccount->id,
-                $amount,
+                $amountValue,
                 $fromAccount->account_number,
-                $description,
+                $dto->description,
                 $transactionOut->id
             );
         });
@@ -69,8 +65,8 @@ class TransferService
             transactionOutId: $transactionOut->id,
             accountFromId: $fromAccount->id,
             accountToId: $toAccount->id,
-            amount: (string)$amount,
-            currency: $fromAccount->currency,
+            amount: (string)$dto->amount->getValue(),
+            currency: $dto->amount->currency,
         ));
 
         //  Dispatch Job after success transfer
@@ -84,7 +80,7 @@ class TransferService
         return [
             'transaction_out_id' => $transactionOut->id,
             'transaction_in_id' => $transactionIn->id,
-            'amount' => $amount,
+            'amount' => $dto->amount->getValue(),
         ];
     }
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\DTO\TransferDTO;
+use App\ValueObjects\Money;
 use Illuminate\Foundation\Http\FormRequest;
 
 class TransferRequest extends FormRequest
@@ -36,5 +38,22 @@ class TransferRequest extends FormRequest
             'amount.min' => 'Сума має бути не менше 0.01',
             'description.max' => 'Опис не може перевищувати 500 символів',
         ];
+    }
+
+    public function toTransferDTO(): TransferDTO
+    {
+        $validated = $this->validated();
+
+        $currency = $validated['currency'] ?? 'UAH';
+
+        return new TransferDTO(
+            accountFromId: (int)$validated['from_account_id'],
+            accountToId: (int)$validated['to_account_id'],
+            amount: new Money(
+                amount: (string)$validated['amount'],
+                currency: $currency,
+            ),
+            description: (string)($validated['description'] ?? ''),
+        );
     }
 }
