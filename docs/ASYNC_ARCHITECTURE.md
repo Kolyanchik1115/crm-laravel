@@ -78,7 +78,8 @@ UpdateDashboardCacheListener::class,
 ],
 ];
 ```
-
+У Laravel 11 **не потрібно** реєструвати Listeners в `EventServiceProvider`.
+Laravel автоматично знаходить всі Listeners в папці `app/Listeners/`.
 ---
 
 ## 3. Notification (Сповіщення)
@@ -131,6 +132,8 @@ event(new TransferCompleted(...))
 │      LogTransferToAudit,                      │
 │      UpdateDashboardCacheListener,            │
 │  ]                                            │
+│ З 11 Laravel Laravel автоматично знаходить    │
+│              всі Listeners                    │
 └───────────────────────────────────────────────┘
 │
 ├──────────────────┬──────────────────┐
