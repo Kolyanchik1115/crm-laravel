@@ -8,7 +8,7 @@ use App\DTO\TransferDTO;
 use App\ValueObjects\Money;
 use Illuminate\Foundation\Http\FormRequest;
 
-class TransferRequest extends FormRequest
+class StoreTransferRequest extends FormRequest
 {
     public function authorize(): bool
     {
