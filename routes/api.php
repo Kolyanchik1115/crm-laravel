@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\TransferController;
-use App\Http\Controllers\CreateInvoiceController;
+use App\Http\Controllers\Api\CreateInvoiceController;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use Illuminate\Support\Facades\Route;

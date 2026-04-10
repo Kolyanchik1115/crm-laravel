@@ -8,7 +8,6 @@ use App\Exceptions\InsufficientBalanceException;
 use App\Exceptions\SameAccountTransferException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTransferRequest;
-use App\Http\Requests\TransferRequest;
 use App\Http\Resources\TransferResource;
 use App\Services\TransferService;
 use Illuminate\Http\JsonResponse;

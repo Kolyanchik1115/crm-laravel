@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\InvoiceItem;
+use App\Repositories\Contracts\InvoiceItemRepositoryInterface;
 
-class InvoiceItemRepository
+class InvoiceItemRepository implements InvoiceItemRepositoryInterface
 {
     public function create(array $data): InvoiceItem
     {
@@ -16,11 +17,11 @@ class InvoiceItemRepository
     public function createMany(int $invoiceId, array $items): void
     {
         foreach ($items as $item) {
-            $this->create([
+            InvoiceItem::create([
                 'invoice_id' => $invoiceId,
-                'service_id' => $item['service_id'],
-                'quantity' => $item['quantity'],
-                'unit_price' => $item['unit_price'],
+                'service_id' => $item->serviceId,
+                'quantity' => $item->quantity,
+                'unit_price' => $item->unitPrice,
             ]);
         }
     }
