@@ -21,6 +21,7 @@ class TransferRequest extends FormRequest
             'from_account_id' => 'required|exists:accounts,id',
             'to_account_id' => 'required|exists:accounts,id|different:from_account_id',
             'amount' => 'required|numeric|min:0.01',
+            'currency' => 'nullable|string|size:3|in:UAH,USD,EUR',
             'description' => 'nullable|string|max:500',
         ];
     }

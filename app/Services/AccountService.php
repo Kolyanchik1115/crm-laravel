@@ -36,9 +36,9 @@ class AccountService
     public function decrementBalance(int $id, string $amount): void
     {
         $account = $this->getAccountById($id);
+        $amountValue = (float)$amount;
 
-        // bccomp -> compares numbers as strings with exact precision
-        if (bccomp($account->balance, $amount, 2) < 0) {
+        if ($account->balance < $amountValue) {
             throw new DomainException('Insufficient funds');
         }
 

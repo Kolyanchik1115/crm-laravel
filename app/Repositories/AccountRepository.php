@@ -40,8 +40,9 @@ class AccountRepository implements AccountRepositoryInterface
         if (!$account) {
             throw new DomainException('Account not found');
         }
-        // bcsub -> function used for arbitrary precision mathematics to add two numbers together
-        $account->balance = bcsub($account->balance, $amount, 2);
+
+        $amountValue = (float)$amount;
+        $account->balance -= $amountValue;
         $account->save();
     }
 
@@ -52,7 +53,9 @@ class AccountRepository implements AccountRepositoryInterface
         if (!$account) {
             throw new DomainException('Account not found');
         }
-        $account->balance = bcadd($account->balance, $amount, 2);
+
+        $amountValue = (float)$amount;
+        $account->balance += $amountValue;
         $account->save();
     }
 }

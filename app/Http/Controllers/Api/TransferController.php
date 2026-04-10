@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\InsufficientBalanceException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TransferRequest;
 use App\Services\TransferService;
@@ -33,6 +34,16 @@ class TransferController extends Controller
                 'data' => $result,
             ]);
 
+        } catch (InsufficientBalanceException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        } catch (\DomainException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 404);
         } catch (\Exception $e) {
             Log::error('Transfer failed', [
                 'error' => $e->getMessage(),
@@ -40,8 +51,8 @@ class TransferController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
-            ], 400);
+                'message' => 'Internal server error',
+            ], 500);
         }
     }
 }
