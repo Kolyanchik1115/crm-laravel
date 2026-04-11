@@ -183,7 +183,7 @@ docker compose logs redis
 - [🔄 LIFECYCLE.md](docs/LIFECYCLE.md) - життєвий цикл HTTP-запиту в Laravel
 - [⚖️ SYMFONY_VS_LARAVEL.md](docs/SYMFONY_VS_LARAVEL.md) - порівняння Laravel та Symfony
 - [📡 ASYNC_ARCHITECTURE.md](docs/ASYNC_ARCHITECTURE.md) - Jobs vs Events vs Notifications
-
+- [📐ARCHITECTURE.md](docs/ARCHITECTURE.md) - Архітектура CRM
 
 ### 📨 Черги (Queues)
 - [📋 QUEUE_SCENARIOS.md](docs/QUEUE_SCENARIOS.md) - сценарії використання черг
