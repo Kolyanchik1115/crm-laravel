@@ -18,12 +18,13 @@ class TransferResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        //TODO: change this later
         return [
-            'transaction_out_id' => $this->transaction_out_id,
-            'transaction_in_id' => $this->transaction_in_id,
-            'amount' => $this->amount,
-            'commission' => $this->commission,
-            'created_at' => $this->created_at?->toISOString(),
+            'transaction_out_id' => $this['transaction_out_id'],
+            'transaction_in_id' => $this['transaction_in_id'],
+            'amount' => $this['amount'],
+            'commission' => $this['commission'],
+            'created_at' => now()->toISOString(),
         ];
     }
 }

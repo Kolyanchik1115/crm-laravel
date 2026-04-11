@@ -216,3 +216,103 @@ public function transfer(Request $request): JsonResponse
 | **Підтримка**                   | Легко знайти, де шукати проблему              |
 | **Перевикористання**            | Сервіси можна використовувати в різних місцях |
 | **Масштабування**               | Легко додавати нові функції                   |
+
+# Чекліст Dependency Injection
+
+### Перевірка що немає `new Repository()` в сервісах
+
+```bash
+grep -r "new.*Repository" app/Services/
+```
+
+**Очікуваний результат:** пусто (нічого не знайдено)
+
+### Перевірка що немає `new Service()` в контролерах
+
+```bash
+grep -r "new.*Service" app/Http/Controllers/
+```
+
+**Очікуваний результат:** тільки `new ServiceResource` (це Resource, не Service)
+
+### Перевірка що всі залежності через конструктор
+
+#### TransferService
+
+```php
+public function __construct(
+    protected AccountRepositoryInterface $accountRepository,
+    protected TransactionRepositoryInterface $transactionRepository,
+) {}
+```
+
+#### InvoiceService
+
+```php
+public function __construct(
+    protected InvoiceRepositoryInterface $invoiceRepository,
+    protected InvoiceItemRepositoryInterface $invoiceItemRepository,
+    protected ServiceRepositoryInterface $serviceRepository,
+) {}
+```
+
+#### TransferController
+
+```php
+public function __construct(
+    protected TransferService $transferService
+) {}
+```
+
+#### CreateInvoiceController
+
+```php
+public function __construct(
+    protected InvoiceService $invoiceService
+) {}
+```
+
+### Binding в AppServiceProvider
+
+```php
+public function register(): void
+{
+    $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
+    $this->app->bind(TransactionRepositoryInterface::class, TransactionRepository::class);
+    $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
+    $this->app->bind(InvoiceItemRepositoryInterface::class, InvoiceItemRepository::class);
+    $this->app->bind(ServiceRepositoryInterface::class, ServiceRepository::class);
+}
+```
+
+### Правила
+
+| ✅ Добре                                                     | ❌ Погано                           |
+|-------------------------------------------------------------|------------------------------------|
+| `__construct(AccountRepositoryInterface $repo)`             | `$repo = new AccountRepository()`  |
+| `__construct(TransferService $service)`                     | `$service = new TransferService()` |
+| `$this->app->bind(Interface::class, Implementation::class)` | Спонтанне створення об'єктів       |
+
+### Як перевірити
+
+```bash
+# Перевірка маршрутів
+php artisan route:list
+
+# Перевірка переказу
+curl -X POST http://localhost:8000/api/v1/transfer \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{"from_account_id":1,"to_account_id":2,"amount":100}'
+
+# Перевірка помилки (однакові рахунки)
+curl -X POST http://localhost:8000/api/v1/transfer \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{"from_account_id":1,"to_account_id":1,"amount":100}'
+
+# Перевірка створення інвойсу
+curl -X POST http://localhost:8000/api/v1/invoices \
+  -H "Content-Type: application/json" \
+  -d '{"client_id":1,"items":[{"service_id":1,"quantity":2,"unit_price":1000}]}'
+```

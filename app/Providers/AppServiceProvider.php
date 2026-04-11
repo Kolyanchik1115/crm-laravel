@@ -23,7 +23,9 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
+        $this->app->bind(TransactionRepositoryInterface::class, TransactionRepository::class);
         $this->app->bind(InvoiceItemRepositoryInterface::class, InvoiceItemRepository::class);
+        $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
         $this->app->bind(ServiceRepositoryInterface::class, ServiceRepository::class);
     }
 
