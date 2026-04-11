@@ -1,5 +1,17 @@
 # CRM Finance - Laravel Project
 
+## 📬 Postman колекція
+
+### Документація API (перегляд)
+
+- [Postman Documentation](https://documenter.getpostman.com/view/24380148/2sBXitCnNR)
+
+### Імпорт колекції через файл
+
+1. Завантаж файл [postman_collection.json](postman/postman_collection.json)
+2. Відкрий Postman → **Import** → обрати файл
+3. Встанови змінну `base_url` (локально: `http://localhost:8000`, на сервері: `https://your-domain.com`)
+
 ## 🚀 Як створити проект
 
 ```bash
@@ -179,6 +191,7 @@ docker compose logs redis
 ## 📚 Документація
 
 ### 🏗️ Архітектура
+
 - [📐 STRUCTURE.md](docs/STRUCTURE.md) - детальний опис структури проекту
 - [🔄 LIFECYCLE.md](docs/LIFECYCLE.md) - життєвий цикл HTTP-запиту в Laravel
 - [⚖️ SYMFONY_VS_LARAVEL.md](docs/SYMFONY_VS_LARAVEL.md) - порівняння Laravel та Symfony
@@ -186,6 +199,7 @@ docker compose logs redis
 - [📐ARCHITECTURE.md](docs/ARCHITECTURE.md) - Архітектура CRM
 
 ### 📨 Черги (Queues)
+
 - [📋 QUEUE_SCENARIOS.md](docs/QUEUE_SCENARIOS.md) - сценарії використання черг
 - [📋 QUEUE_CHECKLIST.md](docs/QUEUE_CHECKLIST.md) - сценарії перед деплоєм
 - [⚙️ QUEUE_SETUP.md](docs/QUEUE_SETUP.md) - налаштування черг у CRM
