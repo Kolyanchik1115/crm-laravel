@@ -30,35 +30,35 @@ class InvoiceService
     public function createInvoice(CreateInvoiceDTO $dto): Invoice
     {
         // exists service checking
-        foreach ($dto->items as $item) {
-            if (!$this->serviceRepository->exists($item->serviceId)) {
-                throw new \DomainException("Service with ID {$item->serviceId} not found");
+        foreach ($dto->items as $invoiceItem) {
+            if (!$this->serviceRepository->exists($invoiceItem->serviceId)) {
+                throw new \DomainException("Service with ID {$invoiceItem->serviceId} not found");
             }
         }
 
-        $invoice = null;
+        $createdInvoice = null;
 
-        DB::transaction(function () use ($dto, &$invoice) {
-            $total = collect($dto->items)->sum(
+        DB::transaction(function () use ($dto, &$createdInvoice) {
+            $invoiceTotalAmount = collect($dto->items)->sum(
                 fn($item) => $item->quantity * $item->unitPrice
             );
 
-            $invoice = $this->invoiceRepository->create([
+            $createdInvoice = $this->invoiceRepository->create([
                 'client_id' => $dto->clientId,
                 'invoice_number' => $this->generateInvoiceNumber(),
-                'total_amount' => $total,
+                'total_amount' => $invoiceTotalAmount,
                 'status' => 'draft',
                 'issued_at' => now(),
             ]);
 
-            $this->invoiceItemRepository->createMany($invoice->id, $dto->items);
+            $this->invoiceItemRepository->createMany($createdInvoice->id, $dto->items);
         });
 
         // event invoice created instead jobs
         event(new InvoiceCreated(
-            invoiceId: $invoice->id,
+            invoiceId: $createdInvoice->id,
             clientId: $dto->clientId,
-            totalAmount: (string)$invoice->total_amount,
+            totalAmount: (string)$createdInvoice->total_amount,
             currency: $dto->currency,
         ));
 
@@ -68,7 +68,7 @@ class InvoiceService
         // // Cache update with 30 sec delay
         // UpdateDashboardCacheJob::dispatch()->onQueue('low')->delay(now()->addSeconds(30));
 
-        return $invoice;
+        return $createdInvoice;
     }
 
     private function generateInvoiceNumber(): string
