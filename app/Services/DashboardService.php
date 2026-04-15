@@ -27,7 +27,9 @@ class DashboardService
             'active' => $clients->where('is_active', true)->count(),
             'inactive' => $clients->where('is_active', false)->count(),
             'total_balance' => $clients->sum('balance'),
-            'total_accounts_balance' => $clients->flatMap->accounts->sum('balance'),
+            'total_accounts_balance' => $clients->flatMap(function ($client) {
+                return $client->accounts;
+            })->sum('balance'),
             'top_clients' => $clients->sortByDesc('balance')->take(5),
         ];
     }

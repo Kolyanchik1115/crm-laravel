@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
 class ClientRepository
 {
     /**
-     * Get all clients with their accounts
+     * @return Collection<int, Client>
      */
     public function getAll(): Collection
     {

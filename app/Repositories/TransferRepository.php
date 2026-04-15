@@ -9,10 +9,15 @@ use App\Models\Transaction;
 
 class TransferRepository
 {
+    /**
+     * @return Account|null
+     */
     public function findAccountForUpdate(int $accountId): ?Account
     {
-        // lockForUpdate - locking a row in the database for the duration of a transaction.
-        return Account::lockForUpdate()->find($accountId);
+        // lockForUpdate - locking a row in the database for the duration of a transaction
+        /** @var Account|null $account */
+        $account = Account::lockForUpdate()->find($accountId);
+        return $account;
     }
 
     public function updateAccountBalance(Account $account, float $newBalance): bool

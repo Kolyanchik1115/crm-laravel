@@ -97,7 +97,7 @@ class TransferService
             'transaction_out_id' => $transactionOut->id,
             'transaction_in_id' => $transactionIn->id,
             'amount' => $dto->amount->getValue(),
-            'commission' => $commission ?? 0,
+            'commission' => $commission,
         ];
     }
 

@@ -7,6 +7,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
+/**
+ * @property int $invoice_id
+ * @property int $service_id
+ * @property int $quantity
+ * @property float $unit_price
+ *
+ * @property-read Invoice $invoice
+ * @property-read Service $service
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|InvoiceItem create(array $attributes)
+ */
 //Pivot - for manyToMany relation table
 class InvoiceItem extends Pivot
 {

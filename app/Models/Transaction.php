@@ -8,6 +8,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $account_id
+ * @property float $amount
+ * @property string $type
+ * @property string $status
+ * @property string|null $description
+ * @property string|null $confirmation_sent_at
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ *
+ * @property-read Account $account
+ * @property-read Client|null $client
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder|Transaction create(array $attributes)
+ * @method static \Illuminate\Database\Eloquent\Builder|Transaction find(int $id)
+ * @method static \Illuminate\Database\Eloquent\Builder|Transaction whereDate(string $column, string $date)
+ * @method static \Illuminate\Database\Eloquent\Builder|Transaction sum(string $column)
+ */
 class Transaction extends Model
 {
     use HasFactory;

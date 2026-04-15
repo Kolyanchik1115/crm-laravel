@@ -23,14 +23,14 @@ class DailyCrmReportJob implements ShouldQueue
 
     public function handle(): void
     {
-        $yesterday = now()->subDay();
+        $yesterday = now()->subDay()->toDateString();
 
         $transactionsCount = Transaction::whereDate('created_at', $yesterday)->count();
         $transactionsSum = Transaction::whereDate('created_at', $yesterday)->sum('amount');
         $newInvoicesCount = Invoice::whereDate('created_at', $yesterday)->count();
         $newClientsCount = Client::whereDate('created_at', $yesterday)->count();
 
-        Log::info('DailyCrmReportJob: Звіт за ' . $yesterday->toDateString(), [
+        Log::info('DailyCrmReportJob: Звіт за ' . $yesterday, [
             'transactions_count' => $transactionsCount,
             'transactions_sum' => $transactionsSum,
             'new_invoices_count' => $newInvoicesCount,

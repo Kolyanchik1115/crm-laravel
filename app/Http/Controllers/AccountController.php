@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Services\AccountService;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 
 class AccountController extends Controller
 {

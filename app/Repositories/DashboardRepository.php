@@ -12,6 +12,8 @@ class DashboardRepository
 {
     /**
      * Get all clients with their accounts
+     *
+     * @return Collection<int, Client>
      */
     public function getAllClientsWithAccounts(): Collection
     {

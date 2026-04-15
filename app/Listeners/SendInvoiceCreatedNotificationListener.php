@@ -14,9 +14,10 @@ class SendInvoiceCreatedNotificationListener implements ShouldQueue
 {
     public function handle(InvoiceCreated $event): void
     {
+        /** @var Client|null $client */
         $client = Client::find($event->clientId);
 
-        if (!$client) {
+        if ($client === null) {
             Log::warning('SendInvoiceCreatedNotificationListener: Client not found', [
                 'client_id' => $event->clientId,
             ]);

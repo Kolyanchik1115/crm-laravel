@@ -16,7 +16,7 @@ use Illuminate\Support\Carbon;
  * @property string $invoice_number
  * @property float $total_amount
  * @property string $status
- * @property string|null $issued_at
+ * @property Carbon|null $issued_at
  * @property int $client_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at

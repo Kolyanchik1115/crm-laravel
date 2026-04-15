@@ -72,7 +72,8 @@
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
         ],
         "cs-fix": "php-cs-fixer fix",
-        "cs-check": "php-cs-fixer fix --dry-run --diff"
+        "cs-check": "php-cs-fixer fix --dry-run --diff",
+        "stan": "phpstan analyse app --memory-limit=2G"
     },
     "extra": {
         "laravel": {

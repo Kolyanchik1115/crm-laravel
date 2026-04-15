@@ -42,9 +42,10 @@ class UpdateDashboardCacheJob implements ShouldQueue
                 'clients_count' => Client::count(),
                 'active_clients_count' => Client::where('is_active', true)->count(),
                 'inactive_clients_count' => Client::where('is_active', false)->count(),
-                'transactions_today' => Transaction::whereDate('created_at', today())->sum('amount'),
+                'transactions_today' => Transaction::whereDate('created_at', today()->toDateString())
+                    ->sum('amount'),
                 'transactions_total' => Transaction::sum('amount'),
-                'invoices_today' => Invoice::whereDate('created_at', today())->count(),
+                'invoices_today' => Invoice::whereDate('created_at', today()->toDateString())->count(),
                 'invoices_total' => Invoice::count(),
                 'invoices_total_amount' => Invoice::sum('total_amount'),
                 'updated_at' => now()->toIso8601String(),

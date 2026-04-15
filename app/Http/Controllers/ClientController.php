@@ -6,7 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Services\ClientService;
 use App\Http\Requests\StoreClientRequest;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 
 class ClientController extends Controller
