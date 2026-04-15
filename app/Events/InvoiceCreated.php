@@ -9,14 +9,14 @@ use Illuminate\Queue\SerializesModels;
 
 class InvoiceCreated
 {
-    use Dispatchable, SerializesModels;
+    use Dispatchable;
+    use SerializesModels;
 
     public function __construct(
         public readonly int    $invoiceId,
         public readonly int    $clientId,
         public readonly string $totalAmount,
         public readonly string $currency,
-    )
-    {
+    ) {
     }
 }

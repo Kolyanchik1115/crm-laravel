@@ -21,8 +21,7 @@ class LogInvoiceAuditJob implements ShouldQueue
         private readonly int    $invoiceId,
         private readonly ?int   $userId = null,
         private readonly string $eventType = 'invoice_created'
-    )
-    {
+    ) {
     }
 
     public function handle(): void

@@ -10,15 +10,14 @@ final readonly class CreateInvoiceDTO
         public int    $clientId,
         public array  $items,
         public string $currency = 'UAH',
-    )
-    {
+    ) {
     }
 
     public function toArray(): array
     {
         return [
             'client_id' => $this->clientId,
-            'items' => array_map(fn($item) => $item->toArray(), $this->items),
+            'items' => array_map(fn ($item) => $item->toArray(), $this->items),
             'currency' => $this->currency,
         ];
     }

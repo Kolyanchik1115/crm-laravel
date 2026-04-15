@@ -10,7 +10,9 @@ use Illuminate\Queue\SerializesModels;
 
 class TransferCompleted
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     /**
      * Create a new event instance.
@@ -21,7 +23,6 @@ class TransferCompleted
         public readonly int    $accountToId,
         public readonly string $amount,
         public readonly string $currency,
-    )
-    {
+    ) {
     }
 }

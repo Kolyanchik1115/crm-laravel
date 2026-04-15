@@ -18,8 +18,7 @@ class TransferConfirmationNotification extends Notification implements ShouldQue
         private readonly string $amount,
         private readonly string $currency,
         private readonly bool   $isReceiver, // true = received, false = sent
-    )
-    {
+    ) {
     }
 
     public function via(object $notifiable): array
@@ -37,7 +36,7 @@ class TransferConfirmationNotification extends Notification implements ShouldQue
             ? "На ваш рахунок надійшло {$this->amount} {$this->currency}."
             : "Ваш переказ на суму {$this->amount} {$this->currency} успішно виконано.";
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject($subject)
             ->line($message)
             ->action('Переглянути транзакції', url('/transactions'))

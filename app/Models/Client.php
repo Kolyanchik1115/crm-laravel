@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Models;
@@ -10,7 +11,8 @@ use Illuminate\Notifications\Notifiable;
 
 class Client extends Model
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
+    use Notifiable;
 
     protected $table = 'clients';
 

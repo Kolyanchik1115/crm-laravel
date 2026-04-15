@@ -11,8 +11,7 @@ final readonly class Money
     public function __construct(
         public string $amount,
         public string $currency = 'UAH'
-    )
-    {
+    ) {
         $this->amountValue = (float)$this->amount;
 
         if ($this->amountValue <= 0) {

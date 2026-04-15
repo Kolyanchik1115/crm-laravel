@@ -26,8 +26,7 @@ class TransferRepository
         float   $amount,
         string  $toAccountNumber,
         ?string $description = null
-    ): Transaction
-    {
+    ): Transaction {
         return Transaction::create([
             'account_id' => $accountId,
             'amount' => -$amount,
@@ -43,8 +42,7 @@ class TransferRepository
         string  $fromAccountNumber,
         ?string $description = null,
         ?int    $transactionOutId = null
-    ): Transaction
-    {
+    ): Transaction {
 
         $desc = "Надходження з рахунку {$fromAccountNumber}. {$description}";
 

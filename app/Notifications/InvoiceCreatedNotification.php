@@ -17,8 +17,7 @@ class InvoiceCreatedNotification extends Notification implements ShouldQueue
         private readonly int    $invoiceId,
         private readonly string $totalAmount,
         private readonly string $currency,
-    )
-    {
+    ) {
     }
 
     public function via(object $notifiable): array
@@ -28,7 +27,7 @@ class InvoiceCreatedNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject('Новий рахунок-фактура')
             ->line("Рахунок №{$this->invoiceId} на суму {$this->totalAmount} {$this->currency} створено.")
             ->line('Будь ласка, здійсніть оплату в найближчий час.')

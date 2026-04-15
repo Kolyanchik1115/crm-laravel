@@ -10,8 +10,7 @@ final readonly class InvoiceItemDTO
         public int   $serviceId,
         public int   $quantity,
         public float $unitPrice,
-    )
-    {
+    ) {
     }
 
     public function toArray(): array

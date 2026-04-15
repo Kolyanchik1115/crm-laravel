@@ -42,11 +42,11 @@ class DashboardService
         return [
             'total_count' => $transactions->count(),
             'total_amount' => $transactions->sum('amount'),
-            'amount_by_type' => $transactions->groupBy('type')->map(fn($group) => [
+            'amount_by_type' => $transactions->groupBy('type')->map(fn ($group) => [
                 'total' => $group->sum('amount'),
                 'count' => $group->count(),
             ]),
-            'status_stats' => $transactions->groupBy('status')->map(fn($group) => [
+            'status_stats' => $transactions->groupBy('status')->map(fn ($group) => [
                 'total' => $group->sum('amount'),
                 'count' => $group->count(),
             ]),

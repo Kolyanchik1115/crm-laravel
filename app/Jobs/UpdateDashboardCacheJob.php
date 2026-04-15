@@ -21,8 +21,7 @@ class UpdateDashboardCacheJob implements ShouldQueue
 
     public function __construct(
         private readonly ?string $cacheKey = null
-    )
-    {
+    ) {
     }
 
     public function handle(): void

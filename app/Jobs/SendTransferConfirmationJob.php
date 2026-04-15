@@ -20,8 +20,7 @@ class SendTransferConfirmationJob implements ShouldQueue
 
     public function __construct(
         private readonly int $transactionIdOut
-    )
-    {
+    ) {
     }
 
     public function handle(): void

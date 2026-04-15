@@ -13,8 +13,7 @@ final readonly class TransferDTO
         public int    $accountToId,
         public Money  $amount,
         public string $description = '',
-    )
-    {
+    ) {
     }
 
     public function toArray(): array

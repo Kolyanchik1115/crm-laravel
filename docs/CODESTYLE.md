@@ -172,3 +172,37 @@ grep -r "declare(strict_types=1)" app/ --include="*.php" | wc -l
 find app -name "*.php" -exec sh -c 'grep -q "declare(strict_types=1)" "$1" || echo "$1"' _ {} \;
 ```
 
+## PHP-CS-Fixer
+
+### Встановлення
+
+```bash
+composer require --dev friendsofphp/php-cs-fixer
+```
+
+### Використання
+
+```bash
+# Перевірка (dry-run) — покаже що треба виправити без змін
+composer cs-check
+
+# Автоматичне виправлення коду
+composer cs-fix
+```
+
+### Для Docker
+
+```bash
+docker compose exec app composer cs-check
+docker compose exec app composer cs-fix
+```
+
+### Що виправляє
+
+| Правило | Опис |
+|---------|------|
+| `@PSR12` | Стандарт PSR-12 |
+| `declare_strict_types` | Додає `declare(strict_types=1)` |
+| `strict_param` | Строгі порівняння |
+| `ordered_imports` | Сортує `use` |
+| `array_syntax` | Короткий синтаксис масивів `[]` |

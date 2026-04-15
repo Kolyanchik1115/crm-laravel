@@ -11,13 +11,11 @@ use App\Services\InvoiceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
-
 class CreateInvoiceController extends Controller
 {
     public function __construct(
         protected InvoiceService $invoiceService
-    )
-    {
+    ) {
     }
 
     public function store(StoreInvoiceRequest $request): JsonResponse

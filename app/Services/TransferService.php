@@ -21,8 +21,7 @@ class TransferService
     public function __construct(
         protected AccountRepositoryInterface     $accountRepository,
         protected TransactionRepositoryInterface $transactionRepository,
-    )
-    {
+    ) {
     }
 
     public function executeTransfer(TransferDTO $dto): array
@@ -39,7 +38,11 @@ class TransferService
         $commission = 0;
 
         DB::transaction(function () use (
-            $dto, &$transactionOut, &$transactionIn, &$fromAccount, &$toAccount,
+            $dto,
+            &$transactionOut,
+            &$transactionIn,
+            &$fromAccount,
+            &$toAccount,
             &$commission
         ) {
             $fromAccount = $this->accountRepository->findById($dto->accountFromId);

@@ -45,7 +45,7 @@ class StoreInvoiceRequest extends FormRequest
         $validated = $this->validated();
 
         $items = array_map(
-            fn($item) => new InvoiceItemDTO(
+            fn ($item) => new InvoiceItemDTO(
                 serviceId: (int)$item['service_id'],
                 quantity: (int)$item['quantity'],
                 unitPrice: (float)$item['unit_price'],
