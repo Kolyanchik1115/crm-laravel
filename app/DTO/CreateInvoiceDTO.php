@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\DTO;
 
-use App\ValueObjects\Money;
-
 final readonly class CreateInvoiceDTO
 {
     public function __construct(
