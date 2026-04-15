@@ -1,239 +1,191 @@
-# Code Style Guide (PSR-12)
+# Code Style Guide CRM
 
-## Чекліст перевірки коду
+## PSR Стандарти
 
-### 1. Strict Types
+Проект дотримується наступних PSR стандартів:
+
+### PSR-1: Basic Coding Standard
+
+- Файли мають використовувати лише `<?php` теги
+- Файли мають використовувати UTF-8 без BOM
+- Класи мають бути названі в `StudlyCaps`
+- Константи класів мають бути в `UPPER_CASE`
+- Методи мають бути названі в `camelCase`
+
+### PSR-4: Autoloading Standard
+
+- Кожен клас знаходиться у власному файлі
+- Простір імен (`namespace`) відповідає структурі директорій
+- Автозавантаження налаштоване через Composer
+
+### PSR-12: Extended Coding Style
+
+- Розширений стандарт кодування
+- Включає всі правила з попередніх PSR
+- Визначає правила для структури файлів, відступів, рядків тощо
+
+## Типізація
+
+### Strict Types
 
 ```php
 <?php
 
-declare(strict_types=1);  // ← має бути після <?php
+declare(strict_types=1);  // Обов'язково після <?php
 ```
 
-**Де перевірити:** всі файли в `app/`
+**Правила:**
 
----
+- `declare(strict_types=1);` має бути у **кожному** PHP файлі
+- Розташовується одразу після відкриваючого `<?php` тегу
+- Порожній рядок після декларації
 
-### 2. Type Hints
+### Type Hints
 
 ```php
-// ✅ Добре
+// ✅ Обов'язкові type hints
 public function executeTransfer(TransferDTO $dto): array
 public function findById(int $id): ?Account
 private function calculateCommission(Money $amount): float
 
-// ❌ Погано
+// ❌ Заборонено
 public function executeTransfer($dto)
 public function findById($id)
 ```
----
 
-### 3. Відступи
+**Вимоги:**
 
-- Використовуй **4 пробіли**, не таби
-- Без змішування пробілів і табів
+- Вказуйте типи для всіх аргументів методів/функцій
+- Вказуйте тип повернення (`: type`) для всіх методів
+- Використовуйте `?type` для nullable типів
+- Використовуйте union types де необхідно: `int|float`
 
-```php
-// ✅ Добре
-public function transfer(Request $request): JsonResponse
-{
-    $validated = $request->validated();
-    return $this->service->execute($validated);
-}
+## Іменування
 
-// ❌ Погано (таби)
-public function transfer(Request $request): JsonResponse
-{
-	$validated = $request->validated();
-	return $this->service->execute($validated);
-}
+Детальні правила іменування дивіться в **[NAMING_CONVENTIONS.md](NAMING_CONVENTIONS.md)**
+
+**Основні правила:**
+
+- **Класи**: `StudlyCaps` (напр. `TransferService`)
+- **Методи**: `camelCase` (напр. `executeTransfer()`)
+- **Змінні**: `camelCase` (напр. `$accountBalance`)
+- **Константи**: `UPPER_CASE` (напр. `COMMISSION_RATE`)
+- **Приватні/захищені властивості**: `$camelCase` (без підкреслень)
+
+## Структура проекту
+
+```
+app/
+├── DTO/              # Data Transfer Objects
+│   └── TransferDTO.php
+├── Services/         # Бізнес-логіка
+│   └── TransferService.php
+├── Repositories/     # Робота з даними
+│   └── AccountRepository.php
+├── Controllers/      # HTTP контролери
+│   └── TransferController.php
+├── Models/           # Eloquent моделі
+│   └── Account.php
+└── Exceptions/       # Кастомні винятки
+    └── TransferException.php
 ```
 
----
+## Інструменти
 
-### 4. Фігурні дужки
+### PHP-CS-Fixer
 
-- Відкриваюча дужка `{` на тому ж рядку
-- Закриваюча дужка `}` на окремому рядку
-
-```php
-// ✅ Добре
-class TransferService
-{
-    public function execute(): void
-    {
-        if ($condition) {
-            $this->doSomething();
-        }
-    }
-}
-
-// ❌ Погано
-class TransferService {
-    public function execute(): void {
-        if ($condition) {
-            $this->doSomething();
-        }
-    }
-}
-```
-
----
-
-### 5. Пробіли навколо операторів
-
-```php
-// ✅ Добре
-$result = $a + $b;
-$account->balance -= $amount;
-$total = $dto->amount->getValue();
-function (int $a, int $b) { return $a + $b; }
-
-// ❌ Погано
-$result=$a+$b;
-$account->balance-=$amount;
-function (int $a,int $b){return $a+$b;}
-```
-
----
-
-### 6. Після коми в аргументах
-
-```php
-// ✅ Добре
-public function transfer(int $fromId, int $toId, float $amount): void
-$this->repository->create(['amount' => $amount, 'type' => 'deposit'])
-
-// ❌ Погано
-public function transfer(int $fromId,int $toId,float $amount): void
-$this->repository->create(['amount' => $amount,'type' => 'deposit'])
-```
-
----
-
-### 7. Довжина рядка
-
-- Максимум **120 символів**
-- При перевищенні — перенесення з відступом
-
-```php
-// ✅ Добре (перенесення)
-$this->accountRepository->decrementBalance(
-    $dto->accountFromId,
-    (string) $totalDeduct
-);
-
-// ❌ Погано (дуже довгий рядок)
-$this->accountRepository->decrementBalance($dto->accountFromId, (string) $totalDeduct, $extraParam);
-```
-
----
-
-### 8. Порядок елементів у класі
-
-```php
-class TransferService
-{
-    // 1. Константи
-    private const float COMMISSION_RATE = 0.005;
-    private const float COMMISSION_THRESHOLD = 10000;
-
-    // 2. Властивості (public, protected, private)
-    protected AccountRepositoryInterface $accountRepository;
-    protected TransactionRepositoryInterface $transactionRepository;
-
-    // 3. Конструктор
-    public function __construct(
-        protected AccountRepositoryInterface $accountRepository,
-        protected TransactionRepositoryInterface $transactionRepository,
-    ) {}
-
-    // 4. Публічні методи
-    public function executeTransfer(TransferDTO $dto): array {}
-
-    // 5. Захищені методи
-    protected function validate(): void {}
-
-    // 6. Приватні методи
-    private function calculateCommission(Money $amount): float {}
-}
-```
-
-## Команди для автоматичної перевірки
+Автоматичне виправлення кодстайлу:
 
 ```bash
-# Перевірка синтаксису всіх PHP файлів
-find app -name "*.php" -exec php -l {} \;
-
-# Перевірка наявності declare(strict_types=1)
-grep -r "declare(strict_types=1)" app/ --include="*.php" | wc -l
-
-# Пошук файлів без strict_types
-find app -name "*.php" -exec sh -c 'grep -q "declare(strict_types=1)" "$1" || echo "$1"' _ {} \;
-```
-
-## PHP-CS-Fixer
-
-### Встановлення
-
-```bash
-composer require --dev friendsofphp/php-cs-fixer
-```
-
-### Використання
-
-```bash
-# Перевірка (dry-run) — покаже що треба виправити без змін
+# Перевірка (dry-run) — покаже що треба виправити
 composer cs-check
 
 # Автоматичне виправлення коду
 composer cs-fix
 ```
 
-### Для Docker
+### PHPStan
+
+Статичний аналіз коду:
+
+```bash
+# Запуск аналізу
+composer stan
+```
+
+## Команди для Docker
+
+Якщо ви використовуєте Docker, запускайте перевірки через контейнер:
+
+```bash
+# Перевірка кодстайлу
+docker compose exec app composer cs-check
+
+# Виправлення кодстайлу
+docker compose exec app composer cs-fix
+
+# Статичний аналіз PHPStan
+docker compose exec app composer stan
+```
+
+## Чекліст перед комітом
+
+Перед створенням коміту, переконайтеся що:
+
+### ✅ Code Style
+
+- [ ] Запущено `composer cs-check` (або `docker compose exec app composer cs-check`)
+- [ ] Немає помилок кодстайлу
+- [ ] Всі файли мають `declare(strict_types=1);`
+- [ ] Відступи — 4 пробіли, не таби
+- [ ] Фігурні дужки на правильних місцях
+- [ ] Рядки не довші 120 символів
+
+### ✅ Static Analysis
+
+- [ ] Запущено `composer stan` (або `docker compose exec app composer stan`)
+- [ ] Немає помилок PHPStan
+- [ ] Всі type hints коректні
+
+### ✅ Автоматичне виправлення
+
+Якщо перевірки не пройшли:
+
+```bash
+# Виправте кодстайл автоматично
+composer cs-fix
+
+# Додайте виправлені файли
+git add .
+
+# Запустіть перевірки знову
+composer cs-check && composer stan
+
+# Якщо все добре - робіть коміт
+git commit -m "your message"
+```
+
+## Швидкі команди
+
+### Локально
+
+```bash
+composer cs-check    # перевірка стилю
+composer cs-fix      # виправлення стилю
+composer stan        # статичний аналіз
+```
+
+### Docker
 
 ```bash
 docker compose exec app composer cs-check
 docker compose exec app composer cs-fix
+docker compose exec app composer stan
 ```
 
-### Що виправляє
+## Додаткові ресурси
 
-| Правило | Опис |
-|---------|------|
-| `@PSR12` | Стандарт PSR-12 |
-| `declare_strict_types` | Додає `declare(strict_types=1)` |
-| `strict_param` | Строгі порівняння |
-| `ordered_imports` | Сортує `use` |
-| `array_syntax` | Короткий синтаксис масивів `[]` |
-
-
-## PHP-CS-Fixer результати
-
-### Перевірка коду
-
-```bash
-composer cs-fix
-```
-
-**Результат:** Fixed 0 of 74 files
-
-
-Жоден файл не потребував виправлень. Код вже відповідає:
-
-- PSR-12 стандартам
-- `declare(strict_types=1)` у всіх файлах
-- Правильним відступам (4 пробіли)
-- Правильному порядку елементів у класах
-
-### Перевірка функціональності
-
-Після запуску PHP-CS-Fixer всі API працюють коректно:
-
-- ✅ Переказ коштів (`POST /api/v1/transfer`)
-- ✅ Створення інвойсу (`POST /api/v1/invoices`)
-- ✅ Отримання списків (`GET /api/v1/clients`, `/api/v1/accounts`)
-
-### Висновок
-
-Код повністю відповідає стандартам, додаткових виключень не потрібно.
+- [PSR-12: Extended Coding Style](https://www.php-fig.org/psr/psr-12/)
+- [PHP-CS-Fixer Documentation](https://github.com/FriendsOfPHP/PHP-CS-Fixer)
+- [PHPStan Documentation](https://phpstan.org/)
+- [NAMING_CONVENTIONS.md](NAMING_CONVENTIONS.md) — правила іменування
