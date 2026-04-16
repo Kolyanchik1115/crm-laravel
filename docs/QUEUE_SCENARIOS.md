@@ -301,7 +301,7 @@ HTTP-запит
 ### Приклад коду
 
 ```php
-class InvoiceController extends Controller
+use Modules\Invoice\Domain\Entities\Invoice;use Modules\Invoice\Domain\Entities\InvoiceItem;class InvoiceController extends Controller
 {
     public function store(StoreInvoiceRequest $request): JsonResponse
     {

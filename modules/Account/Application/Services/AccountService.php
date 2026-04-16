@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Account\Application\Services;
 
-
 use DomainException;
 use Illuminate\Database\Eloquent\Collection;
 use Modules\Account\Domain\Entities\Account;

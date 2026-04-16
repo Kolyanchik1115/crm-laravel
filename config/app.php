@@ -122,12 +122,4 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
-
-    'providers' => [
-        Modules\Client\Providers\ClientServiceProvider::class,
-        Modules\Account\Providers\AccountServiceProvider::class,
-        Modules\Transaction\Providers\TransactionServiceProvider::class,
-        Modules\Dashboard\Providers\DashboardServiceProvider::class,
-    ]
-
 ];

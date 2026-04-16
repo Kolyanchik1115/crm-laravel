@@ -2,4 +2,5 @@ parameters:
     level: 5
     paths:
         - app
+        - modules
     tmpDir: storage/phpstan

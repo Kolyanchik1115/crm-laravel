@@ -7,9 +7,9 @@ namespace Modules\Dashboard\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Event;
 use Modules\Dashboard\Application\Services\DashboardService;
-use App\Events\TransferCompleted;
-use App\Events\InvoiceCreated;
 use Modules\Dashboard\Infrastructure\Repositories\DashboardRepository;
+use Modules\Transaction\Domain\Events\TransferCompleted;
+use Modules\Invoice\Domain\Events\InvoiceCreated;
 use Modules\Dashboard\Application\Listeners\UpdateDashboardCacheListener;
 use Modules\Dashboard\Application\Listeners\UpdateDashboardCacheOnInvoiceListener;
 
@@ -17,7 +17,7 @@ class DashboardServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //Services
+        // Service
         $this->app->singleton(DashboardService::class, function ($app) {
             return new DashboardService($app->make(DashboardRepository::class));
         });
@@ -25,14 +25,7 @@ class DashboardServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        //routes
-        $this->loadRoutesFrom(__DIR__ . '/../Interfaces/Http/routes/web.php');
-
-        //views
-        $this->loadViewsFrom(__DIR__ . '/../Interfaces/views', 'dashboard');
-
-        // TODO: should i move this to bootstrap.app config file??
-        //  listeners
+        // Events
         Event::listen(
             TransferCompleted::class,
             UpdateDashboardCacheListener::class

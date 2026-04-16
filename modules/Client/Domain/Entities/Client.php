@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Client\Domain\Entities;
 
-use App\Models\Account;
-use App\Models\Invoice;
+use Database\Factories\ClientFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
+use Modules\Account\Domain\Entities\Account;
+use Modules\Invoice\Domain\Entities\Invoice;
 
 /**
  * @property int $id
@@ -67,5 +68,9 @@ class Client extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+    protected static function newFactory(): ClientFactory
+    {
+        return ClientFactory::new();
     }
 }

@@ -5,27 +5,28 @@ declare(strict_types=1);
 namespace Modules\Account\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Modules\Account\Domain\Repositories\AccountRepositoryInterface;
+use Modules\Account\Application\Services\AccountService;
 use Modules\Account\Infrastructure\Repositories\AccountRepository;
+use Modules\Account\Domain\Repositories\AccountRepositoryInterface;
 
 class AccountServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //Repositories
+        // Repository
         $this->app->bind(
             AccountRepositoryInterface::class,
             AccountRepository::class
         );
+
+        // Service
+        $this->app->singleton(AccountService::class, function ($app) {
+            return new AccountService($app->make(AccountRepositoryInterface::class));
+        });
     }
 
     public function boot(): void
     {
-        //routes
-        $this->loadRoutesFrom(__DIR__ . '/../Interfaces/Http/routes/api.php');
-        $this->loadRoutesFrom(__DIR__ . '/../Interfaces/Http/routes/web.php');
-
-        //views
-        $this->loadViewsFrom(__DIR__ . '/../Interfaces/views', 'accounts');
+        //
     }
 }

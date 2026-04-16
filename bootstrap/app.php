@@ -11,6 +11,14 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withProviders([
+        Modules\Client\Providers\ClientServiceProvider::class,
+        Modules\Account\Providers\AccountServiceProvider::class,
+        Modules\Transaction\Providers\TransactionServiceProvider::class,
+        Modules\Dashboard\Providers\DashboardServiceProvider::class,
+        Modules\Invoice\Providers\InvoiceServiceProvider::class,
+        Modules\Service\Providers\ServiceServiceProvider::class,
+    ])
     ->withMiddleware(function (Middleware $middleware): void {
         //
     })

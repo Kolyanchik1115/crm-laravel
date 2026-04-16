@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Service;
 use Illuminate\Database\Seeder;
+use Modules\Service\Domain\Entities\Service;
 
 class ServiceSeeder extends Seeder
 {

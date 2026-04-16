@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Transaction\Domain\Entities;
 
+use Database\Factories\ServiceFactory;
+use Database\Factories\TransactionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -52,5 +54,9 @@ class Transaction extends Model
     public function account(): BelongsTo
     {
         return $this->belongsTo(Account::class);
+    }
+    protected static function newFactory(): TransactionFactory
+    {
+        return TransactionFactory::new();
     }
 }

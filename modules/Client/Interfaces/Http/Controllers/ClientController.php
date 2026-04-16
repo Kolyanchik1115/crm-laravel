@@ -26,7 +26,7 @@ class ClientController extends Controller
     {
         $clients = $this->clientService->getAllClients();
 
-        return view('clients::clients.index', ['clients' => $clients]);
+        return view('clients.index', ['clients' => $clients]);
     }
 
     /**
@@ -36,12 +36,12 @@ class ClientController extends Controller
     {
         $client = $this->clientService->getClientById($id);
 
-        return view('clients::clients.show', ['client' => $client]);
+        return view('clients.show', ['client' => $client]);
     }
 
     public function create(): View
     {
-        return view('clients::clients.create');
+        return view('clients.create');
     }
 
     public function store(StoreClientRequest $request): RedirectResponse

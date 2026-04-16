@@ -78,8 +78,9 @@
 - `channels.php` - маршрути для WebSocket
 
 *Порівняння з Module 3:* Замість прямих звернень до файлів `public/invoices.php`, ми визначаємо маршрут:
+
 ```php
-Route::get('/invoices', [InvoiceController::class, 'index']);
+use Modules\Invoice\Interfaces\Http\Api\InvoiceController;Route::get('/invoices', [InvoiceController::class, 'index']);
 ```
 
 ---

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Transaction\Infrastructure\Repositories;
 
-use App\Models\Transaction;
 use Illuminate\Database\Eloquent\Collection;
+use Modules\Transaction\Domain\Entities\Transaction;
 use Modules\Transaction\Domain\Repositories\TransactionRepositoryInterface;
 
 class TransactionRepository implements TransactionRepositoryInterface

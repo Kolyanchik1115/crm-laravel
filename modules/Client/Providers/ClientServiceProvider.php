@@ -12,7 +12,7 @@ class ClientServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //Services
+        // Service
         $this->app->singleton(ClientService::class, function ($app) {
             return new ClientService($app->make(ClientRepository::class));
         });
@@ -20,11 +20,6 @@ class ClientServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // routes
-        $this->loadRoutesFrom(__DIR__ . '/../Interfaces/Http/routes/web.php');
-        $this->loadRoutesFrom(__DIR__ . '/../Interfaces/Http/routes/api.php');
-
-        //  views
-        $this->loadViewsFrom(__DIR__ . '/../Interfaces/views', 'clients');
+        //
     }
 }

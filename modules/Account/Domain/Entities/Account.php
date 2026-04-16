@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Account\Domain\Entities;
 
+use Database\Factories\AccountFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -54,5 +55,10 @@ class Account extends Model
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    protected static function newFactory(): AccountFactory
+    {
+        return AccountFactory::new();
     }
 }

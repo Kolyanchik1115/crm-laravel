@@ -67,7 +67,7 @@ private const string status = 'completed';
 
 ```php
 // ✅ Добре
-public function decrementBalance(int $accountId, string $amount): void
+use Modules\Invoice\Application\DTO\CreateInvoiceDTO;use Modules\Invoice\Domain\Entities\Invoice;public function decrementBalance(int $accountId, string $amount): void
 public function createInvoice(CreateInvoiceDTO $dto): Invoice
 
 // ❌ Погано

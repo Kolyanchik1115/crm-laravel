@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Dashboard\Application\Jobs;
 
-use App\Models\Invoice;
-
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Modules\Client\Domain\Entities\Client;
+use Modules\Invoice\Domain\Entities\Invoice;
 use Modules\Transaction\Domain\Entities\Transaction;
 
 class UpdateDashboardCacheJob implements ShouldQueue
@@ -22,8 +21,7 @@ class UpdateDashboardCacheJob implements ShouldQueue
 
     public function __construct(
         private readonly ?string $cacheKey = null
-    )
-    {
+    ) {
     }
 
     public function handle(): void

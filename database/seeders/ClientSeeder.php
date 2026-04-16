@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use Client;
 use Illuminate\Database\Seeder;
+use Modules\Client\Domain\Entities\Client;
 
 class ClientSeeder extends Seeder
 {

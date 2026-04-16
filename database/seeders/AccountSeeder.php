@@ -5,8 +5,8 @@ namespace Database\Seeders;
 
 namespace Database\Seeders;
 
-use App\Models\Account;
 use Illuminate\Database\Seeder;
+use Modules\Account\Domain\Entities\Account;
 
 class AccountSeeder extends Seeder
 {

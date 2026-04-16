@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\Invoice;
-use Client;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Client\Domain\Entities\Client;
+use Modules\Invoice\Domain\Entities\Invoice;
 
 class InvoiceFactory extends Factory
 {

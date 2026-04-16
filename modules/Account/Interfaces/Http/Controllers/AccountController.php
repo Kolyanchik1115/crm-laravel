@@ -24,7 +24,7 @@ class AccountController extends Controller
     {
         $accounts = $this->accountService->getAllAccounts();
 
-        return view('accounts::accounts.index', ['accounts' => $accounts]);
+        return view('accounts.index', ['accounts' => $accounts]);
     }
 
     /**
@@ -34,6 +34,6 @@ class AccountController extends Controller
     {
         $account = $this->accountService->getAccountById($id);
 
-        return view('accounts::accounts.show', ['account' => $account]);
+        return view('accounts.show', ['account' => $account]);
     }
 }

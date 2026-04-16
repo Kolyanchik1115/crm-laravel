@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Transaction\Domain\Repositories;
 
-use App\Models\Transaction;
 use Illuminate\Database\Eloquent\Collection;
+use Modules\Transaction\Domain\Entities\Transaction;
 
 interface TransactionRepositoryInterface
 {

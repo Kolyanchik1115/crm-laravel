@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Invoice;
-use App\Models\Service;
 use Illuminate\Database\Seeder;
+use Modules\Invoice\Domain\Entities\Invoice;
+use Modules\Service\Domain\Entities\Service;
 
 class InvoiceItemSeeder extends Seeder
 {

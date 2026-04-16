@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Client\Interfaces\Http\Resources;
 
-use App\Http\Resources\AccountResource;
-use App\Http\Resources\InvoiceResource;
-use App\Models\Account;
-use App\Models\Invoice;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
+use Modules\Account\Domain\Entities\Account;
+use Modules\Account\Interfaces\Http\Resources\AccountResource;
+use Modules\Invoice\Domain\Entities\Invoice;
+use Modules\Invoice\Interfaces\Http\Resources\InvoiceResource;
 
 /**
  * @property int $id
