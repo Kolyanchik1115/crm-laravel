@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace Modules\Account\Interfaces\Http\Controllers;
 
-use App\Services\AccountService;
+use App\Http\Controllers\Controller;
 use Illuminate\Contracts\View\View;
+use Modules\Account\Application\Services\AccountService;
 
 class AccountController extends Controller
 {

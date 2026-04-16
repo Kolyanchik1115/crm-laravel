@@ -10,8 +10,8 @@ use App\Exceptions\InsufficientBalanceException;
 use App\Exceptions\SameAccountTransferException;
 use App\Repositories\Contracts\AccountRepositoryInterface;
 use App\Repositories\Contracts\TransactionRepositoryInterface;
-use App\ValueObjects\Money;
 use Illuminate\Support\Facades\DB;
+use Money;
 
 class TransferService
 {

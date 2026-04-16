@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Repositories\Contracts;
+namespace Modules\Account\Domain\Repositories;
 
-use App\Models\Account;
 use Illuminate\Database\Eloquent\Collection;
+use Modules\Account\Domain\Entities\Account;
 
 interface AccountRepositoryInterface
 {

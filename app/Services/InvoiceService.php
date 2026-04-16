@@ -31,7 +31,7 @@ class InvoiceService
         // exists service checking
         foreach ($dto->items as $invoiceItem) {
             if (!$this->serviceRepository->exists($invoiceItem->serviceId)) {
-                throw new \DomainException("Service with ID {$invoiceItem->serviceId} not found");
+                throw new \DomainException("Services with ID {$invoiceItem->serviceId} not found");
             }
         }
 

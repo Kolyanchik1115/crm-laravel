@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Repositories;
+namespace Modules\Account\Infrastructure\Repositories;
 
-use App\Models\Account;
-use App\Repositories\Contracts\AccountRepositoryInterface;
 use DomainException;
 use Illuminate\Database\Eloquent\Collection;
+use Modules\Account\Domain\Entities\Account;
+use Modules\Account\Domain\Repositories\AccountRepositoryInterface;
 
 class AccountRepository implements AccountRepositoryInterface
 {

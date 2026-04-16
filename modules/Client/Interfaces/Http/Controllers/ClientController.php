@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace Modules\Client\Interfaces\Http\Controllers;
 
-use App\Services\ClientService;
-use App\Http\Requests\StoreClientRequest;
-use Illuminate\Contracts\View\View;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
+use Modules\Client\Application\Services\ClientService;
+use Illuminate\Contracts\View\View;
+use Modules\Client\Interfaces\Http\Requests\StoreClientRequest;
 
 class ClientController extends Controller
 {
@@ -25,7 +26,7 @@ class ClientController extends Controller
     {
         $clients = $this->clientService->getAllClients();
 
-        return view('clients.index', ['clients' => $clients]);
+        return view('clients::clients.index', ['clients' => $clients]);
     }
 
     /**
@@ -35,12 +36,12 @@ class ClientController extends Controller
     {
         $client = $this->clientService->getClientById($id);
 
-        return view('clients.show', ['client' => $client]);
+        return view('clients::clients.show', ['client' => $client]);
     }
 
     public function create(): View
     {
-        return view('clients.create');
+        return view('clients::clients.create');
     }
 
     public function store(StoreClientRequest $request): RedirectResponse

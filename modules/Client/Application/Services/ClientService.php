@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace Modules\Client\Application\Services;
 
-use App\Models\Client;
-use App\Repositories\ClientRepository;
+use Modules\Client\Domain\Entities\Client;
+use Modules\Client\Infrastructure\Repositories\ClientRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 

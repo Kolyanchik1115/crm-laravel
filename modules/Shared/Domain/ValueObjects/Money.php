@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\ValueObjects;
+namespace Modules\Shared\Domain\ValueObjects;
 
 final readonly class Money
 {

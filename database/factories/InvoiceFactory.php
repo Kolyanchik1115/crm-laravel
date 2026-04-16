@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\Client;
 use App\Models\Invoice;
+use Client;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class InvoiceFactory extends Factory

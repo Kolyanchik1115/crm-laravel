@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use App\DTO\TransferDTO;
-use App\ValueObjects\Money;
 use Illuminate\Foundation\Http\FormRequest;
+use Money;
 
 class StoreTransferRequest extends FormRequest
 {

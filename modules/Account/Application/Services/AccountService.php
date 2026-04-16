@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace Modules\Account\Application\Services;
 
-use App\Models\Account;
-use App\Repositories\AccountRepository;
+
 use DomainException;
 use Illuminate\Database\Eloquent\Collection;
+use Modules\Account\Domain\Entities\Account;
+use Modules\Account\Infrastructure\Repositories\AccountRepository;
 
 class AccountService
 {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Client;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -61,12 +62,12 @@ class Invoice extends Model
     {
         return $this->hasMany(InvoiceItem::class);
     }
-    // belongsToMany returns Service models instead of InvoiceItem,
+    // belongsToMany returns Services models instead of InvoiceItem,
     // so nested items.service fails and pivot fields
     // (quantity, unit_price) are not accessible properly
     //    public function items(): BelongsToMany
     //    {
-    //        return $this->belongsToMany(Service::class, 'invoice_items')
+    //        return $this->belongsToMany(Services::class, 'invoice_items')
     //            ->withPivot('quantity', 'unit_price');
     //    }
 

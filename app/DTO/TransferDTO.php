@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\DTO;
 
-use App\ValueObjects\Money;
+use Money;
 
 final readonly class TransferDTO
 {

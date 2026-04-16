@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Api;
+namespace Modules\Account\Interfaces\Http\Api;
 
-use App\Models\Account;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\AccountResource;
 use Illuminate\Http\JsonResponse;
+use Modules\Account\Domain\Entities\Account;
+use Modules\Account\Interfaces\Http\Resources\AccountResource;
 
 class AccountController extends Controller
 {

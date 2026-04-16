@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Models\Client;
 use App\Models\Transaction;
+use Client;
 use Illuminate\Database\Eloquent\Collection;
 
 class DashboardRepository

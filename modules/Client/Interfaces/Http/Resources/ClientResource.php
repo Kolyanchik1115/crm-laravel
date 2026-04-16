@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Resources;
+namespace Modules\Client\Interfaces\Http\Resources;
 
+use App\Http\Resources\AccountResource;
+use App\Http\Resources\InvoiceResource;
 use App\Models\Account;
 use App\Models\Invoice;
 use Illuminate\Database\Eloquent\Collection;

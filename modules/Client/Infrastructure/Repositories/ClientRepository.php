@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Repositories;
+namespace Modules\Client\Infrastructure\Repositories;
 
-use App\Models\Client;
+use Modules\Client\Domain\Entities\Client;
 use Illuminate\Database\Eloquent\Collection;
 
 class ClientRepository

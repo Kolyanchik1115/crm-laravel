@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Events\InvoiceCreated;
-use App\Models\Client;
 use App\Notifications\InvoiceCreatedNotification;
+use Client;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
 
