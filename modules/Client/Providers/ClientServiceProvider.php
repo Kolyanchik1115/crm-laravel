@@ -12,7 +12,7 @@ class ClientServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        // Services register
+        //Services
         $this->app->singleton(ClientService::class, function ($app) {
             return new ClientService($app->make(ClientRepository::class));
         });

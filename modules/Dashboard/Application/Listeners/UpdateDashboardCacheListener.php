@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Listeners;
+namespace Modules\Dashboard\Application\Listeners;
 
 use App\Events\TransferCompleted;
-use App\Jobs\UpdateDashboardCacheJob;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Modules\Dashboard\Application\Jobs\UpdateDashboardCacheJob;
 
 class UpdateDashboardCacheListener implements ShouldQueue
 {

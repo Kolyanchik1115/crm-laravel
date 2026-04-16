@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Repositories;
+namespace Modules\Dashboard\Infrastructure\Repositories;
 
-use App\Models\Transaction;
-use Client;
 use Illuminate\Database\Eloquent\Collection;
+use Modules\Client\Domain\Entities\Client;
+use Modules\Transaction\Domain\Entities\Transaction;
 
 class DashboardRepository
 {

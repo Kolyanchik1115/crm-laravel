@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace Modules\Transaction\Application\Services;
 
-use App\Repositories\TransactionRepository;
 use Illuminate\Database\Eloquent\Collection;
+use Modules\Transaction\Infrastructure\Repositories\TransactionRepository;
 
 class TransactionService
 {

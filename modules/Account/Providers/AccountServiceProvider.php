@@ -12,6 +12,7 @@ class AccountServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        //Repositories
         $this->app->bind(
             AccountRepositoryInterface::class,
             AccountRepository::class

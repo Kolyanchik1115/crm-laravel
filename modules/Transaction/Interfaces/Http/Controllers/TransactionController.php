@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace Modules\Transaction\Interfaces\Http\Controllers;
 
-use App\Services\TransactionService;
+use App\Http\Controllers\Controller;
 use Illuminate\Contracts\View\View;
+use Modules\Transaction\Application\Services\TransactionService;
 
 class TransactionController extends Controller
 {
@@ -23,6 +24,6 @@ class TransactionController extends Controller
     {
         $transactions = $this->transactionService->getAllTransactions();
 
-        return view('transactions.index', ['transactions' => $transactions]);
+        return view('transactions::transactions.index', ['transactions' => $transactions]);
     }
 }

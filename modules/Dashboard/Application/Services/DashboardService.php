@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace Modules\Dashboard\Application\Services;
 
-use App\Repositories\DashboardRepository;
+use Modules\Dashboard\Infrastructure\Repositories\DashboardRepository;
 
 class DashboardService
 {

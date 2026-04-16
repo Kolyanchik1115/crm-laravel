@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Resources;
+namespace Modules\Transaction\Interfaces\Http\Resources;
 
-use App\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
+use Modules\Account\Domain\Entities\Account;
+use Modules\Account\Interfaces\Http\Resources\AccountResource;
 
 /**
  * @property int $id

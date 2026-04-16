@@ -126,6 +126,8 @@ return [
     'providers' => [
         Modules\Client\Providers\ClientServiceProvider::class,
         Modules\Account\Providers\AccountServiceProvider::class,
+        Modules\Transaction\Providers\TransactionServiceProvider::class,
+        Modules\Dashboard\Providers\DashboardServiceProvider::class,
     ]
 
 ];

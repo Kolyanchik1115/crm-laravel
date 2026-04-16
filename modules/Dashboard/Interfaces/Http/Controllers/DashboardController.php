@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace Modules\Dashboard\Interfaces\Http\Controllers;
 
-use App\Services\DashboardService;
+use App\Http\Controllers\Controller;
 use Illuminate\Contracts\View\View;
+use Modules\Dashboard\Application\Services\DashboardService;
 
 class DashboardController extends Controller
 {
@@ -20,7 +21,7 @@ class DashboardController extends Controller
     {
         $data = $this->dashboardService->getDashboardData();
 
-        return view('dashboard', [
+        return view('dashboard::dashboard', [
             // Client stats
             'clientsCount' => $data['clients']['total'],
             'activeClientsCount' => $data['clients']['active'],

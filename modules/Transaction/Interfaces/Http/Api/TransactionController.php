@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Api;
+namespace Modules\Transaction\Interfaces\Http\Api;
 
-use App\Models\Transaction;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\TransactionResource;
 use Illuminate\Http\JsonResponse;
+use Modules\Transaction\Domain\Entities\Transaction;
+use Modules\Transaction\Interfaces\Http\Resources\TransactionResource;
 
 class TransactionController extends Controller
 {

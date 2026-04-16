@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Repositories;
+namespace Modules\Transaction\Infrastructure\Repositories;
 
 use App\Models\Transaction;
-use App\Repositories\Contracts\TransactionRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Modules\Transaction\Domain\Repositories\TransactionRepositoryInterface;
 
 class TransactionRepository implements TransactionRepositoryInterface
 {

@@ -2,11 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Api\AccountController;
-use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\ServiceController;
-use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\TransferController;
 use App\Http\Controllers\Api\CreateInvoiceController;
 use App\Models\Invoice;
@@ -24,10 +21,6 @@ use Illuminate\Support\Facades\Route;
 // while keeping v1 for existing clients. This is a standard Api development practice.
 Route::prefix('v1')->group(function () {
 
-    // Transactions
-    Route::get('/transactions', [TransactionController::class, 'index']);
-    Route::get('/transactions/{id}', [TransactionController::class, 'show']);
-
     // Services
     Route::get('/services', [ServiceController::class, 'index']);
     Route::get('/services/{id}', [ServiceController::class, 'show']);
@@ -37,22 +30,6 @@ Route::prefix('v1')->group(function () {
     Route::get('/invoices/{id}', [InvoiceController::class, 'show']);
     Route::post('/invoices', [CreateInvoiceController::class, 'store']);
 
-    // test job controller
-    Route::get('/dashboard-stats', function () {
-        $stats = Cache::get('crm:dashboard:stats');
-
-        if (!$stats) {
-            return response()->json([
-                'status' => 'cache_miss',
-                'message' => 'Cache is empty, job not executed yet',
-            ]);
-        }
-
-        return response()->json([
-            'status' => 'cache_hit',
-            'data' => $stats,
-        ]);
-    });
 
     // Success invoice create
     Route::post('/test/create-invoice', function () {
@@ -144,5 +121,22 @@ Route::prefix('v1')->group(function () {
 
     //Transfers
     Route::post('/transfer', [TransferController::class, 'transfer']);
+
+    //Dashboard
+    Route::get('/dashboard-stats', function () {
+        $stats = Cache::get('crm:dashboard:stats');
+
+        if (!$stats) {
+            return response()->json([
+                'status' => 'cache_miss',
+                'message' => 'Cache is empty, job not executed yet',
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'cache_hit',
+            'data' => $stats,
+        ]);
+    });
 });
 
