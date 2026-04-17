@@ -40,6 +40,7 @@ class Transaction extends Model
         'status',
         'description',
         'confirmation_sent_at',
+        'id',
     ];
 
     protected $casts = [
