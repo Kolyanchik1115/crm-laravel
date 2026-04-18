@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature\Services;
 
 use App\DTO\TransferDTO;
+use App\Exceptions\InsufficientBalanceException;
+use App\Exceptions\SameAccountTransferException;
 use App\Models\Account;
 use App\Models\Client;
 use App\Repositories\AccountRepository;
@@ -12,6 +14,7 @@ use App\Repositories\TransactionRepository;
 use App\Services\TransferService;
 use App\ValueObjects\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class TransferServiceIntegrationTest extends TestCase
@@ -34,7 +37,8 @@ class TransferServiceIntegrationTest extends TestCase
         );
     }
 
-    public function test_transfer_persists_transactions_and_updates_balances(): void
+    #[Test]
+    public function transfer_persists_transactions_and_updates_balances(): void
     {
         // Arrange
         $client = Client::factory()->create([
@@ -109,7 +113,8 @@ class TransferServiceIntegrationTest extends TestCase
         $this->assertDatabaseCount('transactions', 2);
     }
 
-    public function test_transfer_with_commission_persists_correct_amounts(): void
+    #[Test]
+    public function transfer_with_commission_persists_correct_amounts(): void
     {
         // Arrange
         $client = Client::factory()->create([
@@ -177,7 +182,8 @@ class TransferServiceIntegrationTest extends TestCase
         ]);
     }
 
-    public function test_transfer_fails_when_insufficient_balance(): void
+    #[Test]
+    public function transfer_fails_when_insufficient_balance(): void
     {
         // Arrange
         $client = Client::factory()->create([
@@ -213,7 +219,7 @@ class TransferServiceIntegrationTest extends TestCase
         );
 
         // Act & Assert
-        $this->expectException(\App\Exceptions\InsufficientBalanceException::class);
+        $this->expectException(InsufficientBalanceException::class);
 
         try {
             $this->transferService->executeTransfer($dto);
@@ -230,7 +236,8 @@ class TransferServiceIntegrationTest extends TestCase
         }
     }
 
-    public function test_transfer_fails_when_same_account(): void
+    #[Test]
+    public function transfer_fails_when_same_account(): void
     {
         // Arrange
         $client = Client::factory()->create([
@@ -259,7 +266,7 @@ class TransferServiceIntegrationTest extends TestCase
         );
 
         // Act & Assert
-        $this->expectException(\App\Exceptions\SameAccountTransferException::class);
+        $this->expectException(SameAccountTransferException::class);
 
         try {
             $this->transferService->executeTransfer($dto);
