@@ -216,3 +216,36 @@ test:
     - composer test
     - composer test:coverage
 ```
+
+# Перевірка регресії
+
+### Приклад: зміна правила комісії
+
+**Експеримент:** Змінимо поріг комісії в `TransferService` з `10000` на `20000`
+
+```php
+// Було
+private const float COMMISSION_THRESHOLD = 10000;
+
+// Змінили на
+private const float COMMISSION_THRESHOLD = 20000;
+```
+
+**Результат запуску тестів:**
+
+```
+FAILED  Tests\Unit\Services\TransferServiceTest > execute transfer applies commission when amount above threshold
+No matching handler found for decrementBalance(1, '15075')
+Expected: decrementBalance(1, '15000')
+```
+
+**Висновок:** Тест `executeTransfer_applies_commission_when_amount_above_threshold` впав,
+тому що комісія не застосувалася (поріг став 20000, а сума 15000).
+
+✅ Це підтверджує, що тест перевіряє коректну поведінку комісії.
+✅ Якщо хтось випадково змінить правило комісії, тест попередить про це.
+✅ Регресія не пройде непоміченою.
+
+### Повернення змін
+
+Після повернення порогу на `10000` тести знову зелені.
