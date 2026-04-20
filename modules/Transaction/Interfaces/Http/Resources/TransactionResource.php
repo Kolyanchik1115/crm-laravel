@@ -19,7 +19,7 @@ use Modules\Account\Interfaces\Http\Resources\AccountResource;
  * @property int $account_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read Account $account
+ * @property-read Account $accounts
  */
 class TransactionResource extends JsonResource
 {
@@ -32,7 +32,7 @@ class TransactionResource extends JsonResource
             'status' => $this->status,
             'description' => $this->description,
             'account_id' => $this->account_id,
-            'account' => new AccountResource($this->whenLoaded('account')),
+            'accounts' => new AccountResource($this->whenLoaded('accounts')),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];

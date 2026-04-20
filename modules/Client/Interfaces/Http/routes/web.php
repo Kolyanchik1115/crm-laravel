@@ -12,7 +12,7 @@ Route::group(['prefix' => 'clients'], function () {
     Route::get('/{id}', [ClientController::class, 'show'])->name('clients.show');
 });
 
-Route::get('/test-client', function () {
+Route::get('/test-clients', function () {
     return 'Кiлькiсть клiєнтiв: ' . Client::count();
 });
 

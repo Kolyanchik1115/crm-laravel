@@ -24,6 +24,6 @@ class TransactionController extends Controller
     {
         $transactions = $this->transactionService->getAllTransactions();
 
-        return view('transactions.index', ['transactions' => $transactions]);
+        return view('transaction::transactions.index', ['transactions' => $transactions]);
     }
 }

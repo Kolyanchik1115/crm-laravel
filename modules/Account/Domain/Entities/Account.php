@@ -21,7 +21,7 @@ use Modules\Transaction\Domain\Entities\Transaction;
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
  *
- * @property-read Client $client
+ * @property-read Client $clients
  * @property-read \Illuminate\Database\Eloquent\Collection|Transaction[] $transactions
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Account find(int $id)

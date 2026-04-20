@@ -13,6 +13,6 @@ Route::group(['prefix' => 'accounts'], function () {
 });
 
 // Test route
-Route::get('/test-account/{id}', function ($id) {
+Route::get('/test-accounts/{id}', function ($id) {
     return Account::with('client')->find($id);
 });

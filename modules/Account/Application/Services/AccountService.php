@@ -27,7 +27,7 @@ class AccountService
     }
 
     /**
-     * Get account by ID
+     * Get accounts by ID
      */
     public function getAccountById(int $id): Account
     {

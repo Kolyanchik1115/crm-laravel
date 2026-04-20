@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,6 +22,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // All modules registration
+        $modulesPath = base_path('modules');
+
+        foreach (glob($modulesPath . '/*/Interfaces/Http/views', GLOB_ONLYDIR) as $viewsPath) {
+            $moduleName = basename(dirname($viewsPath, 3));
+            View::addNamespace(strtolower($moduleName), $viewsPath);
+        }
     }
 }

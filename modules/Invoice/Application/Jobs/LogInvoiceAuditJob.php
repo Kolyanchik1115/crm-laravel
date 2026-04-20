@@ -28,7 +28,7 @@ class LogInvoiceAuditJob implements ShouldQueue
     {
         try {
 
-            // invoice with client and items
+            // invoice with clients and items
             $invoice = Invoice::with(['client', 'items'])->find($this->invoiceId);
 
             if (!$invoice) {

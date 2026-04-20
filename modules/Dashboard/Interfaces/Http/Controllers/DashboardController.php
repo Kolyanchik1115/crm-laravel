@@ -21,7 +21,7 @@ class DashboardController extends Controller
     {
         $data = $this->dashboardService->getDashboardData();
 
-        return view('dashboard', [
+        return view('dashboard::dashboard', [
             // Client stats
             'clientsCount' => $data['clients']['total'],
             'activeClientsCount' => $data['clients']['active'],

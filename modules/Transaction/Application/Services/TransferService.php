@@ -26,7 +26,7 @@ class TransferService
 
     public function executeTransfer(TransferDTO $dto): array
     {
-        // check if account is not same
+        // check if accounts is not same
         if ($dto->accountFromId === $dto->accountToId) {
             throw new SameAccountTransferException();
         }

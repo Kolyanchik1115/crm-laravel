@@ -24,16 +24,16 @@ class AccountController extends Controller
     {
         $accounts = $this->accountService->getAllAccounts();
 
-        return view('accounts.index', ['accounts' => $accounts]);
+        return view('account::accounts.index', ['accounts' => $accounts]);
     }
 
     /**
-     * Display the specified account
+     * Display the specified accounts
      */
     public function show(int $id): View
     {
         $account = $this->accountService->getAccountById($id);
 
-        return view('accounts.show', ['account' => $account]);
+        return view('account::accounts.show', ['account' => $account]);
     }
 }

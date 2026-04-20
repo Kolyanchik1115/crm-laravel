@@ -22,7 +22,7 @@ class AccountRepository implements AccountRepositoryInterface
     }
 
     /**
-     * Find account by ID with client
+     * Find accounts by ID with clients
      */
     public function findOrFail(int $id): Account
     {

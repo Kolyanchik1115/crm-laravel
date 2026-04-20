@@ -46,7 +46,7 @@ class ClientService
 
 
     /**
-     * Get client by ID
+     * Get clients by ID
      */
     public function getClientById(int $id): Client
     {
@@ -54,7 +54,7 @@ class ClientService
     }
 
     /**
-     * Create new client and invalidate cache
+     * Create new clients and invalidate cache
      */
     public function createClient(array $data): Client
     {

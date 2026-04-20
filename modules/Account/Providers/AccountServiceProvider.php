@@ -24,9 +24,4 @@ class AccountServiceProvider extends ServiceProvider
             return new AccountService($app->make(AccountRepositoryInterface::class));
         });
     }
-
-    public function boot(): void
-    {
-        //
-    }
 }

@@ -16,7 +16,7 @@ class DashboardService
     }
 
     /**
-     * Get client statistics
+     * Get clients statistics
      */
     public function getClientStats(): array
     {

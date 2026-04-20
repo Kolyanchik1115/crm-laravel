@@ -21,7 +21,7 @@ use Modules\Service\Domain\Entities\Service;
  * @property int $client_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read Client $client
+ * @property-read Client $clients
  * @property-read Collection|Service[] $items
  */
 class InvoiceResource extends JsonResource
@@ -35,7 +35,7 @@ class InvoiceResource extends JsonResource
             'status' => $this->status,
             'issued_at' => $this->issued_at?->toISOString(),
             'client_id' => $this->client_id,
-            'client' => new ClientResource($this->whenLoaded('client')),
+            'clients' => new ClientResource($this->whenLoaded('clients')),
             'items' => InvoiceItemResource::collection($this->whenLoaded('items')),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),

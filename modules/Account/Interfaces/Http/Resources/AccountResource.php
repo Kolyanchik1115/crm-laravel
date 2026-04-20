@@ -21,7 +21,7 @@ use Modules\Transaction\Interfaces\Http\Resources\TransactionResource;
  * @property int $client_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read Client $client
+ * @property-read Client $clients
  * @property-read Collection|Transaction[] $transactions
  */
 class AccountResource extends JsonResource
@@ -34,7 +34,7 @@ class AccountResource extends JsonResource
             'balance' => $this->balance,
             'currency' => $this->currency,
             'client_id' => $this->client_id,
-            'client' => new ClientResource($this->whenLoaded('client')),
+            'clients' => new ClientResource($this->whenLoaded('clients')),
             'transactions' => TransactionResource::collection($this->whenLoaded('transactions')),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),

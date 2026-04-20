@@ -24,7 +24,7 @@ use Modules\Service\Domain\Entities\Service;
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
  *
- * @property-read Client $client
+ * @property-read Client $clients
  * @property-read \Illuminate\Database\Eloquent\Collection|Service[] $items
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Invoice create(array $attributes)

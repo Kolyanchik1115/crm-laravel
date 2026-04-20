@@ -10,6 +10,6 @@ class SameAccountTransferException extends DomainException
 {
     public function __construct()
     {
-        parent::__construct('Cannot transfer to the same account');
+        parent::__construct('Cannot transfer to the same accounts');
     }
 }

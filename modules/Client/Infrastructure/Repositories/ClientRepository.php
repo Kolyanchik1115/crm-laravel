@@ -20,7 +20,7 @@ class ClientRepository
     }
 
     /**
-     * Find client by ID with accounts
+     * Find clients by ID with accounts
      */
     public function findOrFail(int $id): Client
     {
@@ -28,7 +28,7 @@ class ClientRepository
     }
 
     /**
-     * Create new client
+     * Create new clients
      */
     public function create(array $data): Client
     {

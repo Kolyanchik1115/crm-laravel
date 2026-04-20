@@ -17,9 +17,4 @@ class ClientServiceProvider extends ServiceProvider
             return new ClientService($app->make(ClientRepository::class));
         });
     }
-
-    public function boot(): void
-    {
-        //
-    }
 }

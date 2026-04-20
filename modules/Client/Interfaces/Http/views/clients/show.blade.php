@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('shared::layouts.app')
 
 @section('title', 'Клієнт: ' . $client->full_name)
 

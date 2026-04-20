@@ -23,8 +23,8 @@ use Modules\Client\Domain\Entities\Client;
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
  *
- * @property-read Account $account
- * @property-read Client|null $client
+ * @property-read Account $accounts
+ * @property-read Client|null $clients
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Transaction create(array $attributes)
  * @method static \Illuminate\Database\Eloquent\Builder|Transaction find(int $id)

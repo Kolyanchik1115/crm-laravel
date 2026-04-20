@@ -11,7 +11,7 @@ use Modules\Transaction\Domain\Repositories\TransactionRepositoryInterface;
 class TransactionRepository implements TransactionRepositoryInterface
 {
     /**
-     * Get all transactions with account and client
+     * Get all transactions with accounts and clients
      */
     public function getAll(): Collection
     {
