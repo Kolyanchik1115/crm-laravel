@@ -18,9 +18,4 @@ class ServiceServiceProvider extends ServiceProvider
             ServiceRepository::class
         );
     }
-
-    public function boot(): void
-    {
-        //
-    }
 }
