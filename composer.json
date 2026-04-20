@@ -54,6 +54,9 @@
             "@php artisan config:clear --ansi",
             "@php artisan test"
         ],
+        "test:unit": "php artisan test --testsuite=Unit",
+        "test:feature": "php artisan test --testsuite=Feature",
+        "test:coverage": "php artisan test --coverage-text",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

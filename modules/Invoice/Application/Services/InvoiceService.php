@@ -67,8 +67,18 @@ class InvoiceService
 
     private function generateInvoiceNumber(): string
     {
-        $lastInvoice = $this->invoiceRepository->findById(Invoice::max('id'));
-        $lastNumber = $lastInvoice ? (int)substr($lastInvoice->invoice_number, -4) : 0;
+        $maxId = Invoice::max('id');
+
+        if ($maxId === null) {
+            return 'INV-' . date('Ymd') . '-0001';
+        }
+
+        $lastInvoice = $this->invoiceRepository->findById($maxId);
+
+        $lastNumber = $lastInvoice
+            ? (int)substr($lastInvoice->invoice_number, -4)
+            : 0;
+
         $newNumber = $lastNumber + 1;
 
         return 'INV-' . date('Ymd') . '-' . str_pad(

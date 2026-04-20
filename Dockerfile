@@ -12,6 +12,8 @@ RUN docker-php-ext-install pdo pdo_mysql
 
 RUN pecl install redis && docker-php-ext-enable redis
 
+RUN pecl install xdebug && docker-php-ext-enable xdebug
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 RUN a2enmod rewrite
