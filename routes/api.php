@@ -27,7 +27,6 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
     // Clients
     Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
     Route::get('/clients/{id}', [ClientController::class, 'show'])->name('clients.show');
-    Route::get('/clients/{id}/accounts', [ClientController::class, 'accounts'])->name('clients.accounts');
 
     // Accounts
     Route::get('/accounts', [AccountController::class, 'index'])->name('accounts.index');
