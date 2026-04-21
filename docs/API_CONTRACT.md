@@ -4,25 +4,25 @@
 
 1. [Версіонування](#версіонування)
 2. [Ресурс vs дія: Антипатерни та правильний підхід](#ресурс-vs-дія-антипатерни-та-правильний-підхід)
-   - [Правило](#правило)
-   - [Таблиця порівняння](#таблиця-порівняння-погано-vs-добре)
-   - [Альтернативний підхід](#альтернативний-підхід-винесення-балансу-в-окремий-підресурс)
-   - [Чому дії в URL — це антипатерн?](#чому-дії-в-url-це-антипатерн)
-   - [Як перевірити API на правильність?](#як-перевірити-api-на-правильність)
-   - [Правильні приклади для CRM](#правильні-приклади-для-crm)
+    - [Правило](#правило)
+    - [Таблиця порівняння](#таблиця-порівняння-погано-vs-добре)
+    - [Альтернативний підхід](#альтернативний-підхід-винесення-балансу-в-окремий-підресурс)
+    - [Чому дії в URL — це антипатерн?](#чому-дії-в-url-це-антипатерн)
+    - [Як перевірити API на правильність?](#як-перевірити-api-на-правильність)
+    - [Правильні приклади для CRM](#правильні-приклади-для-crm)
 3. [Ресурс: Transfers (Перекази)](#ресурс-transfers-перекази)
-   - [POST /api/v1/transfers](#post-apiv1transfers)
-   - [GET /api/v1/transfers](#get-apiv1transfers)
-   - [GET /api/v1/transfers/{id}](#get-apiv1transfersid)
+    - [POST /api/v1/transfers](#post-apiv1transfers)
+    - [GET /api/v1/transfers](#get-apiv1transfers)
+    - [GET /api/v1/transfers/{id}](#get-apiv1transfersid)
 4. [Ресурс: Accounts (Рахунки)](#ресурс-accounts-рахунки)
-   - [GET /api/v1/accounts](#get-apiv1accounts)
-   - [GET /api/v1/accounts/{id}](#get-apiv1accountsid)
-   - [GET /api/v1/accounts/{id}/transactions](#get-apiv1accountsidtransactions)
+    - [GET /api/v1/accounts](#get-apiv1accounts)
+    - [GET /api/v1/accounts/{id}](#get-apiv1accountsid)
+    - [GET /api/v1/accounts/{id}/transactions](#get-apiv1accountsidtransactions)
 5. [Ресурс: Invoices (Рахунки-фактури)](#ресурс-invoices-рахунки-фактури)
-   - [POST /api/v1/invoices](#post-apiv1invoices)
-   - [GET /api/v1/invoices](#get-apiv1invoices)
-   - [GET /api/v1/invoices/{id}](#get-apiv1invoicesid)
-   - [PATCH /api/v1/invoices/{id}](#patch-apiv1invoicesid)
+    - [POST /api/v1/invoices](#post-apiv1invoices)
+    - [GET /api/v1/invoices](#get-apiv1invoices)
+    - [GET /api/v1/invoices/{id}](#get-apiv1invoicesid)
+    - [PATCH /api/v1/invoices/{id}](#patch-apiv1invoicesid)
 6. [Діаграма ресурсів](#діаграма-ресурсів)
 
 ---
@@ -994,6 +994,11 @@ curl -X PATCH http://localhost:8000/api/v1/invoices/50 \
 
 ```
 /api/v1/
+clients
+│   ├── GET /                 (список клієнтів)
+│   ├── GET /{id}             (деталі клієнта)
+│   └── GET /{id}/accounts    (рахунки клієнта) 
+│
 ├── accounts
 │   ├── GET /                 (список рахунків)
 │   ├── GET /{id}             (деталі рахунку)
