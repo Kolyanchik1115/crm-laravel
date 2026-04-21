@@ -994,6 +994,11 @@ curl -X PATCH http://localhost:8000/api/v1/invoices/50 \
 
 ```
 /api/v1/
+clients
+│   ├── GET /                 (список клієнтів)
+│   ├── GET /{id}             (деталі клієнта)
+│   └── GET /{id}/accounts    (рахунки клієнта) 
+│
 ├── accounts
 │   ├── GET /                 (список рахунків)
 │   ├── GET /{id}             (деталі рахунку)
