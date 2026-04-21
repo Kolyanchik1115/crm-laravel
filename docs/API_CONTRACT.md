@@ -1,8 +1,122 @@
 # API Contract CRM
 
+## 📑 Зміст
+
+1. [Версіонування](#версіонування)
+2. [Ресурс vs дія: Антипатерни та правильний підхід](#ресурс-vs-дія-антипатерни-та-правильний-підхід)
+   - [Правило](#правило)
+   - [Таблиця порівняння](#таблиця-порівняння-погано-vs-добре)
+   - [Альтернативний підхід](#альтернативний-підхід-винесення-балансу-в-окремий-підресурс)
+   - [Чому дії в URL — це антипатерн?](#чому-дії-в-url-це-антипатерн)
+   - [Як перевірити API на правильність?](#як-перевірити-api-на-правильність)
+   - [Правильні приклади для CRM](#правильні-приклади-для-crm)
+3. [Ресурс: Transfers (Перекази)](#ресурс-transfers-перекази)
+   - [POST /api/v1/transfers](#post-apiv1transfers)
+   - [GET /api/v1/transfers](#get-apiv1transfers)
+   - [GET /api/v1/transfers/{id}](#get-apiv1transfersid)
+4. [Ресурс: Accounts (Рахунки)](#ресурс-accounts-рахунки)
+   - [GET /api/v1/accounts](#get-apiv1accounts)
+   - [GET /api/v1/accounts/{id}](#get-apiv1accountsid)
+   - [GET /api/v1/accounts/{id}/transactions](#get-apiv1accountsidtransactions)
+5. [Ресурс: Invoices (Рахунки-фактури)](#ресурс-invoices-рахунки-фактури)
+   - [POST /api/v1/invoices](#post-apiv1invoices)
+   - [GET /api/v1/invoices](#get-apiv1invoices)
+   - [GET /api/v1/invoices/{id}](#get-apiv1invoicesid)
+   - [PATCH /api/v1/invoices/{id}](#patch-apiv1invoicesid)
+6. [Діаграма ресурсів](#діаграма-ресурсів)
+
+---
+
 ## Версіонування
 
 Всі API ендпоінти використовують префікс `/api/v1/` для підтримки зворотної сумісності.
+
+---
+
+## Ресурс vs дія: Антипатерни та правильний підхід
+
+### Правило
+
+> **Дія визначається HTTP-методом; URL лише ідентифікує ресурс.**
+
+| HTTP метод | Дія |
+|------------|-----|
+| `GET` | Отримання ресурсу(ів) |
+| `POST` | Створення нового ресурсу |
+| `PUT` | Повне оновлення ресурсу |
+| `PATCH` | Часткове оновлення ресурсу |
+| `DELETE` | Видалення ресурсу |
+
+### Таблиця порівняння: Погано vs Добре
+
+| ❌ Погано (дія в URL) | ✅ Добре (ресурс + метод) |
+|----------------------|--------------------------|
+| `POST /createTransfer` | `POST /api/v1/transfers` |
+| `GET /getAccountBalance` | `GET /api/v1/accounts/{id}` (баланс у тілі) |
+| `POST /cancelInvoice` | `PATCH /api/v1/invoices/{id}` з `{"status": "cancelled"}` |
+| `GET /listAllTransfers` | `GET /api/v1/transfers` |
+| `POST /updateTransfer` | ❌ Заборонено (фінансова історія незмінна) |
+| `DELETE /deleteTransfer` | ❌ Заборонено (фінансова історія незмінна) |
+| `GET /getTransferById?id=123` | `GET /api/v1/transfers/123` |
+| `POST /markInvoiceAsPaid` | `PATCH /api/v1/invoices/{id}` з `{"status": "paid"}` |
+| `GET /getClientAccounts?clientId=1` | `GET /api/v1/accounts?client_id=1` |
+| `POST /makeTransfer` | `POST /api/v1/transfers` |
+
+### Альтернативний підхід: винесення балансу в окремий підресурс
+
+Якщо потрібно отримувати тільки баланс (без інших даних рахунку):
+
+| Підхід | URL |
+|--------|-----|
+| Підресурс | `GET /api/v1/accounts/{id}/balance` |
+
+**Приклад відповіді:**
+
+```json
+{
+    "account_id": 1,
+    "balance": 15000.00,
+    "currency": "UAH"
+}
+```
+
+### Чому дії в URL — це антипатерн?
+
+| Проблема | Пояснення |
+|----------|-----------|
+| **Не RESTful** | Порушує принципи REST, де URL позначає ресурс, а методи — дії |
+| **Важко документувати** | Кожна дія — унікальний URL, немає єдиного шаблону |
+| **Нестандартні методи** | Немає чіткої відповідності між HTTP методом і дією |
+| **Ускладнює кешування** | Кеш працює з HTTP методами (GET кешується, POST — ні) |
+| **Дублювання коду** | Схожі дії призводять до дублювання логіки |
+
+### Як перевірити API на правильність?
+
+1. **Подивись на URL** — чи є в ньому дієслово? (`create`, `update`, `delete`, `get`, `list`)
+2. **Перевір HTTP метод** — чи відповідає він дії?
+    - Читання → `GET`
+    - Створення → `POST`
+    - Оновлення → `PUT` / `PATCH`
+    - Видалення → `DELETE`
+3. **Чи можна передбачити URL?** — якщо знаєш ID ресурсу, чи зможеш сформувати URL?
+
+### Правильні приклади для CRM
+
+| Ресурс | GET (читання) | POST (створення) | PATCH (оновлення) | DELETE (видалення) |
+|--------|---------------|------------------|-------------------|-------------------|
+| `transfers` | `/api/v1/transfers` `/api/v1/transfers/{id}` | `/api/v1/transfers` | ❌ заборонено | ❌ заборонено |
+| `accounts` | `/api/v1/accounts` `/api/v1/accounts/{id}` | ❌ (через клієнта) | ❌ заборонено | ❌ заборонено |
+| `invoices` | `/api/v1/invoices` `/api/v1/invoices/{id}` | `/api/v1/invoices` | `/api/v1/invoices/{id}` (тільки статус) | ❌ заборонено |
+| `clients` | `/api/v1/clients` `/api/v1/clients/{id}` | `/api/v1/clients` | `/api/v1/clients/{id}` | ❌ заборонено |
+
+### Висновок
+
+- ✅ **Добре**: `GET /api/v1/transfers/123`
+- ❌ **Погано**: `POST /getTransferById?id=123`
+- ✅ **Добре**: `PATCH /api/v1/invoices/123` з `{"status": "paid"}`
+- ❌ **Погано**: `POST /markInvoiceAsPaid?id=123`
+
+> **Запам'ятай:** URL — це іменник (ресурс). HTTP метод — це дієслово (дія).
 
 ---
 
@@ -10,7 +124,7 @@
 
 ### Опис
 
-Ресурс `transfers` представляє операції переказу коштів між рахунками. 
+Ресурс `transfers` представляє операції переказу коштів між рахунками.
 Це критична фінансова операція, тому видалення та оновлення заборонені.
 
 ### Ендпоінти
@@ -32,6 +146,8 @@
 ---
 
 ## POST /api/v1/transfers
+
+[↑ Зміст](#-зміст)
 
 ### Опис
 Створює новий переказ коштів між двома рахунками.
@@ -147,6 +263,8 @@ curl -X POST http://localhost:8000/api/v1/transfers \
 
 ## GET /api/v1/transfers
 
+[↑ Зміст](#-зміст)
+
 ### Опис
 Отримує список переказів з можливістю фільтрації.
 
@@ -220,6 +338,8 @@ curl "http://localhost:8000/api/v1/transfers?account_id=1&date_from=2026-01-01&p
 
 ## GET /api/v1/transfers/{id}
 
+[↑ Зміст](#-зміст)
+
 ### Опис
 Отримує детальну інформацію про один переказ за ID.
 
@@ -284,43 +404,9 @@ curl http://localhost:8000/api/v1/transfers/100
 
 ---
 
-## Діаграма послідовності (Sequence Diagram)
-
-```
-Клієнт          API Gateway      TransferController    TransferService         Repository         БД
-  │                   │                     │                      │                 │             │
-  │──POST /transfers─▶│                     │                      │                 │             │
-  │                   │──▶validate request─▶│                      │                 │             │
-  │                   │                     │──▶executeTransfer()─▶│                 │             │
-  │                   │                     │                      │───findById()───▶│───SELECT───▶│
-  │                   │                     │                      │◀──Account──────│◀─────────────│
-  │                   │                     │                      │───decrement()──▶│───UPDATE───▶│
-  │                   │                     │                      │───increment()──▶│───UPDATE───▶│
-  │                   │                     │                      │───create()─────▶│───INSERT───▶│
-  │                   │                     │◀───result────────────│                 │             │
-  │                   │◀───201 Created──────│                      │                 │             │
-  │◀───Response───────│                     │                      │                 │             │
-```
-
----
-
-## Зміни в майбутніх версіях
-
-### Плановані зміни в v2
-
-- Додавання пагінації з курсором (cursor-based pagination)
-- Додавання фільтрації за статусом переказу
-- Додавання Webhooks для сповіщення про нові перекази
-
----
-
-# Версіонування
-
-Всі API ендпоінти використовують префікс `/api/v1/` для підтримки зворотної сумісності.
-
----
-
 ## Ресурс: Accounts (Рахунки)
+
+[↑ Зміст](#-зміст)
 
 ### Опис
 
@@ -344,6 +430,8 @@ curl http://localhost:8000/api/v1/transfers/100
 ---
 
 ## GET /api/v1/accounts
+
+[↑ Зміст](#-зміст)
 
 ### Опис
 Отримує список рахунків з можливістю фільтрації за клієнтом.
@@ -422,6 +510,8 @@ curl "http://localhost:8000/api/v1/accounts?client_id=1&per_page=10"
 
 ## GET /api/v1/accounts/{id}
 
+[↑ Зміст](#-зміст)
+
 ### Опис
 Отримує детальну інформацію про один рахунок за ID.
 
@@ -481,6 +571,8 @@ curl http://localhost:8000/api/v1/accounts/1
 ---
 
 ## GET /api/v1/accounts/{id}/transactions
+
+[↑ Зміст](#-зміст)
 
 ### Опис
 Отримує список транзакцій для конкретного рахунку (підресурс).
@@ -565,6 +657,8 @@ curl "http://localhost:8000/api/v1/accounts/1/transactions?type=transfer_out&per
 
 ## Ресурс: Invoices (Рахунки-фактури)
 
+[↑ Зміст](#-зміст)
+
 ### Опис
 
 Ресурс `invoices` представляє рахунки-фактури для клієнтів. Кожен рахунок містить позиції з послугами, кількістю та ціною.
@@ -588,6 +682,8 @@ curl "http://localhost:8000/api/v1/accounts/1/transactions?type=transfer_out&per
 ---
 
 ## POST /api/v1/invoices
+
+[↑ Зміст](#-зміст)
 
 ### Опис
 Створює новий рахунок-фактуру для клієнта з позиціями послуг.
@@ -683,6 +779,8 @@ curl -X POST http://localhost:8000/api/v1/invoices \
 
 ## GET /api/v1/invoices
 
+[↑ Зміст](#-зміст)
+
 ### Опис
 Отримує список рахунків-фактур.
 
@@ -752,6 +850,8 @@ curl "http://localhost:8000/api/v1/invoices?client_id=1&status=paid"
 ---
 
 ## GET /api/v1/invoices/{id}
+
+[↑ Зміст](#-зміст)
 
 ### Опис
 Отримує детальну інформацію про один рахунок-фактуру з позиціями.
@@ -830,6 +930,8 @@ curl http://localhost:8000/api/v1/invoices/50
 
 ## PATCH /api/v1/invoices/{id}
 
+[↑ Зміст](#-зміст)
+
 ### Опис
 Оновлює статус рахунку-фактури (наприклад, після оплати).
 
@@ -857,7 +959,7 @@ curl http://localhost:8000/api/v1/invoices/50
 
 ```bash
 curl -X PATCH http://localhost:8000/api/v1/invoices/50 \
-  -H "Content-Type: application/json" \
+  -H "Content-Type": application/json \
   -d '{"status": "paid"}'
 ```
 
@@ -887,6 +989,8 @@ curl -X PATCH http://localhost:8000/api/v1/invoices/50 \
 ---
 
 ## Діаграма ресурсів
+
+[↑ Зміст](#-зміст)
 
 ```
 /api/v1/
