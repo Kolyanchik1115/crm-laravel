@@ -211,3 +211,10 @@ docker compose logs redis
 ### 📨 Тестування 
 
 - [🔄 TESTING.md](docs/TESTING.md) - iнструкцiї до тестування
+
+### 🏗️ API 
+
+- [🔄 API_CONTRACT](docs/API_CONTRACT.md) - iнструкцiї до api
+- [🔄 API_STATUS_CODES](docs/API_STATUS_CODES.md) - cтатус коди
+
+
