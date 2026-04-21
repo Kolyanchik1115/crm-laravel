@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\V1;
 
-use App\Models\Client;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ClientResource;
+use App\Models\Client;
 use Illuminate\Http\JsonResponse;
 
 class ClientController extends Controller

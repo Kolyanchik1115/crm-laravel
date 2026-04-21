@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\InsufficientBalanceException;
 use App\Exceptions\SameAccountTransferException;
@@ -11,6 +11,7 @@ use App\Http\Requests\StoreTransferRequest;
 use App\Http\Resources\TransferResource;
 use App\Services\TransferService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class TransferController extends Controller
@@ -20,6 +21,30 @@ class TransferController extends Controller
     public function __construct(TransferService $transferService)
     {
         $this->transferService = $transferService;
+    }
+
+    public function index(): JsonResponse
+    {
+        return response()->json([
+            'message' => 'GET /api/v1/transfers - TODO: implement index',
+            'data' => []
+        ]);
+    }
+
+    public function show(int $id): JsonResponse
+    {
+        return response()->json([
+            'message' => "GET /api/v1/transfers/{$id} - TODO: implement show",
+            'data' => null
+        ]);
+    }
+
+    public function store(Request $request): JsonResponse
+    {
+        return response()->json([
+            'message' => 'POST /api/v1/transfers - TODO: implement store',
+            'data' => null
+        ], 201);
     }
 
     public function transfer(StoreTransferRequest $request): JsonResponse

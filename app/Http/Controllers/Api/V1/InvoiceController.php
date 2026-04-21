@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\V1;
 
-use App\Models\Invoice;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\InvoiceResource;
+use App\Models\Invoice;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
 {
@@ -29,5 +30,20 @@ class InvoiceController extends Controller
         return (new InvoiceResource($invoice))
             ->response()
             ->setStatusCode(200);
+    }
+    public function store(Request $request): JsonResponse
+    {
+        return response()->json([
+            'message' => 'POST /api/v1/invoices - TODO: implement store',
+            'data' => null
+        ], 201);
+    }
+
+    public function update(Request $request, int $id): JsonResponse
+    {
+        return response()->json([
+            'message' => "PATCH /api/v1/invoices/{$id} - TODO: implement update",
+            'data' => null
+        ]);
     }
 }
