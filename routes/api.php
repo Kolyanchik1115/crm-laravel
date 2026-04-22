@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AccountController;
 use App\Http\Controllers\Api\V1\ClientController;
-use App\Http\Controllers\Api\V1\CreateInvoiceController;
 use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\ServiceController;
 use App\Http\Controllers\Api\V1\TransactionController;
@@ -46,7 +45,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
     // Invoices
     Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
     Route::get('/invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
-    Route::post('/invoices', [CreateInvoiceController::class, 'store'])->name('invoices.store');
+    Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
 
     //Transfers
     Route::get('/transfers', [TransferController::class, 'index'])->name('transfers.index');

@@ -188,29 +188,102 @@
             "name": "Інвойси",
             "item": [
                 {
-                    "name": "Створення інвойсу",
+                    "name": "Створення інвойсу - успішно",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
                                 "key": "Content-Type",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
                             }
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"client_id\": 1,\n    \"items\": [\n        {\n            \"service_id\": 1,\n            \"quantity\": 2,\n            \"unit_price\": 1000\n        },\n        {\n            \"service_id\": 2,\n            \"quantity\": 1,\n            \"unit_price\": 5000\n        }\n    ]\n}"
+                            "raw": "{\n    \"client_id\": 1,\n    \"currency\": \"UAH\",\n    \"items\": [\n        {\n            \"service_id\": 1,\n            \"quantity\": 2,\n            \"unit_price\": \"1000.00\"\n        },\n        {\n            \"service_id\": 2,\n            \"quantity\": 1,\n            \"unit_price\": \"5000.00\"\n        }\n    ]\n}"
                         },
                         "url": {
                             "raw": "{{base_url}}/api/v1/invoices",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "invoices"
-                            ]
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "invoices"]
+                        }
+                    }
+                },
+                {
+                    "name": "Помилка - відсутній client_id",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"items\": [\n        {\n            \"service_id\": 1,\n            \"quantity\": 2,\n            \"unit_price\": \"1000.00\"\n        }\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/invoices",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "invoices"]
+                        }
+                    }
+                },
+                {
+                    "name": "Помилка - пустий масив items",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"client_id\": 1,\n    \"items\": []\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/invoices",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "invoices"]
+                        }
+                    }
+                },
+                {
+                    "name": "Помилка - невірний формат unit_price",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"client_id\": 1,\n    \"items\": [\n        {\n            \"service_id\": 1,\n            \"quantity\": 2,\n            \"unit_price\": \"1000.123\"\n        }\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/invoices",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "invoices"]
                         }
                     }
                 },
@@ -218,17 +291,16 @@
                     "name": "Список інвойсів",
                     "request": {
                         "method": "GET",
-                        "header": [],
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/invoices",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "invoices"
-                            ]
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "invoices"]
                         }
                     }
                 },
@@ -236,18 +308,16 @@
                     "name": "Деталі інвойсу",
                     "request": {
                         "method": "GET",
-                        "header": [],
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/invoices/1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "invoices",
-                                "1"
-                            ]
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "invoices", "1"]
                         }
                     }
                 }
