@@ -48,12 +48,18 @@ class TransferController extends Controller
         $dto = $request->toTransferDTO();
         $result = $this->transferService->executeTransfer($dto);
 
-        return (new TransferResource((object)$result))
+        $response = (new TransferResource((object)$result))
             ->additional([
                 'success' => true,
                 'message' => 'Переказ успішно виконано',
             ])
             ->response()
             ->setStatusCode(201);
+
+        //location
+        $location = url("/api/v1/transfers/{$result['transaction_out_id']}");
+        $response->header('Location', $location);
+
+        return $response;
     }
 }

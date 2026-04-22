@@ -15,7 +15,7 @@ class AccountController extends Controller
     {
         $accounts = Account::with(['client', 'transactions'])
             ->orderBy('account_number')
-            ->get();
+            ->paginate(15);
 
         return AccountResource::collection($accounts)
             ->response()

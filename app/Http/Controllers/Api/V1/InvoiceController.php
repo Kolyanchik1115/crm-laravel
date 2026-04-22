@@ -22,7 +22,7 @@ class InvoiceController extends Controller
     {
         $invoices = Invoice::with(['client', 'items.service'])
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(15);
 
         return InvoiceResource::collection($invoices)
             ->response()
@@ -40,16 +40,20 @@ class InvoiceController extends Controller
     public function store(StoreInvoiceRequest $request): JsonResponse
     {
         $dto = $request->toCreateInvoiceDTO();
-
         $invoice = $this->invoiceService->createInvoice($dto);
 
-        return (new InvoiceResource($invoice))
+        $response = (new InvoiceResource($invoice))
             ->additional([
                 'success' => true,
                 'message' => 'Рахунок-фактуру успішно створено',
             ])
             ->response()
             ->setStatusCode(201);
+
+        $location = url("/api/v1/invoices/{$invoice->id}");
+        $response->header('Location', $location);
+
+        return $response;
     }
 
     public function update(Request $request, int $id): JsonResponse
