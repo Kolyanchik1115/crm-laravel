@@ -7,11 +7,10 @@ namespace App\Http\Controllers\Api\V1;
 use App\Exceptions\InsufficientBalanceException;
 use App\Exceptions\SameAccountTransferException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreTransferRequest;
+use App\Http\Requests\Api\V1\StoreTransferRequest;
 use App\Http\Resources\TransferResource;
 use App\Services\TransferService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class TransferController extends Controller
@@ -39,15 +38,7 @@ class TransferController extends Controller
         ]);
     }
 
-    public function store(Request $request): JsonResponse
-    {
-        return response()->json([
-            'message' => 'POST /api/v1/transfers - TODO: implement store',
-            'data' => null
-        ], 201);
-    }
-
-    public function transfer(StoreTransferRequest $request): JsonResponse
+    public function store(StoreTransferRequest $request): JsonResponse
     {
         try {
             $dto = $request->toTransferDTO();
