@@ -3,28 +3,29 @@
 ## 📑 Зміст
 
 1. [Версіонування](#версіонування)
-2. [Ресурс vs дія: Антипатерни та правильний підхід](#ресурс-vs-дія-антипатерни-та-правильний-підхід)
+2. [Формат помилок](#формат-помилок)
+3. [Ресурс vs дія: Антипатерни та правильний підхід](#ресурс-vs-дія-антипатерни-та-правильний-підхід)
     - [Правило](#правило)
     - [Таблиця порівняння](#таблиця-порівняння-погано-vs-добре)
     - [Альтернативний підхід](#альтернативний-підхід-винесення-балансу-в-окремий-підресурс)
     - [Чому дії в URL — це антипатерн?](#чому-дії-в-url-це-антипатерн)
     - [Як перевірити API на правильність?](#як-перевірити-api-на-правильність)
     - [Правильні приклади для CRM](#правильні-приклади-для-crm)
-3. [Ресурс: Transfers (Перекази)](#ресурс-transfers-перекази)
+4. [Ресурс: Transfers (Перекази)](#ресурс-transfers-перекази)
     - [POST /api/v1/transfers](#post-apiv1transfers)
     - [GET /api/v1/transfers](#get-apiv1transfers)
     - [GET /api/v1/transfers/{id}](#get-apiv1transfersid)
-4. [Ресурс: Accounts (Рахунки)](#ресурс-accounts-рахунки)
+5. [Ресурс: Accounts (Рахунки)](#ресурс-accounts-рахунки)
     - [GET /api/v1/accounts](#get-apiv1accounts)
     - [GET /api/v1/accounts/{id}](#get-apiv1accountsid)
     - [GET /api/v1/accounts/{id}/transactions](#get-apiv1accountsidtransactions)
-5. [Ресурс: Invoices (Рахунки-фактури)](#ресурс-invoices-рахунки-фактури)
+6. [Ресурс: Invoices (Рахунки-фактури)](#ресурс-invoices-рахунки-фактури)
     - [POST /api/v1/invoices](#post-apiv1invoices)
     - [GET /api/v1/invoices](#get-apiv1invoices)
     - [GET /api/v1/invoices/{id}](#get-apiv1invoicesid)
     - [PATCH /api/v1/invoices/{id}](#patch-apiv1invoicesid)
-6. [Діаграма ресурсів](#діаграма-ресурсів)
-7. [Підсумкова таблиця контракту API](#підсумкова-таблиця-контракту-API)
+7. [Діаграма ресурсів](#діаграма-ресурсів)
+8. [Підсумкова таблиця контракту API](#підсумкова-таблиця-контракту-API)
 
 ---
 
@@ -104,6 +105,288 @@ Route::prefix('v2')->group(function () {   // майбутнє
 
 > **Для фінансових інтеграцій:** Перехід на v2 — добровільний. v1 підтримується мінімум 6 місяців після анонсу v2.
 
+---
+
+## Завдання 4. Централізована обробка domain-виключень
+
+Ось повна реалізація:
+
+---
+
+## 1. Оновлення `App\Exceptions\Handler.php`
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Exceptions;
+
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\ValidationException;
+use Throwable;
+
+class Handler extends ExceptionHandler
+{
+    /**
+     * The list of the inputs that are never flashed to the session on validation exceptions.
+     *
+     * @var array<int, string>
+     */
+    protected $dontFlash = [
+        'current_password',
+        'password',
+        'password_confirmation',
+    ];
+
+    /**
+     * Register the exception handling callbacks for the application.
+     */
+    public function register(): void
+    {
+        $this->reportable(function (Throwable $e) {
+            //
+        });
+    }
+
+    /**
+     * Render an exception into an HTTP response.
+     */
+    public function render($request, Throwable $e)
+    {
+        // Перевіряємо, чи це API запит
+        if ($request->expectsJson() || $request->is('api/*')) {
+            
+            // 1. Бізнес-винятки (422)
+            if ($e instanceof InsufficientBalanceException) {
+                return response()->json([
+                    'message' => 'Недостатньо коштів на рахунку.',
+                    'code' => 'INSUFFICIENT_BALANCE',
+                ], 422);
+            }
+            
+            if ($e instanceof SameAccountTransferException) {
+                return response()->json([
+                    'message' => 'Рахунок відправника і одержувача не можуть збігатися.',
+                    'code' => 'SAME_ACCOUNT_TRANSFER',
+                ], 422);
+            }
+            
+            // 2. DomainException (422)
+            if ($e instanceof \DomainException) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                    'code' => 'DOMAIN_ERROR',
+                ], 422);
+            }
+            
+            // 3. Model not found (404)
+            if ($e instanceof ModelNotFoundException) {
+                return response()->json([
+                    'message' => 'Ресурс не знайдено.',
+                ], 404);
+            }
+            
+            // 4. Validation errors (422) - залишаємо стандартну обробку Laravel
+            if ($e instanceof ValidationException) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+            
+            // 5. Системні помилки (500) - не показуємо stack trace
+            if ($this->isHttpException($e)) {
+                $statusCode = $e->getStatusCode();
+                
+                // 404 Not Found для неіснуючих маршрутів
+                if ($statusCode === 404) {
+                    return response()->json([
+                        'message' => 'Ресурс не знайдено.',
+                    ], 404);
+                }
+            }
+            
+            // Всі інші помилки - 500
+            return response()->json([
+                'message' => 'Внутрішня помилка сервера.',
+            ], 500);
+        }
+        
+        return parent::render($request, $e);
+    }
+}
+```
+
+---
+
+## 2. Створення класів винятків (якщо ще не створені)
+
+### `App\Exceptions\InsufficientBalanceException.php`
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Exceptions;
+
+use Exception;
+
+class InsufficientBalanceException extends Exception
+{
+    public function __construct(string $message = "Недостатньо коштів на рахунку")
+    {
+        parent::__construct($message);
+    }
+}
+```
+
+### `App\Exceptions\SameAccountTransferException.php`
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Exceptions;
+
+use Exception;
+
+class SameAccountTransferException extends Exception
+{
+    public function __construct(string $message = "Рахунок відправника і одержувача не можуть збігатися")
+    {
+        parent::__construct($message);
+    }
+}
+```
+
+---
+
+## 3. Спрощення контролера (видаляємо try-catch)
+
+Тепер `TransferController` стає чистішим:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Api\V1;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\StoreTransferRequest;
+use App\Http\Resources\Api\V1\TransferResource;
+use App\Models\Transaction;
+use App\Services\TransferService;
+use Illuminate\Http\JsonResponse;
+
+class TransferController extends Controller
+{
+    protected TransferService $transferService;
+
+    public function __construct(TransferService $transferService)
+    {
+        $this->transferService = $transferService;
+    }
+
+    public function index(): JsonResponse
+    {
+        $perPage = (int) request()->get('per_page', 15);
+        
+        $transfers = Transaction::with(['account'])
+            ->where('type', 'transfer_out')
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+
+        return TransferResource::collection($transfers)
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    public function show(int $id): JsonResponse
+    {
+        $transfer = Transaction::with(['account'])
+            ->where('type', 'transfer_out')
+            ->findOrFail($id);
+
+        return (new TransferResource($transfer))
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    public function store(StoreTransferRequest $request): JsonResponse
+    {
+        $dto = $request->toTransferDTO();
+        $result = $this->transferService->executeTransfer($dto);
+
+        return (new TransferResource((object) $result))
+            ->additional([
+                'success' => true,
+                'message' => 'Переказ успішно виконано',
+            ])
+            ->response()
+            ->setStatusCode(201);
+    }
+}
+```
+
+## Формат помилок
+
+API повертає помилки в єдиному JSON-форматі. Статус-коди відповідають типу помилки.
+
+### Валідація (422 Unprocessable Entity)
+
+Помилки валідації FormRequest:
+
+```json
+{
+    "message": "Сума має бути додатнім числом з максимум двома знаками після коми",
+    "errors": {
+        "amount": [
+            "Сума має бути додатнім числом з максимум двома знаками після коми"
+        ]
+    }
+}
+```
+
+### Бізнес-помилки (422 Unprocessable Entity)
+
+Помилки, пов'язані з бізнес-логікою:
+
+| Код помилки | Опис |
+|-------------|------|
+| `INSUFFICIENT_BALANCE` | Недостатньо коштів на рахунку |
+| `SAME_ACCOUNT_TRANSFER` | Рахунок відправника і одержувача збігаються |
+| `DOMAIN_ERROR` | Загальна бізнес-помилка |
+
+**Приклад відповіді:**
+```json
+{
+    "message": "Недостатньо коштів на рахунку.",
+    "code": "INSUFFICIENT_BALANCE"
+}
+```
+
+### Ресурс не знайдено (404 Not Found)
+
+```json
+{
+    "message": "Ресурс не знайдено."
+}
+```
+
+### Внутрішня помилка сервера (500 Internal Server Error)
+
+```json
+{
+    "message": "Внутрішня помилка сервера."
+}
+```
+
+> **Примітка:** Stack trace ніколи не показується клієнту в production-середовищі.
 ---
 
 ## Ресурс vs дія: Антипатерни та правильний підхід

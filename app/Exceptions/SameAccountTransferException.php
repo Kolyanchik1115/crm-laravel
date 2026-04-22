@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
-use DomainException;
+use Exception;
 
-class SameAccountTransferException extends DomainException
+class SameAccountTransferException extends Exception
 {
-    public function __construct()
+    public function __construct(string $message = "Рахунок відправника і одержувача не можуть збігатися")
     {
-        parent::__construct('Cannot transfer to the same account');
+        parent::__construct($message);
     }
 }

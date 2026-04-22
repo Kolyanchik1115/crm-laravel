@@ -96,6 +96,8 @@ class TransferService
         return [
             'transaction_out_id' => $transactionOut->id,
             'transaction_in_id' => $transactionIn->id,
+            'account_from_id' => $fromAccount->id,
+            'account_to_id' => $toAccount->id,
             'amount' => $dto->amount->getValue(),
             'commission' => $commission,
         ];

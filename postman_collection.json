@@ -31,10 +31,11 @@
                             "host": ["{{base_url}}"],
                             "path": ["api", "v1", "transfers"]
                         }
-                    }
+                    },
+                    "response": []
                 },
                 {
-                    "name": "Успішний переказ з комісією",
+                    "name": "Успішний переказ з комісією (>10000)",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -56,7 +57,8 @@
                             "host": ["{{base_url}}"],
                             "path": ["api", "v1", "transfers"]
                         }
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Помилка - недостатньо коштів",
@@ -81,7 +83,8 @@
                             "host": ["{{base_url}}"],
                             "path": ["api", "v1", "transfers"]
                         }
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Помилка - однакові рахунки",
@@ -106,7 +109,8 @@
                             "host": ["{{base_url}}"],
                             "path": ["api", "v1", "transfers"]
                         }
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Помилка - невірний формат суми (3 знаки)",
@@ -131,7 +135,8 @@
                             "host": ["{{base_url}}"],
                             "path": ["api", "v1", "transfers"]
                         }
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Помилка - невірна валюта",
@@ -156,31 +161,54 @@
                             "host": ["{{base_url}}"],
                             "path": ["api", "v1", "transfers"]
                         }
-                    }
+                    },
+                    "response": []
                 },
                 {
-                    "name": "Список переказів",
+                    "name": "Список переказів (пагінація)",
                     "request": {
                         "method": "GET",
-                        "header": [],
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
                         "url": {
-                            "raw": "{{base_url}}/api/v1/transfers",
+                            "raw": "{{base_url}}/api/v1/transfers?page=1&per_page=5",
                             "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "transfers"]
+                            "path": ["api", "v1", "transfers"],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "5"
+                                }
+                            ]
                         }
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Деталі переказу",
                     "request": {
                         "method": "GET",
-                        "header": [],
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/transfers/1",
                             "host": ["{{base_url}}"],
                             "path": ["api", "v1", "transfers", "1"]
                         }
-                    }
+                    },
+                    "response": []
                 }
             ]
         },
@@ -210,7 +238,8 @@
                             "host": ["{{base_url}}"],
                             "path": ["api", "v1", "invoices"]
                         }
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Помилка - відсутній client_id",
@@ -235,7 +264,8 @@
                             "host": ["{{base_url}}"],
                             "path": ["api", "v1", "invoices"]
                         }
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Помилка - пустий масив items",
@@ -260,7 +290,8 @@
                             "host": ["{{base_url}}"],
                             "path": ["api", "v1", "invoices"]
                         }
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Помилка - невірний формат unit_price",
@@ -285,7 +316,8 @@
                             "host": ["{{base_url}}"],
                             "path": ["api", "v1", "invoices"]
                         }
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Список інвойсів",
@@ -298,11 +330,22 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}/api/v1/invoices",
+                            "raw": "{{base_url}}/api/v1/invoices?page=1&per_page=10",
                             "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "invoices"]
+                            "path": ["api", "v1", "invoices"],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "10"
+                                }
+                            ]
                         }
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Деталі інвойсу",
@@ -319,7 +362,8 @@
                             "host": ["{{base_url}}"],
                             "path": ["api", "v1", "invoices", "1"]
                         }
-                    }
+                    },
+                    "response": []
                 }
             ]
         },
@@ -330,58 +374,55 @@
                     "name": "Список клієнтів",
                     "request": {
                         "method": "GET",
-                        "header": [],
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/clients",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "clients"
-                            ]
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "clients"]
                         }
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Деталі клієнта",
                     "request": {
                         "method": "GET",
-                        "header": [],
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/clients/1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "clients",
-                                "1"
-                            ]
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "clients", "1"]
                         }
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Рахунки клієнта",
                     "request": {
                         "method": "GET",
-                        "header": [],
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/clients/1/accounts",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "clients",
-                                "1",
-                                "accounts"
-                            ]
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "clients", "1", "accounts"]
                         }
-                    }
+                    },
+                    "response": []
                 }
             ]
         },
@@ -392,58 +433,55 @@
                     "name": "Список рахунків",
                     "request": {
                         "method": "GET",
-                        "header": [],
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/accounts",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "accounts"
-                            ]
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "accounts"]
                         }
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Деталі рахунку",
                     "request": {
                         "method": "GET",
-                        "header": [],
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/accounts/1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "accounts",
-                                "1"
-                            ]
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "accounts", "1"]
                         }
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Транзакції рахунку",
                     "request": {
                         "method": "GET",
-                        "header": [],
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/accounts/1/transactions",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "accounts",
-                                "1",
-                                "transactions"
-                            ]
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "accounts", "1", "transactions"]
                         }
-                    }
+                    },
+                    "response": []
                 }
             ]
         },
@@ -454,38 +492,37 @@
                     "name": "Список транзакцій",
                     "request": {
                         "method": "GET",
-                        "header": [],
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/transactions",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "transactions"
-                            ]
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "transactions"]
                         }
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Деталі транзакції",
                     "request": {
                         "method": "GET",
-                        "header": [],
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/transactions/1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "transactions",
-                                "1"
-                            ]
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "transactions", "1"]
                         }
-                    }
+                    },
+                    "response": []
                 }
             ]
         },
@@ -496,38 +533,37 @@
                     "name": "Список послуг",
                     "request": {
                         "method": "GET",
-                        "header": [],
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/services",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "services"
-                            ]
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "services"]
                         }
-                    }
+                    },
+                    "response": []
                 },
                 {
                     "name": "Деталі послуги",
                     "request": {
                         "method": "GET",
-                        "header": [],
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/services/1",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "services",
-                                "1"
-                            ]
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "services", "1"]
                         }
-                    }
+                    },
+                    "response": []
                 }
             ]
         },
@@ -538,80 +574,19 @@
                     "name": "Статистика дашборду (кеш)",
                     "request": {
                         "method": "GET",
-                        "header": [],
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/dashboard-stats",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "dashboard-stats"
-                            ]
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "dashboard-stats"]
                         }
-                    }
-                }
-            ]
-        },
-        {
-            "name": "Тестові ендпоінти",
-            "item": [
-                {
-                    "name": "Тест створення інвойсу",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{}"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/api/v1/test/create-invoice",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "test",
-                                "create-invoice"
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Тест створення інвойсу з помилкою",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{}"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/api/v1/test/create-invoice-error",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "test",
-                                "create-invoice-error"
-                            ]
-                        }
-                    }
+                    },
+                    "response": []
                 }
             ]
         }

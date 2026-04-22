@@ -6,32 +6,40 @@ namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use stdClass;
 
-/**
- * @property int $id
- * @property int $account_from_id
- * @property int $account_to_id
- * @property float $amount
- * @property string $currency
- * @property string $status
- * @property string $description
- * @property float $commission
- * @property \Illuminate\Support\Carbon $created_at
- */
 class TransferResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $resource = $this->resource;
+
+        if (is_array($resource) || $resource instanceof stdClass) {
+            $data = (array) $resource;
+
+            return [
+                'id' => $data['transaction_out_id'] ?? null,
+                'account_from_id' => $data['account_from_id'] ?? null,
+                'account_to_id' => $data['account_to_id'] ?? null,
+                'amount' => (float) ($data['amount'] ?? 0),
+                'currency' => $data['currency'] ?? 'UAH',
+                'status' => $data['status'] ?? 'completed',
+                'description' => $data['description'] ?? '',
+                'commission' => (float) ($data['commission'] ?? 0),
+                'created_at' => $data['created_at'] ?? now()->toIso8601String(),
+            ];
+        }
+
         return [
-            'id' => $this->id,
-            'account_from_id' => $this->account_from_id,
-            'account_to_id' => $this->account_to_id,
-            'amount' => (float) $this->amount,
-            'currency' => $this->currency ?? 'UAH',
-            'status' => $this->status ?? 'completed',
-            'description' => $this->description ?? '',
-            'commission' => (float) ($this->commission ?? 0),
-            'created_at' => $this->created_at->toIso8601String(),
+            'id' => $resource->id,
+            'account_from_id' => $resource->account_from_id ?? $resource->account_id,
+            'account_to_id' => $resource->account_to_id ?? null,
+            'amount' => (float) $resource->amount,
+            'currency' => $resource->currency ?? 'UAH',
+            'status' => $resource->status ?? 'completed',
+            'description' => $resource->description ?? '',
+            'commission' => (float) ($resource->commission ?? 0),
+            'created_at' => $resource->created_at?->toIso8601String() ?? now()->toIso8601String(),
         ];
     }
 }
