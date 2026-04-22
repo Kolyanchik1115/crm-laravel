@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\Api\V1\AccountResource;
+use App\Http\Resources\Api\V1\InvoiceResource;
 use App\Models\Account;
 use App\Models\Invoice;
 use Illuminate\Database\Eloquent\Collection;

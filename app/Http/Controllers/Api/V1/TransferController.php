@@ -8,7 +8,8 @@ use App\Exceptions\InsufficientBalanceException;
 use App\Exceptions\SameAccountTransferException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\StoreTransferRequest;
-use App\Http\Resources\TransferResource;
+use App\Http\Resources\Api\V1\TransferResource;
+use App\Models\Transaction;  // ← використовуємо Transaction
 use App\Services\TransferService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
@@ -24,18 +25,25 @@ class TransferController extends Controller
 
     public function index(): JsonResponse
     {
-        return response()->json([
-            'message' => 'GET /api/v1/transfers - TODO: implement index',
-            'data' => []
-        ]);
+        $transfers = Transaction::with(['account'])
+            ->where('type', 'transfer_out')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return TransferResource::collection($transfers)
+            ->response()
+            ->setStatusCode(200);
     }
 
     public function show(int $id): JsonResponse
     {
-        return response()->json([
-            'message' => "GET /api/v1/transfers/{$id} - TODO: implement show",
-            'data' => null
-        ]);
+        $transfer = Transaction::with(['account'])
+            ->where('type', 'transfer_out')
+            ->findOrFail($id);
+
+        return (new TransferResource($transfer))
+            ->response()
+            ->setStatusCode(200);
     }
 
     public function store(StoreTransferRequest $request): JsonResponse
@@ -44,13 +52,13 @@ class TransferController extends Controller
             $dto = $request->toTransferDTO();
             $result = $this->transferService->executeTransfer($dto);
 
-            return (new TransferResource($result))
+            return (new TransferResource((object) $result))
                 ->additional([
                     'success' => true,
                     'message' => 'Переказ успішно виконано',
                 ])
                 ->response()
-                ->setStatusCode(200);
+                ->setStatusCode(201);
 
         } catch (SameAccountTransferException|InsufficientBalanceException $e) {
             return response()->json([
