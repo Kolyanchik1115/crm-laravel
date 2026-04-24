@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature;
+namespace Feature;
 
 use App\Models\Account;
 use App\Models\Client;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
+use Route;
 use Tests\TestCase;
 
 class TransferControllerTest extends TestCase
@@ -50,34 +51,42 @@ class TransferControllerTest extends TestCase
     {
         $amount = 1000;
 
-        $response = $this->postJson('/api/v1/transfer', [
-            'from_account_id' => $this->fromAccount->id,
-            'to_account_id' => $this->toAccount->id,
-            'amount' => $amount,
+        $response = $this->postJson('/api/v1/transfers', [
+            'account_from_id' => $this->fromAccount->id,
+            'account_to_id' => $this->toAccount->id,
+            'amount' => (string)$amount,
             'currency' => 'UAH',
             'description' => 'Test transfer',
         ]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
+
         $response->assertJsonStructure([
-            'success',
-            'message',
             'data' => [
-                'transaction_out_id',
-                'transaction_in_id',
+                'id',
+                'account_from_id',
+                'account_to_id',
                 'amount',
+                'currency',
+                'status',
+                'description',
                 'commission',
                 'created_at',
             ],
+            'success',
+            'message',
         ]);
 
         $response->assertJson([
             'success' => true,
             'message' => 'Переказ успішно виконано',
             'data' => [
-                'amount' => $amount,
+                'amount' => (float)$amount,
             ],
         ]);
+
+        $response->assertHeader('Location');
+        $response->assertHeaderContains('Location', '/api/v1/transfers/');
 
         $this->assertDatabaseHas('transactions', [
             'account_id' => $this->fromAccount->id,
@@ -107,19 +116,17 @@ class TransferControllerTest extends TestCase
     #[Test]
     public function transfer_endpoint_returns_error_when_insufficient_balance(): void
     {
-        $amount = 10000;
-
-        $response = $this->postJson('/api/v1/transfer', [
-            'from_account_id' => $this->fromAccount->id,
-            'to_account_id' => $this->toAccount->id,
-            'amount' => $amount,
+        $response = $this->postJson('/api/v1/transfers', [
+            'account_from_id' => $this->fromAccount->id,
+            'account_to_id' => $this->toAccount->id,
+            'amount' => '10000',
             'currency' => 'UAH',
         ]);
 
         $response->assertStatus(422);
         $response->assertJson([
-            'success' => false,
-            'message' => 'Insufficient funds for transfer',
+            'code' => 'INSUFFICIENT_BALANCE',
+            'message' => 'Недостатньо коштів на рахунку',
         ]);
 
         $this->assertDatabaseCount('transactions', 0);
@@ -128,37 +135,37 @@ class TransferControllerTest extends TestCase
     #[Test]
     public function transfer_endpoint_returns_error_when_same_account(): void
     {
-        $response = $this->postJson('/api/v1/transfer', [
-            'from_account_id' => $this->fromAccount->id,
-            'to_account_id' => $this->fromAccount->id,
-            'amount' => 100,
+        $response = $this->postJson('/api/v1/transfers', [
+            'account_from_id' => $this->fromAccount->id,
+            'account_to_id' => $this->fromAccount->id,
+            'amount' => '100',
             'currency' => 'UAH',
         ]);
 
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['to_account_id']);
+        $response->assertJsonValidationErrors(['account_to_id']);
     }
 
     #[Test]
     public function transfer_endpoint_returns_error_when_account_not_found(): void
     {
-        $response = $this->postJson('/api/v1/transfer', [
-            'from_account_id' => 99999,
-            'to_account_id' => $this->toAccount->id,
-            'amount' => 100,
+        $response = $this->postJson('/api/v1/transfers', [
+            'account_from_id' => 99999,
+            'account_to_id' => $this->toAccount->id,
+            'amount' => '100',
             'currency' => 'UAH',
         ]);
 
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['from_account_id']);
+        $response->assertJsonValidationErrors(['account_from_id']);
     }
 
     #[Test]
     public function transfer_endpoint_returns_validation_error_when_amount_missing(): void
     {
-        $response = $this->postJson('/api/v1/transfer', [
-            'from_account_id' => $this->fromAccount->id,
-            'to_account_id' => $this->toAccount->id,
+        $response = $this->postJson('/api/v1/transfers', [
+            'account_from_id' => $this->fromAccount->id,
+            'account_to_id' => $this->toAccount->id,
             'currency' => 'UAH',
         ]);
 
@@ -169,10 +176,10 @@ class TransferControllerTest extends TestCase
     #[Test]
     public function transfer_endpoint_returns_validation_error_when_amount_negative(): void
     {
-        $response = $this->postJson('/api/v1/transfer', [
-            'from_account_id' => $this->fromAccount->id,
-            'to_account_id' => $this->toAccount->id,
-            'amount' => -100,
+        $response = $this->postJson('/api/v1/transfers', [
+            'account_from_id' => $this->fromAccount->id,
+            'account_to_id' => $this->toAccount->id,
+            'amount' => '-100',
             'currency' => 'UAH',
         ]);
 
@@ -188,14 +195,15 @@ class TransferControllerTest extends TestCase
 
         $this->fromAccount->update(['balance' => 20000]);
 
-        $response = $this->postJson('/api/v1/transfer', [
-            'from_account_id' => $this->fromAccount->id,
-            'to_account_id' => $this->toAccount->id,
-            'amount' => $amount,
+        $response = $this->postJson('/api/v1/transfers', [
+            'account_from_id' => $this->fromAccount->id,
+            'account_to_id' => $this->toAccount->id,
+            'amount' => (string)$amount,
             'currency' => 'UAH',
         ]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
+
         $response->assertJson([
             'success' => true,
             'data' => [
