@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Modules\Transaction\Domain\Entities\Transaction;
+use Modules\Transaction\src\Domain\Entities\Transaction;
 
 class TransactionSeeder extends Seeder
 {

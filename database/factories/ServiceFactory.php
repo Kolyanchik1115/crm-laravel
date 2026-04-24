@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Modules\Service\Domain\Entities\Service;
+use Modules\Service\src\Domain\Entities\Service;
 
 class ServiceFactory extends Factory
 {

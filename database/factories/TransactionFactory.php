@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Modules\Account\Domain\Entities\Account;
-use Modules\Transaction\Domain\Entities\Transaction;
+use Modules\Account\src\Domain\Entities\Account;
+use Modules\Transaction\src\Domain\Entities\Transaction;
 
 class TransactionFactory extends Factory
 {

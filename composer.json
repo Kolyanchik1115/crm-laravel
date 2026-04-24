@@ -10,7 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
-        "laravel/framework": "*",
+        "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
         "predis/predis": "^3.4"
     },
@@ -34,7 +34,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "Tests\\": "tests/",
+            "Tests\\Modules\\": "modules/"
         }
     },
     "scripts": {

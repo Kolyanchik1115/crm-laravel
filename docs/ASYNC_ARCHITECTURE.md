@@ -68,10 +68,9 @@ currency: $fromAccount->currency,
 ```
 
 ### Реєстрація Listeners
-
 ```php
 // app/Providers/EventServiceProvider.php
-use Modules\Dashboard\Application\Listeners\UpdateDashboardCacheListener;protected $listen = [
+protected $listen = [
 TransferCompleted::class => [
 SendTransferConfirmationNotification::class,
 LogTransferToAudit::class,

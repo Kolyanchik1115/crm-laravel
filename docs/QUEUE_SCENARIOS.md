@@ -301,7 +301,7 @@ HTTP-запит
 ### Приклад коду
 
 ```php
-use Modules\Invoice\Domain\Entities\Invoice;use Modules\Invoice\Domain\Entities\InvoiceItem;class InvoiceController extends Controller
+class InvoiceController extends Controller
 {
     public function store(StoreInvoiceRequest $request): JsonResponse
     {
@@ -450,8 +450,8 @@ public function handle(): void
     $transaction = Transaction::find($this->transactionId);
     
     // 2. Отримати дані відправника та отримувача
-    $fromAccount = Account::with('clients')->find($transaction->from_account_id);
-    $toAccount = Account::with('clients')->find($transaction->to_account_id);
+    $fromAccount = Account::with('client')->find($transaction->from_account_id);
+    $toAccount = Account::with('client')->find($transaction->to_account_id);
     
     $sender = $fromAccount->client;
     $receiver = $toAccount->client;

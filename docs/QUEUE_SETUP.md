@@ -168,7 +168,7 @@ php artisan queue:monitor default
 
 ```php
 // Відправка в чергу notifications
-use Modules\Invoice\Application\Jobs\LogInvoiceAuditJob;SendTransferConfirmationJob::dispatch($id)->onQueue('notifications');
+SendTransferConfirmationJob::dispatch($id)->onQueue('notifications');
 
 // Відправка в чергу audit
 LogInvoiceAuditJob::dispatch($id)->onQueue('audit');

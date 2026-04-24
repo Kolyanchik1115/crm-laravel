@@ -249,8 +249,7 @@ public function __construct(
 #### InvoiceService
 
 ```php
-
-use Modules\Invoice\Domain\Repositories\InvoiceItemRepositoryInterface;use Modules\Invoice\Domain\Repositories\InvoiceRepositoryInterface;public function __construct(
+public function __construct(
     protected InvoiceRepositoryInterface $invoiceRepository,
     protected InvoiceItemRepositoryInterface $invoiceItemRepository,
     protected ServiceRepositoryInterface $serviceRepository,
@@ -276,8 +275,7 @@ public function __construct(
 ### Binding в AppServiceProvider
 
 ```php
-
-use Modules\Invoice\Domain\Repositories\InvoiceItemRepositoryInterface;use Modules\Invoice\Domain\Repositories\InvoiceRepositoryInterface;use Modules\Invoice\Infrastructure\Repositories\InvoiceItemRepository;use Modules\Invoice\Infrastructure\Repositories\InvoiceRepository;public function register(): void
+public function register(): void
 {
     $this->app->bind(AccountRepositoryInterface::class, AccountRepository::class);
     $this->app->bind(TransactionRepositoryInterface::class, TransactionRepository::class);

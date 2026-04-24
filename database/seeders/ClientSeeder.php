@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Modules\Client\Domain\Entities\Client;
+use Modules\Client\src\Domain\Entities\Client;
 
 class ClientSeeder extends Seeder
 {

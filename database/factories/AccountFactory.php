@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Modules\Account\Domain\Entities\Account;
-use Modules\Client\Domain\Entities\Client;
+use Modules\Account\src\Domain\Entities\Account;
+use Modules\Client\src\Domain\Entities\Client;
 
 class AccountFactory extends Factory
 {

@@ -5,7 +5,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
-use Modules\Client\Domain\Entities\Client;
+use Modules\Client\src\Domain\Entities\Client;
 
 class ClientFactory extends Factory
 {

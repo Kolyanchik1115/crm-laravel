@@ -208,6 +208,12 @@ docker compose logs redis
 - [🔄 JOB_LIFECYCLE.md](docs/JOB_LIFECYCLE.md) - життєвий цикл Job у Laravel
 - [🏭 QUEUE_PRODUCTION.md](docs/QUEUE_PRODUCTION.md) - налаштування worker'ів у production
 
-### 📨 Тестування 
+### 📨 Тестування
 
 - [🔄 TESTING.md](docs/TESTING.md) - iнструкцiї до тестування
+
+### 🏗️ API
+
+- [🔄 API_CONTRACT](docs/API_CONTRACT.md) - iнструкцiї до api
+- [🔄 API_STATUS_CODES](docs/API_STATUS_CODES.md) - cтатус коди
+

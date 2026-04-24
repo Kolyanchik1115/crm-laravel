@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Modules\Invoice\Domain\Entities\Invoice;
+use Modules\Invoice\src\Domain\Entities\Invoice;
 
 class InvoiceSeeder extends Seeder
 {

@@ -6,7 +6,7 @@ namespace Database\Seeders;
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Modules\Account\Domain\Entities\Account;
+use Modules\Account\src\Domain\Entities\Account;
 
 class AccountSeeder extends Seeder
 {
