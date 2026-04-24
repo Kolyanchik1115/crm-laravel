@@ -37,18 +37,4 @@ class TransactionServiceProvider extends ServiceProvider
             );
         });
     }
-
-    public function boot(): void
-    {
-        // Events
-        Event::listen(
-            TransferCompleted::class,
-            SendTransferConfirmationNotification::class
-        );
-
-        Event::listen(
-            TransferCompleted::class,
-            LogTransferToAudit::class
-        );
-    }
 }

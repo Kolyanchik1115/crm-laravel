@@ -22,18 +22,4 @@ class DashboardServiceProvider extends ServiceProvider
             return new DashboardService($app->make(DashboardRepository::class));
         });
     }
-
-    public function boot(): void
-    {
-        // Events
-        Event::listen(
-            TransferCompleted::class,
-            UpdateDashboardCacheListener::class
-        );
-
-        Event::listen(
-            InvoiceCreated::class,
-            UpdateDashboardCacheOnInvoiceListener::class
-        );
-    }
 }
