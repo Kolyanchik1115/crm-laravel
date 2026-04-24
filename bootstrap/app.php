@@ -6,32 +6,39 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Modules\Account\src\Providers\AccountServiceProvider;
+use Modules\Client\src\Providers\ClientServiceProvider;
+use Modules\Dashboard\src\Providers\DashboardServiceProvider;
+use Modules\Invoice\src\Providers\InvoiceServiceProvider;
+use Modules\Service\src\Providers\ServiceServiceProvider;
 use Modules\Transaction\src\Domain\Exceptions\InsufficientBalanceException;
 use Modules\Transaction\src\Domain\Exceptions\SameAccountTransferException;
+use Modules\Transaction\src\Providers\EventServiceProvider;
+use Modules\Transaction\src\Providers\TransactionServiceProvider;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
-        commands: __DIR__.'/../routes/console.php',
+        web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
     ->withProviders([
         //client
-        \Modules\Client\src\Providers\ClientServiceProvider::class,
+        ClientServiceProvider::class,
         //account
-        \Modules\Account\src\Providers\AccountServiceProvider::class,
+        AccountServiceProvider::class,
         //transaction
-        \Modules\Transaction\src\Providers\TransactionServiceProvider::class,
-        \Modules\Transaction\src\Providers\EventServiceProvider::class,
+        TransactionServiceProvider::class,
+        EventServiceProvider::class,
         //dashboard
-        \Modules\Dashboard\src\Providers\DashboardServiceProvider::class,
-        \Modules\Dashboard\src\Providers\EventServiceProvider::class,
+        DashboardServiceProvider::class,
+        EventServiceProvider::class,
         //invoice
-        \Modules\Invoice\src\Providers\InvoiceServiceProvider::class,
+        InvoiceServiceProvider::class,
         //service
-        \Modules\Service\src\Providers\ServiceServiceProvider::class,
+        ServiceServiceProvider::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         //

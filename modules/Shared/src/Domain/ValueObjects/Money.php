@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace Modules\Shared\src\Domain\ValueObjects;
+
 final readonly class Money
 {
     private float $amountValue;
@@ -10,8 +11,7 @@ final readonly class Money
     public function __construct(
         public string $amount,
         public string $currency = 'UAH'
-    )
-    {
+    ) {
         $this->amountValue = (float)$this->amount;
 
         if ($this->amountValue <= 0) {

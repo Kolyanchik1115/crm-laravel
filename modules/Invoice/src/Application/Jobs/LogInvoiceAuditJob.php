@@ -27,8 +27,8 @@ class LogInvoiceAuditJob implements ShouldQueue
     public function handle(): void
     {
         try {
-
             // invoice with clients and items
+            /** @var Invoice|null $invoice */
             $invoice = Invoice::with(['client', 'items'])->find($this->invoiceId);
 
             if (!$invoice) {
@@ -39,11 +39,14 @@ class LogInvoiceAuditJob implements ShouldQueue
                 return;
             }
 
-            //  payload
+            // client name with nullsafe operator
+            $clientName = $invoice->client?->full_name ?? 'Unknown';
+
+            // payload
             $payload = [
                 'total_amount' => $invoice->total_amount,
                 'items_count' => $invoice->items->count(),
-                'client_name' => $invoice->client->full_name,
+                'client_name' => $clientName,
             ];
 
             AuditLog::updateOrCreate(
@@ -62,7 +65,7 @@ class LogInvoiceAuditJob implements ShouldQueue
             Log::info('LogInvoiceAuditJob: Audit record created', [
                 'job' => self::class,
                 'invoice_id' => $this->invoiceId,
-                'client_name' => $invoice->client->full_name,
+                'client_name' => $clientName,
                 'total_amount' => $invoice->total_amount,
                 'items_count' => $invoice->items->count(),
             ]);

@@ -26,7 +26,7 @@ Route::post('/test/create-invoice', function () {
                 ['service_id' => 2, 'quantity' => 1, 'unit_price' => 5000.00],
             ];
 
-            $total = collect($items)->sum(fn($item) => $item['quantity'] * $item['unit_price']);
+            $total = collect($items)->sum(fn ($item) => $item['quantity'] * $item['unit_price']);
 
             // Создаем счет
             $invoice = Invoice::create([
@@ -69,7 +69,7 @@ Route::post('/test/create-invoice-error', function () {
                 ['service_id' => 999, 'quantity' => 1, 'unit_price' => 1000.00], // несуществующий service_id
             ];
 
-            $total = collect($items)->sum(fn($item) => $item['quantity'] * $item['unit_price']);
+            $total = collect($items)->sum(fn ($item) => $item['quantity'] * $item['unit_price']);
 
             $invoice = Invoice::create([
                 'client_id' => $clientId,

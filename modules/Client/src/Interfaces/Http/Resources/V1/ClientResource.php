@@ -10,8 +10,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
 use Modules\Account\src\Domain\Entities\Account;
 use Modules\Account\src\Interfaces\Http\Resources\V1\AccountResource;
-use Modules\Invoice\Interfaces\Http\Resources\V1\InvoiceResource;
 use Modules\Invoice\src\Domain\Entities\Invoice;
+use Modules\Invoice\src\Interfaces\Http\Resources\V1\InvoiceResource;
 
 /**
  * @property int $id

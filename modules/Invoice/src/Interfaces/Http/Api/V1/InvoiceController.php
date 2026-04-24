@@ -7,10 +7,10 @@ namespace Modules\Invoice\src\Interfaces\Http\Api\V1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Modules\Invoice\Interfaces\Http\Requests\StoreInvoiceRequest;
-use Modules\Invoice\Interfaces\Http\Resources\V1\InvoiceResource;
 use Modules\Invoice\src\Application\Services\InvoiceService;
 use Modules\Invoice\src\Domain\Entities\Invoice;
+use Modules\Invoice\src\Interfaces\Http\Requests\V1\StoreInvoiceRequest;
+use Modules\Invoice\src\Interfaces\Http\Resources\V1\InvoiceResource;
 
 class InvoiceController extends Controller
 {

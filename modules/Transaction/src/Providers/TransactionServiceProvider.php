@@ -6,12 +6,10 @@ namespace Modules\Transaction\src\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Modules\Account\src\Domain\Repositories\AccountRepositoryInterface;
-use Modules\Transaction\Application\Services\TransferService;
 use Modules\Transaction\src\Application\Services\TransactionService;
+use Modules\Transaction\src\Application\Services\TransferService;
 use Modules\Transaction\src\Domain\Repositories\TransactionRepositoryInterface;
 use Modules\Transaction\src\Infrastructure\Repositories\TransactionRepository;
-
-// ← змінити на звичайний ServiceProvider
 
 class TransactionServiceProvider extends ServiceProvider
 {

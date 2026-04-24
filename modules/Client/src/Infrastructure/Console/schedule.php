@@ -1,6 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Schedule;
 use Modules\Client\src\Application\Jobs\DailyCrmReportJob;
 
 // Daily report at 9:00

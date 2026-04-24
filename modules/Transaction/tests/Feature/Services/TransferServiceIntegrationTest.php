@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Modules\Transaction\tests\Feature\Services;
 
-use Modules\Shared\Domain\ValueObjects\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Account\src\Domain\Entities\Account;
 use Modules\Account\src\Infrastructure\Repositories\AccountRepository;
 use Modules\Client\src\Domain\Entities\Client;
+use Modules\Shared\src\Domain\ValueObjects\Money;
 use Modules\Transaction\src\Application\DTO\TransferDTO;
 use Modules\Transaction\src\Application\Services\TransferService;
 use Modules\Transaction\src\Domain\Exceptions\InsufficientBalanceException;

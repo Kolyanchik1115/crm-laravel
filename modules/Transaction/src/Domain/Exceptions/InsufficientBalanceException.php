@@ -8,8 +8,8 @@ use DomainException;
 
 class InsufficientBalanceException extends DomainException
 {
-    public function __construct()
+    public function __construct(string $message = "Недостатньо коштів на рахунку")
     {
-        parent::__construct('Insufficient funds for transfer');
+        parent::__construct($message);
     }
 }

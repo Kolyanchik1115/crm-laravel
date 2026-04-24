@@ -1602,7 +1602,7 @@ clients
 
 ```php
 // ❌ НЕПРАВИЛЬНО — баланс в FormRequest
-'balance' => 'min:100'  // не працює, бо FormRequest не знає контекст
+use Modules\Transaction\src\Domain\Exceptions\InsufficientBalanceException;'balance' => 'min:100'  // не працює, бо FormRequest не знає контекст
 
 // ✅ ПРАВИЛЬНО — баланс в Service
 if ($fromAccount->balance < $totalDeduct) {

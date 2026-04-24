@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Modules\Transaction\tests\Feature\Api;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Route;
 use Modules\Account\src\Domain\Entities\Account;
 use Modules\Client\src\Domain\Entities\Client;
+use Modules\Transaction\src\Interfaces\Http\Api\V1\TransferController;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -20,6 +22,8 @@ class TransferApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->registerTransferRoute();
 
         // create client
         $client = Client::factory()->create();
@@ -36,6 +40,21 @@ class TransferApiTest extends TestCase
             'balance' => 0,
             'currency' => 'UAH',
         ]);
+    }
+
+    /**
+     * Route registration for testing purposes.
+     * This is necessary because the routes are cached in the application,
+     * and we need to ensure that our test route is registered before the tests run
+     */
+    private function registerTransferRoute(): void
+    {
+        if (!$this->app->routesAreCached()) {
+            Route::post(
+                '/api/v1/transfers',
+                [TransferController::class, 'store']
+            );
+        }
     }
 
     #[Test]
@@ -116,7 +135,6 @@ class TransferApiTest extends TestCase
             ->assertJsonPath('code', 'INSUFFICIENT_BALANCE')
             ->assertJsonPath('message', 'Недостатньо коштів на рахунку');
     }
-
     #[Test]
     public function transfer_returns_422_with_code_when_same_accounts(): void
     {

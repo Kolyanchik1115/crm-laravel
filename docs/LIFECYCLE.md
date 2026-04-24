@@ -84,7 +84,7 @@ GET /invoices/5 → збігається з Route::get('/invoices/{id}', ...)
 
 ```php
 // Приклад closure
-Route::get('/clients', function () {
+use Modules\Client\src\Interfaces\Http\Api\V1\ClientController;Route::get('/clients', function () {
     return 'Сторінка клієнтів';
 });
 

@@ -7,8 +7,8 @@ namespace Modules\Client\src\Interfaces\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Modules\Client\Interfaces\Http\Requests\StoreClientRequest;
 use Modules\Client\src\Application\Services\ClientService;
+use Modules\Client\src\Interfaces\Http\Requests\V1\StoreClientRequest;
 
 class ClientController extends Controller
 {
