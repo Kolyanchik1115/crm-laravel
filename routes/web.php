@@ -71,3 +71,11 @@ Route::get('/transactions', [TransactionController::class, 'index'])->name('tran
 
 //Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+//Swagger
+Route::get('/api-docs/openapi.yaml', function () {
+    $yamlContent = file_get_contents(storage_path('api-docs/openapi.yaml'));
+    return response($yamlContent, 200, [
+        'Content-Type' => 'application/x-yaml',
+    ]);
+});
