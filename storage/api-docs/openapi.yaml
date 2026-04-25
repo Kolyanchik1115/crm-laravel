@@ -1,0 +1,370 @@
+openapi: 3.0.3
+info:
+  title: CRM API
+  version: 1.0.0
+  description: API для управління клієнтами, рахунками, переказами та рахунками-фактурами
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+  - url: https://crm.example.com/api
+    description: Production server (example)
+
+paths:
+  /api/v1/transfers:
+    get:
+      summary: Отримати список переказів
+      description: Повертає пагінований список переказів з можливістю фільтрації.
+      tags:
+        - Transfers
+      parameters:
+        - name: account_id
+          in: query
+          description: ID рахунку (фільтр переказів для конкретного рахунку)
+          required: false
+          schema:
+            type: integer
+            example: 123
+        - name: date_from
+          in: query
+          description: Початкова дата (ISO 8601)
+          required: false
+          schema:
+            type: string
+            format: date
+            example: "2024-01-01"
+        - name: date_to
+          in: query
+          description: Кінцева дата (ISO 8601)
+          required: false
+          schema:
+            type: string
+            format: date
+            example: "2024-12-31"
+        - name: page
+          in: query
+          description: Номер сторінки
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: per_page
+          in: query
+          description: Кількість записів на сторінці
+          required: false
+          schema:
+            type: integer
+            default: 15
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Успішна відповідь зі списком переказів
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transfer'
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                      last_page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      total:
+                        type: integer
+                  links:
+                    type: object
+                    properties:
+                      first:
+                        type: string
+                      last:
+                        type: string
+                      prev:
+                        type: string
+                        nullable: true
+                      next:
+                        type: string
+                        nullable: true
+        '422':
+          description: Помилка валідації
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+    post:
+      summary: Створити новий переказ
+      description: Виконує переказ коштів між двома рахунками. Якщо сума переказу перевищує 10000 UAH, стягується комісія 0.5%.
+      tags:
+        - Transfers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTransferRequest'
+            examples:
+              valid_usd:
+                summary: Валідний запит (USD)
+                value:
+                  account_from_id: 1001
+                  account_to_id: 2002
+                  amount: 250.00
+                  currency: USD
+                  description: "Оплата за послуги"
+              valid_uah_large:
+                summary: Валідний запит з комісією (велика сума)
+                value:
+                  account_from_id: 1001
+                  account_to_id: 2002
+                  amount: 15000.00
+                  currency: UAH
+                  description: "Переказ великої суми"
+              invalid_same_account:
+                summary: Помилка - однакові рахунки
+                value:
+                  account_from_id: 1001
+                  account_to_id: 1001
+                  amount: 100.00
+                  currency: UAH
+              invalid_insufficient:
+                summary: Помилка - недостатньо коштів
+                value:
+                  account_from_id: 1001
+                  account_to_id: 2002
+                  amount: 999999.00
+                  currency: UAH
+      responses:
+        '201':
+          description: Переказ успішно створено
+          headers:
+            Location:
+              description: URL для отримання створеного ресурсу
+              schema:
+                type: string
+                format: uri
+                example: "http://localhost:8000/api/v1/transfers/5001"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Transfer'
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Переказ успішно виконано"
+        '422':
+          description: Помилка валідації
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              examples:
+                validation_error:
+                  summary: Помилка валідації полів
+                  value:
+                    message: "Рахунок відправника є обов'язковим (and 1 more error)"
+                    errors:
+                      account_from_id: ["Рахунок відправника є обов'язковим"]
+                      amount: ["Сума повинна бути додатньою"]
+                business_error_insufficient:
+                  summary: Бізнес-помилка (недостатньо коштів)
+                  value:
+                    message: "Недостатньо коштів на рахунку"
+                    code: "INSUFFICIENT_BALANCE"
+                business_error_same_account:
+                  summary: Бізнес-помилка (однакові рахунки)
+                  value:
+                    message: "Рахунок отримувача має збігатися з рахунком відправника."
+                    errors:
+                      account_to_id: ["Рахунок отримувача не може бути таким самим, як рахунок відправника"]
+
+  /api/v1/transfers/{id}:
+    get:
+      summary: Отримати деталі конкретного переказу
+      tags:
+        - Transfers
+      parameters:
+        - name: id
+          in: path
+          description: ID переказу
+          required: true
+          schema:
+            type: integer
+            example: 5001
+      responses:
+        '200':
+          description: Деталі переказу
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Transfer'
+                  success:
+                    type: boolean
+                    example: true
+        '404':
+          description: Переказ не знайдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessError'
+              example:
+                message: "Переказ не знайдено"
+                code: "TRANSFER_NOT_FOUND"
+
+components:
+  schemas:
+    CreateTransferRequest:
+      type: object
+      required:
+        - account_from_id
+        - account_to_id
+        - amount
+        - currency
+      properties:
+        account_from_id:
+          type: integer
+          description: ID рахунку відправника
+          example: 1001
+          minimum: 1
+        account_to_id:
+          type: integer
+          description: ID рахунку отримувача
+          example: 2002
+          minimum: 1
+        amount:
+          type: number
+          description: Сума переказу (має бути додатньою, максимум 2 знаки після коми)
+          example: 150.00
+          minimum: 0.01
+          exclusiveMinimum: true
+          multipleOf: 0.01
+        currency:
+          type: string
+          description: Валюта (трилітерний код ISO 4217)
+          example: "UAH"
+          pattern: '^[A-Z]{3}$'
+          maxLength: 3
+          minLength: 3
+        description:
+          type: string
+          description: Опис переказу (необов'язково)
+          example: "Оплата за послуги"
+          maxLength: 255
+      additionalProperties: false
+
+    Transfer:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Унікальний ідентифікатор переказу
+          example: 5001
+        account_from_id:
+          type: integer
+          description: ID рахунку відправника
+          example: 1001
+        account_to_id:
+          type: integer
+          description: ID рахунку отримувача
+          example: 2002
+        amount:
+          type: number
+          description: Сума переказу
+          example: 150.00
+        currency:
+          type: string
+          description: Валюта переказу
+          example: "UAH"
+        status:
+          type: string
+          description: Статус переказу
+          enum:
+            - pending
+            - completed
+            - failed
+            - cancelled
+          example: "completed"
+        description:
+          type: string
+          description: Опис переказу
+          nullable: true
+          example: "Оплата за послуги"
+        commission:
+          type: number
+          description: Комісія за переказ (0.5% для сум > 10000 UAH, 0 для інших валют)
+          example: 0.00
+        created_at:
+          type: string
+          format: date-time
+          description: Дата та час створення
+          example: "2025-04-24T12:00:00+00:00"
+        updated_at:
+          type: string
+          format: date-time
+          description: Дата та час останнього оновлення
+          example: "2025-04-24T12:00:00+00:00"
+
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Загальний опис помилки
+          example: "The account_from_id field is required. (and 1 more error)"
+        errors:
+          type: object
+          description: Об'єкт з деталями помилок для кожного поля
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            account_from_id: ["The account from id field is required."]
+            amount: ["The amount must be at least 0.01."]
+
+    BusinessError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Повідомлення про помилку
+          example: "Недостатньо коштів на рахунку"
+        code:
+          type: string
+          description: Код помилки для програмної обробки
+          enum:
+            - INSUFFICIENT_BALANCE
+            - SAME_ACCOUNT_TRANSFER
+            - TRANSFER_NOT_FOUND
+            - INVALID_CURRENCY
+          example: "INSUFFICIENT_BALANCE"
+
+  examples:
+    TransferObject:
+      value:
+        id: 5001
+        account_from_id: 1001
+        account_to_id: 2002
+        amount: 150.00
+        currency: "UAH"
+        status: "completed"
+        description: "Оплата за послуги"
+        commission: 0.00
+        created_at: "2025-04-24T12:00:00+00:00"
+        updated_at: "2025-04-24T12:00:00+00:00"
