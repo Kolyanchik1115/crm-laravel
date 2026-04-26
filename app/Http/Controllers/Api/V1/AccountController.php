@@ -6,7 +6,9 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\AccountResource;
+use App\Http\Resources\TransactionResource;
 use App\Models\Account;
+use App\Models\Transaction;
 use Illuminate\Http\JsonResponse;
 
 class AccountController extends Controller
@@ -33,9 +35,13 @@ class AccountController extends Controller
 
     public function transactions(int $accountId): JsonResponse
     {
-        return response()->json([
-            'message' => "GET /api/v1/accounts/{$accountId}/transactions - TODO: implement transactions",
-            'data' => []
-        ]);
+        $transactions = Transaction::with(['account'])
+            ->where('account_id', $accountId)
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return TransactionResource::collection($transactions)
+            ->response()
+            ->setStatusCode(200);
     }
 }

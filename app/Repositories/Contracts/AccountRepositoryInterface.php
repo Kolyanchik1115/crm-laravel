@@ -21,4 +21,5 @@ interface AccountRepositoryInterface
     public function decrementBalance(int $id, string $amount): void;
 
     public function incrementBalance(int $id, string $amount): void;
+
 }

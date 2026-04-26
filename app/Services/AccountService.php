@@ -50,5 +50,4 @@ class AccountService
     {
         $this->repository->incrementBalance($id, $amount);
     }
-
 }
