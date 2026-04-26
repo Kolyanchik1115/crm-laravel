@@ -216,5 +216,6 @@ docker compose logs redis
 
 - [🔄 API_CONTRACT](docs/API_CONTRACT.md) - iнструкцiї до api
 - [🔄 API_STATUS_CODES](docs/API_STATUS_CODES.md) - cтатус коди
+- [🔄 API_MAINTENANCE](docs/API_MAINTENANCE.md) - обслуговування API
 
 
