@@ -5,6 +5,7 @@
 ### Документація API (перегляд)
 
 - [Postman Documentation](https://documenter.getpostman.com/view/24380148/2sBXitCnNR)
+- [Swagger Documentation](http://localhost:8000/swagger)
 
 ### Імпорт колекції через файл
 
