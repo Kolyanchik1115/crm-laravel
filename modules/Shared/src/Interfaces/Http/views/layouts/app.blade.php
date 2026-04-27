@@ -19,16 +19,16 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('dashboard') }}">Дашборд</a>
+                    <a class="nav-link" href="{{ url('/dashboard') }}">Дашборд</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('clients.index') }}">Клієнти</a>
+                    <a class="nav-link" href="{{ url('/clients') }}">Клієнти</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('accounts.index') }}">Рахунки</a>
+                    <a class="nav-link" href="{{ url('/accounts') }}">Рахунки</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('transactions.index') }}">Транзакції</a>
+                    <a class="nav-link" href="{{ url('/transactions') }}">Транзакції</a>
                 </li>
             </ul>
         </div>

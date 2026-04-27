@@ -48,8 +48,8 @@
                 </table>
             @endif
 
-            <a href="{{ route('clients.index') }}" class="btn btn-secondary">← Назад до списку</a>
-            <a href="/" class="btn btn-link">На головну</a>
+            <a href="{{ url('/clients') }}" class="btn btn-secondary">← Назад до списку</a>
+            <a href="{{ url('/') }}" class="btn btn-link">На головну</a>
         </div>
     </div>
 @endsection

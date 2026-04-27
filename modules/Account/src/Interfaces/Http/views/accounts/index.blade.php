@@ -30,7 +30,7 @@
                                 <td class="text-center">{{ $account->currency }}</td>
                                 <td>{{ $account->client->full_name }}</td>
                                 <td class="text-center">
-                                    <a href="{{ route('accounts.show', $account->id) }}" class="btn btn-sm btn-success">
+                                    <a href="{{ url('/accounts/' . $account->id) }}" class="btn btn-sm btn-success">
                                         Деталі →
                                     </a>
                                 </td>

@@ -6,7 +6,7 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h2 class="mb-0">Клієнти CRM</h2>
-            <a href="{{ route('clients.create') }}" class="btn btn-success">
+            <a href="{{ url('/clients/create') }}" class="btn btn-success">
                 + Додати клієнта
             </a>
         </div>
@@ -37,7 +37,7 @@
                                     <span class="badge bg-info">{{ $client->accounts->count() }}</span>
                                 </td>
                                 <td class="text-center">
-                                    <a href="{{ route('clients.show', $client->id) }}" class="btn btn-sm btn-success">
+                                    <a href="{{ url('/clients/' . $client->id) }}" class="btn btn-sm btn-success">
                                         Деталі →
                                     </a>
                                 </td>

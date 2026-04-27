@@ -28,22 +28,18 @@ class ClientService
      */
     public function getAllClients(): Collection
     {
-        $cached = Cache::get(self::CACHE_KEY_CLIENTS);
+        $cachedIds = Cache::get(self::CACHE_KEY_CLIENTS);
 
-        // If there is a cache, and it is of the correct type
-        if ($cached instanceof Collection) {
-            return $cached;
+        if (is_array($cachedIds) && !empty($cachedIds)) {
+            return Client::whereIn('id', $cachedIds)->get();
         }
 
-        // If there is no cache, or it is corrupted, we take it from the database
         $clients = $this->repository->getAll();
-
-        // Save in cache
-        Cache::put(self::CACHE_KEY_CLIENTS, $clients, self::CACHE_TTL);
+        // Save only id instead
+        Cache::put(self::CACHE_KEY_CLIENTS, $clients->pluck('id')->toArray(), self::CACHE_TTL);
 
         return $clients;
     }
-
 
     /**
      * Get clients by ID

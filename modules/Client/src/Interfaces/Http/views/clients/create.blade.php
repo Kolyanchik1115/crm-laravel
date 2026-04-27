@@ -9,7 +9,7 @@
         </div>
         <div class="card-body">
             {{--Added novalidate parametr to check custom excetions--}}
-            <form action="{{ route('clients.store') }}" method="POST" novalidate>
+            <form action="{{ url('/clients') }}" method="POST" novalidate>
                 @csrf
 
                 <div class="mb-3">
@@ -82,7 +82,7 @@
                 </div>
 
                 <div class="d-flex justify-content-between">
-                    <a href="{{ route('clients.index') }}" class="btn btn-secondary">Скасувати</a>
+                    <a href="{{ url('/clients') }}" class="btn btn-secondary">Скасувати</a>
                     <button type="submit" class="btn btn-success">Зберегти</button>
                 </div>
             </form>

@@ -25,13 +25,14 @@
                     <div class="alert alert-success">
                         <h5>Інформація про клієнта</h5>
                         <p><strong>ПІБ:</strong>
-                            <a href="{{ route('clients.show', $account->client->id) }}">
+                            <a href="{{ url('/clients/', $account->client->id) }}">
                                 {{ $account->client->full_name }}
                             </a>
                         </p>
                         <p><strong>Email:</strong> {{ $account->client->email }}</p>
                         <p><strong>Баланс
-                                клієнта:</strong> {{ number_format($account->client->balance, 2) }} {{ $account->client->currency }}
+                                клієнта:</strong> {{ number_format($account->client->balance, 2) }}
+                            {{ $account->client->currency }}
                         </p>
                         <p><strong>Статус:</strong>
                             @if($account->client->is_active)
@@ -45,8 +46,8 @@
             </div>
 
             <div class="mt-3">
-                <a href="{{ route('accounts.index') }}" class="btn btn-secondary">← Назад до списку</a>
-                <a href="{{ route('clients.show', $account->client->id) }}" class="btn btn-info">Переглянути клієнта</a>
+                <a href="{{ url('/accounts') }}" class="btn btn-secondary">← Назад до списку</a>
+                <a href="{{ url('/clients/' . $account->client->id) }}" class="btn btn-info">Переглянути клієнта</a>
                 <a href="/" class="btn btn-link">На головну</a>
             </div>
         </div>

@@ -62,12 +62,12 @@
                                 </td>
                                 <td>{{ $transaction->created_at->format('d.m.Y H:i') }}</td>
                                 <td class="font-monospace">
-                                    <a href="{{ route('accounts.show', $transaction->account->id) }}">
+                                    <a href="{{ url('/accounts/' . $transaction->account->id) }}">
                                         {{ $transaction->account->account_number }}
                                     </a>
                                 </td>
                                 <td>
-                                    <a href="{{ route('clients.show', $transaction->account->client->id) }}">
+                                    <a href="{{ url('/clients/' . $transaction->account->client->id) }}">
                                         {{ $transaction->account->client->full_name }}
                                     </a>
                                 </td>

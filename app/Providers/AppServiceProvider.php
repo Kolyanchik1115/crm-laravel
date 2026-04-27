@@ -25,8 +25,8 @@ class AppServiceProvider extends ServiceProvider
         // All modules registration
         $modulesPath = base_path('modules');
 
-        foreach (glob($modulesPath . '/*/Interfaces/Http/views', GLOB_ONLYDIR) as $viewsPath) {
-            $moduleName = basename(dirname($viewsPath, 3));
+        foreach (glob($modulesPath . '/*/src/Interfaces/Http/views', GLOB_ONLYDIR) as $viewsPath) {
+            $moduleName = basename(dirname($viewsPath, 4));
             View::addNamespace(strtolower($moduleName), $viewsPath);
         }
     }

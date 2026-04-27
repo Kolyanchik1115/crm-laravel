@@ -49,6 +49,6 @@ class ClientController extends Controller
 
         $this->clientService->createClient($request->validated());
 
-        return redirect()->route('clients.index');
+        return redirect()->to('/clients');
     }
 }
