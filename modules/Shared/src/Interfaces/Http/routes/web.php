@@ -8,3 +8,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('shared::welcome');
 });
+
+//Swagger
+Route::get('/api-docs/openapi.yaml', function () {
+    $yamlContent = file_get_contents(storage_path('api-docs/openapi.yaml'));
+    return response($yamlContent, 200, [
+        'Content-Type' => 'application/x-yaml',
+    ]);
+});

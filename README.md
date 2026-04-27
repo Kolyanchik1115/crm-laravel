@@ -5,6 +5,7 @@
 ### Документація API (перегляд)
 
 - [Postman Documentation](https://documenter.getpostman.com/view/24380148/2sBXitCnNR)
+- [Swagger Documentation](http://localhost:8000/swagger)
 
 ### Імпорт колекції через файл
 
@@ -216,4 +217,5 @@ docker compose logs redis
 
 - [🔄 API_CONTRACT](docs/API_CONTRACT.md) - iнструкцiї до api
 - [🔄 API_STATUS_CODES](docs/API_STATUS_CODES.md) - cтатус коди
+- [🔄 API_MAINTENANCE](docs/API_MAINTENANCE.md) - обслуговування API
 

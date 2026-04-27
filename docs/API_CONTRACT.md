@@ -28,6 +28,8 @@
 8. [Підсумкова таблиця контракту API](#підсумкова-таблиця-контракту-API)
 9. [Чек-лист для transfers](#чеклист-для-transfers)
 10. [Валідація vs бізнес-логіка](#валідація-vs-бізнес-логіка)
+11. [Документацiя API](#документація-api)
+12. [Перевірка відповідності між OpenAPI специфікацією та тестами](#API-Contract-Validation-Checklist)
 
 ---
 
@@ -278,7 +280,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;use App\Models\Transaction;use Illuminate\Http\JsonResponse;use Modules\Transaction\src\Application\Services\TransferService;use Modules\Transaction\src\Interfaces\Http\Requests\V1\StoreTransferRequest;use Modules\Transaction\src\Interfaces\Http\Resources\V1\TransferResource;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\StoreTransferRequest;
+use App\Http\Resources\Api\V1\TransferResource;
+use App\Models\Transaction;
+use App\Services\TransferService;
+use Illuminate\Http\JsonResponse;
 
 class TransferController extends Controller
 {
@@ -1602,7 +1609,7 @@ clients
 
 ```php
 // ❌ НЕПРАВИЛЬНО — баланс в FormRequest
-use Modules\Transaction\src\Domain\Exceptions\InsufficientBalanceException;'balance' => 'min:100'  // не працює, бо FormRequest не знає контекст
+'balance' => 'min:100'  // не працює, бо FormRequest не знає контекст
 
 // ✅ ПРАВИЛЬНО — баланс в Service
 if ($fromAccount->balance < $totalDeduct) {
@@ -1635,4 +1642,86 @@ if ($fromAccount->balance < $totalDeduct) {
 3. **Легке тестування** — можна тестувати валідацію окремо від бізнес-логіки
 4. **Зручна зміна** — бізнес-правила можна змінювати без впливу на валідацію
 5. **Єдина точка помилок** — всі бізнес-помилки повертають код та повідомлення через Exception Handler
+
+
+## Документація API
+
+### Swagger UI (інтерактивна документація)
+
+Локальний доступ:
+- Відкрийте браузер: [http://localhost:8000/swagger/](http://localhost:8000/swagger/)
+
+### Альтернативний спосіб
+
+1. Відкрийте https://editor.swagger.io/
+2. Натисніть File → Import URL
+3. Введіть: http://localhost:8000/api-docs/openapi.yaml
+
+### Тестування API
+
+- Отримання списку рахунків: `GET /api/v1/accounts`
+- Отримання списку переказів: `GET /api/v1/transfers`
+- Створення інвойсу: `POST /api/v1/invoices` (див. приклад у документації)
+
+### Формат відповідей
+
+Всі ендпоінти повертають JSON у форматі:
+```json
+{
+    "data": { ... },
+    "success": true,
+    "message": "Операція виконана"
+}
+```
+
+### Коди помилок
+
+- 200: Успішний запит
+- 201: Ресурс створено
+- 404: Ресурс не знайдено
+- 422: Помилка валідації (або бізнес-помилка)
+---
+
+Ти правий! Забагато. Давай зробимо мінімально і по суті.
+
+# API Contract Validation Checklist
+
+## Transfer API
+
+| Ендпоінт | Метод | Статуси | Тест |
+|----------|-------|---------|------|
+| `/api/v1/transfers` | GET | 200 | `TransferApiTest::transfer_index_returns_200_with_list` |
+| `/api/v1/transfers` | POST | 201, 422 | `TransferApiTest::transfer_returns_201_with_resource_structure_when_valid` |
+| `/api/v1/transfers` | POST | 422 (validation) | `TransferApiTest::transfer_returns_422_with_errors_structure_when_validation_fails` |
+| `/api/v1/transfers` | POST | 422 (insufficient balance) | `TransferApiTest::transfer_returns_422_with_code_when_insufficient_balance` |
+| `/api/v1/transfers/{id}` | GET | 200, 404 | `TransferApiTest::test_transfer_show_returns_200_when_exists` |
+| `/api/v1/transfers/{id}` | GET | 404 | `TransferApiTest::test_transfer_show_returns_404_when_not_found` |
+
+## Account API
+
+| Ендпоінт | Метод | Статуси | Тест |
+|----------|-------|---------|------|
+| `/api/v1/accounts` | GET | 200 | `AccountApiTest::account_index_returns_200` |
+| `/api/v1/accounts/{id}` | GET | 200, 404 | `AccountApiTest::account_show_returns_200_with_balance` |
+| `/api/v1/accounts/{id}/transactions` | GET | 200, 404 | `AccountApiTest::account_transactions_returns_200` |
+
+## Invoice API
+
+| Ендпоінт | Метод | Статуси | Тест |
+|----------|-------|---------|------|
+| `/api/v1/invoices` | POST | 201, 422 | `InvoiceApiTest::test_invoice_store_returns_201_when_valid` |
+| `/api/v1/invoices` | POST | 422 (invalid items) | `InvoiceApiTest::test_invoice_store_returns_422_when_items_invalid` |
+| `/api/v1/invoices/{id}` | GET | 404 | `InvoiceApiTest::test_invoice_show_returns_404_when_not_found` |
+
+---
+
+## Правило підтримки
+
+> **Змінив ендпоінт → онови OpenAPI і тести**
+
+Завжди тримай документацію синхронізованою з кодом.
+
+```bash
+#Перевірка
+docker compose exec app php artisan test 
 ```

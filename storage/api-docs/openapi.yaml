@@ -1,0 +1,603 @@
+openapi: 3.0.3
+info:
+  title: CRM API
+  version: 1.0.0
+  description: API для управління клієнтами, рахунками, переказами та рахунками-фактурами
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+paths:
+  # TRANSFERS
+  /api/v1/transfers:
+    get:
+      summary: Отримати список переказів
+      tags:
+        - Transfers
+      parameters:
+        - name: account_id
+          in: query
+          schema:
+            type: integer
+        - name: date_from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: date_to
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+      responses:
+        '200':
+          description: Успішна відповідь
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transfer'
+        '422':
+          description: Помилка валідації
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+    post:
+      summary: Створити переказ
+      tags:
+        - Transfers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTransferRequest'
+      responses:
+        '201':
+          description: Переказ створено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Transfer'
+        '422':
+          description: Помилка валідації або бізнес-помилка
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValidationError'
+                  - $ref: '#/components/schemas/BusinessError'
+  /api/v1/transfers/{id}:
+    get:
+      summary: Отримати переказ за ID
+      tags:
+        - Transfers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Деталі переказу
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Transfer'
+        '404':
+          description: Переказ не знайдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessError'
+
+  # INVOICES
+  /api/v1/invoices:
+    get:
+      summary: Отримати список рахунків-фактур
+      tags:
+        - Invoices
+      parameters:
+        - name: client_id
+          in: query
+          description: ID клієнта (фільтр)
+          required: false
+          schema:
+            type: integer
+        - name: status
+          in: query
+          description: Статус рахунку (draft, sent, paid, overdue, cancelled)
+          required: false
+          schema:
+            type: string
+            enum: [draft, sent, paid, overdue, cancelled]
+        - name: date_from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: date_to
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+      responses:
+        '200':
+          description: Успішна відповідь
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Invoice'
+        '422':
+          description: Помилка валідації
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+    post:
+      summary: Створити новий рахунок-фактуру
+      tags:
+        - Invoices
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInvoiceRequest'
+            examples:
+              minimal:
+                summary: Мінімальний приклад
+                value:
+                  client_id: 101
+                  items:
+                    - service_id: 5
+                      quantity: 2
+                      unit_price: 250.00
+              full:
+                summary: Повний приклад з кількома послугами
+                value:
+                  client_id: 101
+                  currency: USD
+                  items:
+                    - service_id: 5
+                      quantity: 2
+                      unit_price: 250.00
+                    - service_id: 8
+                      quantity: 1
+                      unit_price: 1200.00
+              invalid:
+                summary: Приклад з помилками
+                value:
+                  items: []
+      responses:
+        '201':
+          description: Рахунок-фактуру створено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Invoice'
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Рахунок створено"
+        '422':
+          description: Помилка валідації
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Клієнта або послугу не знайдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessError'
+
+  /api/v1/invoices/{id}:
+    get:
+      summary: Отримати рахунок-фактуру за ID
+      tags:
+        - Invoices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Деталі рахунку
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Invoice'
+        '404':
+          description: Рахунок не знайдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessError'
+
+  # ACCOUNTS
+  /api/v1/accounts:
+    get:
+      summary: Отримати список рахунків
+      tags:
+        - Accounts
+      parameters:
+        - name: client_id
+          in: query
+          description: ID клієнта (фільтр)
+          required: false
+          schema:
+            type: integer
+        - name: currency
+          in: query
+          description: Валюта рахунку (UAH, USD, EUR)
+          required: false
+          schema:
+            type: string
+            enum: [UAH, USD, EUR]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 15
+      responses:
+        '200':
+          description: Успішна відповідь
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Account'
+        '422':
+          description: Помилка валідації
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /api/v1/accounts/{id}:
+    get:
+      summary: Отримати рахунок за ID
+      tags:
+        - Accounts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Деталі рахунку
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Account'
+        '404':
+          description: Рахунок не знайдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessError'
+
+  /api/v1/accounts/{id}/transactions:
+    get:
+      summary: Отримати історію транзакцій рахунку
+      tags:
+        - Accounts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID рахунку
+          schema:
+            type: integer
+        - name: type
+          in: query
+          description: Тип транзакції (all, deposit, withdrawal, transfer)
+          required: false
+          schema:
+            type: string
+            enum: [all, deposit, withdrawal, transfer]
+            default: all
+        - name: limit
+          in: query
+          description: Кількість записів
+          required: false
+          schema:
+            type: integer
+            default: 50
+            maximum: 200
+      responses:
+        '200':
+          description: Історія транзакцій
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transfer'
+                  meta:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      limit:
+                        type: integer
+                      account_id:
+                        type: integer
+        '404':
+          description: Рахунок не знайдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessError'
+
+components:
+  schemas:
+    # TRANSFER SCHEMAS
+    CreateTransferRequest:
+      type: object
+      required:
+        - account_from_id
+        - account_to_id
+        - amount
+        - currency
+      properties:
+        account_from_id:
+          type: integer
+          minimum: 1
+        account_to_id:
+          type: integer
+          minimum: 1
+        amount:
+          type: number
+          minimum: 0.01
+          exclusiveMinimum: true
+          multipleOf: 0.01
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          minLength: 3
+          maxLength: 3
+        description:
+          type: string
+          maxLength: 255
+      additionalProperties: false
+
+    Transfer:
+      type: object
+      properties:
+        id:
+          type: integer
+        account_from_id:
+          type: integer
+        account_to_id:
+          type: integer
+        amount:
+          type: number
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [pending, completed, failed, cancelled]
+        description:
+          type: string
+          nullable: true
+        commission:
+          type: number
+        created_at:
+          type: string
+          format: date-time
+
+    #  INVOICE SCHEMAS
+    InvoiceItem:
+      type: object
+      required:
+        - service_id
+        - quantity
+        - unit_price
+      properties:
+        service_id:
+          type: integer
+          description: ID послуги
+          minimum: 1
+        quantity:
+          type: integer
+          description: Кількість
+          minimum: 1
+        unit_price:
+          type: number
+          description: Ціна за одиницю
+          minimum: 0
+          exclusiveMinimum: true
+          multipleOf: 0.01
+      additionalProperties: false
+
+    CreateInvoiceRequest:
+      type: object
+      required:
+        - client_id
+        - items
+      properties:
+        client_id:
+          type: integer
+          description: ID клієнта
+          minimum: 1
+        currency:
+          type: string
+          description: Валюта рахунку
+          enum: [UAH, USD, EUR]
+          default: UAH
+        items:
+          type: array
+          description: Список позицій рахунку
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/InvoiceItem'
+      additionalProperties: false
+
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: integer
+        client_id:
+          type: integer
+        invoice_number:
+          type: string
+          description: Унікальний номер рахунку
+          example: "INV-20250425-0001"
+        total_amount:
+          type: number
+          description: Загальна сума
+        currency:
+          type: string
+          enum: [UAH, USD, EUR]
+        status:
+          type: string
+          enum: [draft, sent, paid, overdue, cancelled]
+          description: Статус рахунку
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceItem'
+        created_at:
+          type: string
+          format: date-time
+        issued_at:
+          type: string
+          format: date
+          description: Дата виставлення
+        paid_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Дата оплати
+
+    #  ACCOUNT SCHEMAS
+    Account:
+      type: object
+      properties:
+        id:
+          type: integer
+        client_id:
+          type: integer
+        account_number:
+          type: string
+          description: Номер рахунку (унікальний)
+          pattern: '^[A-Z]{2}[0-9]{10,30}$'
+          example: "UA123456789012345678901234567"
+        balance:
+          type: number
+          description: Поточний баланс
+        currency:
+          type: string
+          enum: [UAH, USD, EUR]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    # ERROR SCHEMAS
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+    BusinessError:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+          enum:
+            - INSUFFICIENT_BALANCE
+            - SAME_ACCOUNT_TRANSFER
+            - TRANSFER_NOT_FOUND
+            - INVALID_CURRENCY
+            - CLIENT_NOT_FOUND
+            - SERVICE_NOT_FOUND
+            - INVOICE_NOT_FOUND
+            - ACCOUNT_NOT_FOUND
+
+tags:
+  - name: Transfers
+    description: Операції з переказами коштів
+  - name: Invoices
+    description: Управління рахунками-фактурами
+  - name: Accounts
+    description: Управління банківськими рахунками клієнтів

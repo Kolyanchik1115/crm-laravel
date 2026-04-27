@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use Modules\Account\src\Domain\Entities\Account;
 use Modules\Client\src\Domain\Entities\Client;
+use Modules\Transaction\src\Domain\Entities\Transaction;
 use Modules\Transaction\src\Interfaces\Http\Api\V1\TransferController;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
@@ -54,10 +55,9 @@ class TransferApiTest extends TestCase
     private function registerTransferRoute(): void
     {
         if (!$this->app->routesAreCached()) {
-            Route::post(
-                '/api/v1/transfers',
-                [TransferController::class, 'store']
-            );
+            Route::post('/api/v1/transfers', [TransferController::class, 'store']);
+            Route::get('/api/v1/transfers', [TransferController::class, 'index']);
+            Route::get('/api/v1/transfers/{id}', [TransferController::class, 'show']);
         }
     }
 
@@ -200,5 +200,109 @@ class TransferApiTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['amount']);
+    }
+
+    #[Test]
+    public function transfer_index_returns_200_with_list(): void
+    {
+        /** @var Transaction $transaction1 */
+        $transaction1 = Transaction::factory()->create([
+            'account_id' => $this->fromAccount->id,
+            'amount' => -100.00,
+            'type' => 'transfer_out',
+            'status' => 'completed',
+            'description' => 'Outgoing transfer 1',
+        ]);
+
+        /** @var Transaction $transaction2 */
+        $transaction2 = Transaction::factory()->create([
+            'account_id' => $this->toAccount->id,
+            'amount' => 100.00,
+            'type' => 'transfer_out',
+            'status' => 'completed',
+            'description' => 'Incoming transfer 1',
+        ]);
+
+        /** @var Transaction $transaction3 */
+        $transaction3 = Transaction::factory()->create([
+            'account_id' => $this->fromAccount->id,
+            'amount' => -50.00,
+            'type' => 'transfer_out',
+            'status' => 'completed',
+            'description' => 'Outgoing transfer 2',
+        ]);
+
+        $response = $this->getJson('/api/v1/transfers');
+
+        $response->assertStatus(200);
+
+        $response->assertJsonStructure([
+            'data' => [
+                '*' => [
+                    'id',
+                    'account_from_id',
+                    'account_to_id',
+                    'amount',
+                    'currency',
+                    'status',
+                    'description',
+                    'commission',
+                    'created_at',
+                ]
+            ],
+            'links' => [
+                'first',
+                'last',
+                'prev',
+                'next',
+            ],
+            'meta' => [
+                'current_page',
+                'last_page',
+                'per_page',
+                'total',
+            ]
+        ]);
+
+        $this->assertCount(3, $response->json('data'));
+    }
+
+    #[Test]
+    public function transfer_show_returns_200_when_exists(): void
+    {
+        /** @var Transaction $transaction */
+        $transaction = Transaction::factory()->create([
+            'account_id' => $this->fromAccount->id,
+            'amount' => -100.00,
+            'type' => 'transfer_out',
+            'status' => 'completed',
+        ]);
+
+        $response = $this->getJson("/api/v1/transfers/{$transaction->id}");
+
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.id', $transaction->id);
+        $response->assertJsonStructure([
+            'data' => [
+                'id',
+                'account_from_id',
+                'account_to_id',
+                'amount',
+                'currency',
+                'status',
+                'description',
+                'commission',
+                'created_at',
+            ]
+        ]);
+    }
+
+    #[Test]
+    public function transfer_show_returns_404_when_not_found(): void
+    {
+        $response = $this->getJson('/api/v1/transfers/99999');
+
+        $response->assertStatus(404);
+        $response->assertJsonStructure(['message']);
     }
 }

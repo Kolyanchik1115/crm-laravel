@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Modules\Account\src\Domain\Entities\Account;
 use Modules\Account\src\Interfaces\Http\Resources\V1\AccountResource;
+use Modules\Transaction\src\Domain\Entities\Transaction;
+use Modules\Transaction\src\Interfaces\Http\Resources\V1\TransactionResource;
 
 class AccountController extends Controller
 {
@@ -33,9 +35,13 @@ class AccountController extends Controller
 
     public function transactions(int $accountId): JsonResponse
     {
-        return response()->json([
-            'message' => "GET /api/v1/accounts/{$accountId}/transactions - TODO: implement transactions",
-            'data' => []
-        ]);
+        $transactions = Transaction::with(['account'])
+            ->where('account_id', $accountId)
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return TransactionResource::collection($transactions)
+            ->response()
+            ->setStatusCode(200);
     }
 }
