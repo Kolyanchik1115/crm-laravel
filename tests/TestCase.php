@@ -6,21 +6,21 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Cache;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
 abstract class TestCase extends BaseTestCase
 {
+    use MockeryPHPUnitIntegration;
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        // Clear cache before each test
         Cache::flush();
-
     }
 
     protected function tearDown(): void
     {
-        // Clear cache after each test
         Cache::flush();
 
         parent::tearDown();

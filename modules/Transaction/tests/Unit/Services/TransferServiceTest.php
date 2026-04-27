@@ -109,10 +109,9 @@ class TransferServiceTest extends TestCase
             });
 
         // Act
+        /** @var array $result */
         $result = $this->transferService->executeTransfer($dto);
 
-        // Assert
-        $this->assertIsArray($result);
         $this->assertArrayHasKey('transaction_out_id', $result);
         $this->assertArrayHasKey('transaction_in_id', $result);
         $this->assertArrayHasKey('amount', $result);

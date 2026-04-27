@@ -29,27 +29,34 @@ class TransferControllerTest extends TestCase
             Route::post('/api/v1/transfers', [TransferController::class, 'store']);
         }
 
-        $this->client = Client::factory()->create([
+        /** @var Client $client */
+        $client = Client::factory()->create([
             'full_name' => 'Test Client',
             'email' => 'test@example.com',
             'balance' => 0,
             'currency' => 'UAH',
             'is_active' => true,
         ]);
+        $this->client = $client;
 
-        $this->fromAccount = Account::factory()->create([
+        /** @var Account $fromAccount */
+        $fromAccount = Account::factory()->create([
             'client_id' => $this->client->id,
             'account_number' => 'UA1234567890',
             'balance' => 5000.00,
             'currency' => 'UAH',
         ]);
+        $this->fromAccount = $fromAccount;
 
-        $this->toAccount = Account::factory()->create([
+        /** @var Account $toAccount */
+        $toAccount = Account::factory()->create([
             'client_id' => $this->client->id,
             'account_number' => 'UA0987654321',
             'balance' => 1000.00,
             'currency' => 'UAH',
         ]);
+        $this->toAccount = $toAccount;
+
     }
 
     #[Test]

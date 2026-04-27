@@ -19,12 +19,12 @@ use Modules\Service\src\Domain\Entities\Service;
  * @property string $invoice_number
  * @property float $total_amount
  * @property string $status
- * @property string|null $issued_at
+ * @property \DateTimeInterface|null $issued_at
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
  *
- * @property-read Client $clients
- * @property-read \Illuminate\Database\Eloquent\Collection|Service[] $items
+ * @property-read Client|null $client
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, InvoiceItem> $items
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Invoice create(array $attributes)
  * @method static \Illuminate\Database\Eloquent\Builder|Invoice find(int $id)

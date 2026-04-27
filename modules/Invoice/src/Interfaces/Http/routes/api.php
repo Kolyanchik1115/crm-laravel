@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Modules\Invoice\src\Domain\Entities\Invoice;
 use Modules\Invoice\src\Domain\Entities\InvoiceItem;

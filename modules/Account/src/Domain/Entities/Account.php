@@ -20,9 +20,10 @@ use Modules\Transaction\src\Domain\Entities\Transaction;
  * @property string $currency
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
- *
- * @property-read Client $clients
- * @property-read \Illuminate\Database\Eloquent\Collection|Transaction[] $transactions
+ * /**
+ * @method static \Illuminate\Database\Eloquent\Factories\Factory factory()
+ * @property-read \Modules\Client\src\Domain\Entities\Client $client
+ * @property-read \Illuminate\Database\Eloquent\Collection $transactions
  *
  * @method static \Illuminate\Database\Eloquent\Builder|Account find(int $id)
  * @method static \Illuminate\Database\Eloquent\Builder|Account findOrFail(int $id)

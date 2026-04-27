@@ -40,8 +40,7 @@ class LogInvoiceAuditJob implements ShouldQueue
             }
 
             // client name with nullsafe operator
-            $clientName = $invoice->client?->full_name ?? 'Unknown';
-
+            $clientName = $invoice->client->full_name ?? 'Unknown';
             // payload
             $payload = [
                 'total_amount' => $invoice->total_amount,

@@ -26,20 +26,24 @@ class TransferApiTest extends TestCase
         $this->registerTransferRoute();
 
         // create client
+        /** @var Client $client */
         $client = Client::factory()->create();
 
-        // create account
-        $this->fromAccount = Account::factory()->create([
+        /** @var Account $fromAccount */
+        $fromAccount = Account::factory()->create([
             'client_id' => $client->id,
             'balance' => 10000.00,
             'currency' => 'UAH',
         ]);
+        $this->fromAccount = $fromAccount;
 
-        $this->toAccount = Account::factory()->create([
+        /** @var Account $toAccount */
+        $toAccount = Account::factory()->create([
             'client_id' => $client->id,
             'balance' => 0,
             'currency' => 'UAH',
         ]);
+        $this->toAccount = $toAccount;
     }
 
     /**
@@ -135,6 +139,7 @@ class TransferApiTest extends TestCase
             ->assertJsonPath('code', 'INSUFFICIENT_BALANCE')
             ->assertJsonPath('message', 'Недостатньо коштів на рахунку');
     }
+
     #[Test]
     public function transfer_returns_422_with_code_when_same_accounts(): void
     {

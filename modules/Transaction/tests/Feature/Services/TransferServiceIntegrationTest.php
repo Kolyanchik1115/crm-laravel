@@ -41,14 +41,10 @@ class TransferServiceIntegrationTest extends TestCase
     public function transfer_persists_transactions_and_updates_balances(): void
     {
         // Arrange
-        $client = Client::factory()->create([
-            'full_name' => 'Test Client',
-            'email' => 'test@example.com',
-            'balance' => 0,
-            'currency' => 'UAH',
-            'is_active' => true,
-        ]);
+        /** @var Client $client */
+        $client = Client::factory()->create();
 
+        /** @var Account $fromAccount */
         $fromAccount = Account::factory()->create([
             'client_id' => $client->id,
             'account_number' => 'UA1234567890',
@@ -56,6 +52,7 @@ class TransferServiceIntegrationTest extends TestCase
             'currency' => 'UAH',
         ]);
 
+        /** @var Account $toAccount */
         $toAccount = Account::factory()->create([
             'client_id' => $client->id,
             'account_number' => 'UA0987654321',
@@ -76,24 +73,19 @@ class TransferServiceIntegrationTest extends TestCase
         // Act
         $result = $this->transferService->executeTransfer($dto);
 
-        // Assert - Check result structure
-        $this->assertIsArray($result);
+        // Assert
         $this->assertArrayHasKey('transaction_out_id', $result);
         $this->assertArrayHasKey('transaction_in_id', $result);
         $this->assertArrayHasKey('amount', $result);
         $this->assertEquals($amount, $result['amount']);
 
-        // Assert - Check account balances in database
         $fromAccountFresh = Account::find($fromAccount->id);
         $toAccountFresh = Account::find($toAccount->id);
 
-        // From account balance decreased by amount
         $this->assertEquals(8000.00, $fromAccountFresh->balance);
-        // To account balance increased by amount
         $this->assertEquals(7000.00, $toAccountFresh->balance);
 
-        // Assert - Check transactions in database
-        // Transfer_out transaction
+        // Assert
         $this->assertDatabaseHas('transactions', [
             'account_id' => $fromAccount->id,
             'amount' => -$amount,
@@ -101,7 +93,6 @@ class TransferServiceIntegrationTest extends TestCase
             'status' => 'completed',
         ]);
 
-        // Transfer_in transaction
         $this->assertDatabaseHas('transactions', [
             'account_id' => $toAccount->id,
             'amount' => $amount,
@@ -109,7 +100,6 @@ class TransferServiceIntegrationTest extends TestCase
             'status' => 'completed',
         ]);
 
-        // Check that two transactions were created
         $this->assertDatabaseCount('transactions', 2);
     }
 
@@ -117,14 +107,10 @@ class TransferServiceIntegrationTest extends TestCase
     public function transfer_with_commission_persists_correct_amounts(): void
     {
         // Arrange
-        $client = Client::factory()->create([
-            'full_name' => 'Test Client',
-            'email' => 'test2@example.com',
-            'balance' => 0,
-            'currency' => 'UAH',
-            'is_active' => true,
-        ]);
+        /** @var Client $client */
+        $client = Client::factory()->create();
 
+        /** @var Account $fromAccount */
         $fromAccount = Account::factory()->create([
             'client_id' => $client->id,
             'account_number' => 'UA1111111111',
@@ -132,6 +118,7 @@ class TransferServiceIntegrationTest extends TestCase
             'currency' => 'UAH',
         ]);
 
+        /** @var Account $toAccount */
         $toAccount = Account::factory()->create([
             'client_id' => $client->id,
             'account_number' => 'UA2222222222',
@@ -154,19 +141,14 @@ class TransferServiceIntegrationTest extends TestCase
         // Act
         $result = $this->transferService->executeTransfer($dto);
 
-        // Assert - Check commission in result
         $this->assertEquals($commission, $result['commission']);
 
-        // Assert - Check account balances
         $fromAccountFresh = Account::find($fromAccount->id);
         $toAccountFresh = Account::find($toAccount->id);
 
-        // From account balance decreased by amount + commission
         $this->assertEquals(50000 - $totalDeduct, $fromAccountFresh->balance);
-        // To account balance increased by amount only
         $this->assertEquals(10000 + $amount, $toAccountFresh->balance);
 
-        // Assert - Check transactions
         $this->assertDatabaseHas('transactions', [
             'account_id' => $fromAccount->id,
             'amount' => -$amount,
@@ -186,21 +168,18 @@ class TransferServiceIntegrationTest extends TestCase
     public function transfer_fails_when_insufficient_balance(): void
     {
         // Arrange
-        $client = Client::factory()->create([
-            'full_name' => 'Test Client',
-            'email' => 'test3@example.com',
-            'balance' => 0,
-            'currency' => 'UAH',
-            'is_active' => true,
-        ]);
+        /** @var Client $client */
+        $client = Client::factory()->create();
 
+        /** @var Account $fromAccount */
         $fromAccount = Account::factory()->create([
             'client_id' => $client->id,
             'account_number' => 'UA3333333333',
-            'balance' => 500.00, // Insufficient balance
+            'balance' => 500.00,
             'currency' => 'UAH',
         ]);
 
+        /** @var Account $toAccount */
         $toAccount = Account::factory()->create([
             'client_id' => $client->id,
             'account_number' => 'UA4444444444',
@@ -220,34 +199,26 @@ class TransferServiceIntegrationTest extends TestCase
 
         // Act & Assert
         $this->expectException(InsufficientBalanceException::class);
+        $this->transferService->executeTransfer($dto);
 
-        try {
-            $this->transferService->executeTransfer($dto);
-        } finally {
-            // Assert - No transactions were created
-            $this->assertDatabaseCount('transactions', 0);
+        // Assert
+        $this->assertDatabaseCount('transactions', 0);
 
-            // Assert - Balances remained unchanged
-            $fromAccountFresh = Account::find($fromAccount->id);
-            $toAccountFresh = Account::find($toAccount->id);
+        $fromAccountFresh = Account::find($fromAccount->id);
+        $toAccountFresh = Account::find($toAccount->id);
 
-            $this->assertEquals(500.00, $fromAccountFresh->balance);
-            $this->assertEquals(1000.00, $toAccountFresh->balance);
-        }
+        $this->assertEquals(500.00, $fromAccountFresh->balance);
+        $this->assertEquals(1000.00, $toAccountFresh->balance);
     }
 
     #[Test]
     public function transfer_fails_when_same_account(): void
     {
         // Arrange
-        $client = Client::factory()->create([
-            'full_name' => 'Test Client',
-            'email' => 'test4@example.com',
-            'balance' => 0,
-            'currency' => 'UAH',
-            'is_active' => true,
-        ]);
+        /** @var Client $client */
+        $client = Client::factory()->create();
 
+        /** @var Account $account */
         $account = Account::factory()->create([
             'client_id' => $client->id,
             'account_number' => 'UA5555555555',
@@ -260,23 +231,20 @@ class TransferServiceIntegrationTest extends TestCase
 
         $dto = new TransferDTO(
             accountFromId: $account->id,
-            accountToId: $account->id, // Same account
+            accountToId: $account->id,
             amount: new Money((string)$amount, $currency),
             description: 'Test transfer - same account'
         );
 
         // Act & Assert
         $this->expectException(SameAccountTransferException::class);
+        $this->transferService->executeTransfer($dto);
 
-        try {
-            $this->transferService->executeTransfer($dto);
-        } finally {
-            // Assert - No transactions were created
-            $this->assertDatabaseCount('transactions', 0);
+        // Assert
+        $this->assertDatabaseCount('transactions', 0);
 
-            // Assert - Balance remained unchanged
-            $accountFresh = Account::find($account->id);
-            $this->assertEquals(10000.00, $accountFresh->balance);
-        }
+        // Assert
+        $accountFresh = Account::find($account->id);
+        $this->assertEquals(10000.00, $accountFresh->balance);
     }
 }

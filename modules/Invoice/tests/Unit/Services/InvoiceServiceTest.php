@@ -22,6 +22,7 @@ class InvoiceServiceTest extends TestCase
     private MockInterface $invoiceRepository;
     private MockInterface $invoiceItemRepository;
     private MockInterface $serviceRepository;
+
     private InvoiceService $invoiceService;
 
     protected function setUp(): void
@@ -48,9 +49,7 @@ class InvoiceServiceTest extends TestCase
     #[Test]
     public function create_invoice_calculates_total_correctly_and_creates_invoice(): void
     {
-        // Arrange
         $clientId = 1;
-        $currency = 'UAH';
 
         $items = [
             new InvoiceItemDTO(serviceId: 1, quantity: 2, unitPrice: 100.00),
@@ -62,10 +61,9 @@ class InvoiceServiceTest extends TestCase
         $dto = new CreateInvoiceDTO(
             clientId: $clientId,
             items: $items,
-            currency: $currency,
+            currency: 'UAH',
         );
 
-        // Service exist
         foreach ($items as $item) {
             $this->serviceRepository
                 ->shouldReceive('exists')
@@ -74,11 +72,10 @@ class InvoiceServiceTest extends TestCase
                 ->andReturn(true);
         }
 
-        // Invoice creation
         $createdInvoice = new Invoice();
         $createdInvoice->id = 1;
         $createdInvoice->client_id = $clientId;
-        $createdInvoice->invoice_number = 'INV-20260417-0001';
+        $createdInvoice->invoice_number = 'INV-TEST';
         $createdInvoice->total_amount = $expectedTotal;
         $createdInvoice->status = 'draft';
         $createdInvoice->issued_at = now();
@@ -100,22 +97,18 @@ class InvoiceServiceTest extends TestCase
 
         DB::shouldReceive('transaction')
             ->once()
-            ->andReturnUsing(function ($callback) {
-                return $callback();
-            });
+            ->andReturnUsing(fn ($callback) => $callback());
 
-        // Act
         $result = $this->invoiceService->createInvoice($dto);
 
-        // Assert
         $this->assertInstanceOf(Invoice::class, $result);
         $this->assertEquals($expectedTotal, $result->total_amount);
+        $this->assertEquals($clientId, $result->client_id);
     }
 
     #[Test]
     public function create_invoice_throws_exception_when_service_not_found(): void
     {
-        // Arrange
         $items = [
             new InvoiceItemDTO(serviceId: 999, quantity: 1, unitPrice: 100.00),
         ];
@@ -135,7 +128,6 @@ class InvoiceServiceTest extends TestCase
         $this->invoiceRepository->shouldReceive('create')->never();
         $this->invoiceItemRepository->shouldReceive('createMany')->never();
 
-        // Act & Assert
         $this->expectException(\DomainException::class);
         $this->expectExceptionMessage('Service with ID 999 not found');
 
