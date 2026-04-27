@@ -6,12 +6,9 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Cache;
-use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
 abstract class TestCase extends BaseTestCase
 {
-    use MockeryPHPUnitIntegration;
-
     protected function setUp(): void
     {
         parent::setUp();
