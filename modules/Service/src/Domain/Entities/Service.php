@@ -21,7 +21,7 @@ use Modules\Service\src\Infrastructure\Database\Factories\ServiceFactory;
  * @property \Illuminate\Support\Carbon $updated_at
  *
  * @property-read \Illuminate\Database\Eloquent\Collection|Invoice[] $invoices
- *
+ * @method static \Modules\Service\src\Infrastructure\Database\Factories\ServiceFactory factory()
  * @method static \Illuminate\Database\Eloquent\Builder|Service find(int $id)
  * @method static \Illuminate\Database\Eloquent\Builder|Service findOrFail(int $id)
  * @method static \Illuminate\Database\Eloquent\Builder|Service where(string $column, $value)

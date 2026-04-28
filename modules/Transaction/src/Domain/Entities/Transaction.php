@@ -25,6 +25,7 @@ use Modules\Transaction\src\Infrastructure\Database\Factories\TransactionFactory
  * @property-read Account $account
  * @property-read Client|null $client
  *
+ * @method static \Modules\Transaction\src\Infrastructure\Database\Factories\TransactionFactory factory()
  * @method static \Illuminate\Database\Eloquent\Builder|Transaction create(array $attributes)
  * @method static \Illuminate\Database\Eloquent\Builder|Transaction find(int $id)
  * @method static \Illuminate\Database\Eloquent\Builder|Transaction whereDate(string $column, string $date)

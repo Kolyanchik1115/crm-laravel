@@ -24,9 +24,10 @@ use Modules\Invoice\src\Domain\Entities\Invoice;
  * @property \Illuminate\Support\Carbon $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Account> $accounts
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Invoice> $invoices
- *
+ * @method static \Modules\Client\src\Infrastructure\Database\Factories\ClientFactory factory()
  * @method static \Illuminate\Database\Eloquent\Builder|Client where(string $column, $value)
  * @method static \Illuminate\Database\Eloquent\Builder|Client whereDate(string $column, string $date)
+ * @method static \Illuminate\Database\Eloquent\Builder whereIn(string $column, array $values)
  * @method static \Illuminate\Database\Eloquent\Builder|Client find(int $id)
  * @method static \Illuminate\Database\Eloquent\Builder|Client findOrFail(int $id)
  * @method static \Illuminate\Database\Eloquent\Builder|Client create(array $attributes)

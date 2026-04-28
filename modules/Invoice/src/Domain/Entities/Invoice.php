@@ -25,7 +25,7 @@ use Modules\Service\src\Domain\Entities\Service;
  *
  * @property-read Client|null $client
  * @property-read \Illuminate\Database\Eloquent\Collection<int, InvoiceItem> $items
- *
+ * @method static \Modules\Invoice\src\Infrastructure\Database\Factories\InvoiceFactory factory()
  * @method static \Illuminate\Database\Eloquent\Builder|Invoice create(array $attributes)
  * @method static \Illuminate\Database\Eloquent\Builder|Invoice find(int $id)
  * @method static \Illuminate\Database\Eloquent\Builder|Invoice whereDate(string $column, string $date)

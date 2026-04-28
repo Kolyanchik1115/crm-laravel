@@ -21,7 +21,7 @@ use Modules\Transaction\src\Domain\Entities\Transaction;
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
  * /**
- * @method static \Illuminate\Database\Eloquent\Factories\Factory factory()
+ * @method static \Modules\Account\src\Infrastructure\Database\Factories\AccountFactory factory()
  * @property-read \Modules\Client\src\Domain\Entities\Client $client
  * @property-read \Illuminate\Database\Eloquent\Collection $transactions
  *
