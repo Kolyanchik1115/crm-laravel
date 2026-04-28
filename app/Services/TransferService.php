@@ -10,12 +10,14 @@ use App\Exceptions\InsufficientBalanceException;
 use App\Exceptions\SameAccountTransferException;
 use App\Repositories\Contracts\AccountRepositoryInterface;
 use App\Repositories\Contracts\TransactionRepositoryInterface;
+use App\Traits\CorrelationIdTrait;
 use App\ValueObjects\Money;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class TransferService
 {
+    use CorrelationIdTrait;
     private const float COMMISSION_RATE = 0.005; // 0.5%
     private const float COMMISSION_THRESHOLD = 10000;
 
@@ -143,10 +145,5 @@ class TransferService
             return round($amount->getValue() * self::COMMISSION_RATE, 2);
         }
         return 0;
-    }
-
-    private function getCorrelationId(): ?string
-    {
-        return request()->attributes->get('correlation_id');
     }
 }

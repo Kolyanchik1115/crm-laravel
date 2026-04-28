@@ -6,19 +6,17 @@ namespace App\Services;
 
 use App\DTO\CreateInvoiceDTO;
 use App\Events\InvoiceCreated;
-use App\Jobs\LogInvoiceAuditJob;
-use App\Jobs\UpdateDashboardCacheJob;
 use App\Models\Invoice;
 use App\Repositories\Contracts\InvoiceItemRepositoryInterface;
 use App\Repositories\Contracts\InvoiceRepositoryInterface;
 use App\Repositories\Contracts\ServiceRepositoryInterface;
-use App\Repositories\InvoiceRepository;
-use App\Repositories\InvoiceItemRepository;
+use App\Traits\CorrelationIdTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class InvoiceService
 {
+    use CorrelationIdTrait;
     public function __construct(
         protected InvoiceRepositoryInterface     $invoiceRepository,
         protected InvoiceItemRepositoryInterface $invoiceItemRepository,
@@ -28,9 +26,18 @@ class InvoiceService
 
     public function createInvoice(CreateInvoiceDTO $dto): Invoice
     {
+        $correlationId = $this->getCorrelationId();
+
         // exists service checking
         foreach ($dto->items as $invoiceItem) {
             if (!$this->serviceRepository->exists($invoiceItem->serviceId)) {
+                $failedServiceId = $invoiceItem->serviceId;
+
+                Log::warning('Invoice creation failed: service not found', [
+                    'service_id' => $failedServiceId,
+                    'client_id' => $dto->clientId,
+                    'correlation_id' => $correlationId,
+                ]);
                 throw new \DomainException("Service with ID {$invoiceItem->serviceId} not found");
             }
         }
@@ -53,6 +60,15 @@ class InvoiceService
             $this->invoiceItemRepository->createMany($createdInvoice->id, $dto->items);
         });
 
+        Log::info('Invoice created successfully', [
+            'invoice_id' => $createdInvoice->id,
+            'client_id' => $dto->clientId,
+            'total_amount' => (float)$createdInvoice->total_amount,
+            'items_count' => count($dto->items),
+            'currency' => $dto->currency,
+            'status' => $createdInvoice->status,
+            'correlation_id' => $correlationId,
+        ]);
         // event invoice created instead jobs
         event(new InvoiceCreated(
             invoiceId: $createdInvoice->id,

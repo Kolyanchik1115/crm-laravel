@@ -17,8 +17,8 @@
 | Подія | Рівень | Контекст |
 |-------|--------|----------|
 | Переказ створено | `info` | `transfer_id`, `account_from_id`, `account_to_id`, `amount`, `currency`, `correlation_id` |
-| Помилка при створенні переказу (InsufficientBalanceException) | `error` | `transfer_id` (якщо є), `account_from_id`, `error_message`, `correlation_id` |
-| Помилка при створенні переказу (SameAccountTransferException) | `warning` | `account_from_id`, `account_to_id`, `error_message`, `correlation_id` |
+| Помилка при створенні переказу (InsufficientBalanceException) | `warning` | `account_from_id`, `amount`, `balance`, `commission`, `correlation_id` |
+| Помилка при створенні переказу (SameAccountTransferException) | `warning` | `account_from_id`, `account_to_id`, `correlation_id` |
 | Помилка валідації при створенні переказу | `warning` | `errors` (масив помилок), `correlation_id` |
 | Неочікуваний exception при створенні переказу | `error` | `transfer_id` (якщо є), `error_message`, `trace`, `correlation_id` |
 
@@ -28,11 +28,67 @@
 
 | Подія | Рівень | Контекст |
 |-------|--------|----------|
-| Рахунок-фактуру створено | `info` | `invoice_id`, `client_id`, `total_amount`, `items_count`, `correlation_id` |
+| Рахунок-фактуру створено | `info` | `invoice_id`, `client_id`, `total_amount`, `items_count`, `currency`, `status`, `correlation_id` |
 | Помилка створення інвойсу (клієнт не знайдений) | `warning` | `client_id`, `correlation_id` |
-| Помилка створення інвойсу (послуга не знайдена) | `warning` | `service_id`, `invoice_id` (якщо є), `correlation_id` |
+| Помилка створення інвойсу (послуга не знайдена) | `warning` | `service_id`, `client_id`, `correlation_id` |
 | Помилка валідації при створенні інвойсу | `warning` | `errors` (масив помилок), `correlation_id` |
 | Неочікуваний exception при створенні інвойсу | `error` | `invoice_id` (якщо є), `client_id`, `error_message`, `trace`, `correlation_id` |
+
+### Приклади коду для InvoiceService
+
+#### Успішне створення інвойсу (`info`)
+
+```php
+Log::info('Invoice created successfully', [
+    'invoice_id' => $createdInvoice->id,
+    'client_id' => $dto->clientId,
+    'total_amount' => (float)$createdInvoice->total_amount,
+    'items_count' => count($dto->items),
+    'currency' => $dto->currency,
+    'status' => $createdInvoice->status,
+    'correlation_id' => $this->getCorrelationId(),
+]);
+```
+
+#### Клієнт не знайдений (`warning`)
+
+```php
+Log::warning('Invoice creation failed: client not found', [
+    'client_id' => $dto->clientId,
+    'correlation_id' => $this->getCorrelationId(),
+]);
+```
+
+#### Послуга не знайдена (`warning`)
+
+```php
+Log::warning('Invoice creation failed: service not found', [
+    'service_id' => $invoiceItem->serviceId,
+    'client_id' => $dto->clientId,
+    'correlation_id' => $this->getCorrelationId(),
+]);
+```
+
+#### Неочікувана помилка (`error`) - обробляється в ExceptionHandler
+
+```php
+// В глобальному ExceptionHandler (bootstrap/app.php)
+$exceptions->render(function (Throwable $e, Request $request) {
+    if ($request->expectsJson() || $request->is('api/*')) {
+        Log::error('Unexpected server error', [
+            'error_message' => $e->getMessage(),
+            'error_code' => $e->getCode(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString(),
+            'correlation_id' => $request->attributes->get('correlation_id'),
+        ]);
+        return response()->json([
+            'message' => 'Внутрішня помилка сервера.',
+        ], 500);
+    }
+});
+```
 
 ---
 
@@ -47,31 +103,128 @@
 
 ---
 
-## Приклад використання (Laravel)
+## Trait для отримання correlation_id
 
 ```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Traits;
+
+trait CorrelationIdTrait
+{
+    protected function getCorrelationId(): ?string
+    {
+        return request()->attributes->get('correlation_id');
+    }
+    
+    protected function log(string $level, string $message, array $context = []): void
+    {
+        $context['correlation_id'] = $this->getCorrelationId();
+        \Illuminate\Support\Facades\Log::$level($message, $context);
+    }
+}
+```
+
+## Використання в сервісах
+
+```php
+<?php
+
+namespace App\Services;
+
+use App\Traits\CorrelationIdTrait;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
-// Генерація correlation_id на початку запиту
-$correlationId = Str::uuid()->toString();
+class InvoiceService
+{
+    use CorrelationIdTrait;
+    
+    public function createInvoice(CreateInvoiceDTO $dto): Invoice
+    {
+        // Через Log::info з correlation_id
+        Log::info('Creating invoice', [
+            'client_id' => $dto->clientId,
+            'correlation_id' => $this->getCorrelationId(),
+        ]);
+        
+        // Або через скорочений метод log()
+        $this->log('info', 'Invoice created successfully', [
+            'invoice_id' => $invoice->id,
+            'client_id' => $dto->clientId,
+        ]);
+    }
+}
+```
 
-// Успішне створення переказу
-Log::info('Transfer created successfully', [
-    'transfer_id' => $transfer->id,
-    'account_from_id' => $transfer->account_from_id,
-    'account_to_id' => $transfer->account_to_id,
-    'amount' => $transfer->amount,
-    'currency' => $transfer->currency,
-    'correlation_id' => $correlationId,
-]);
+---
 
-// Помилка недостатньо коштів
-Log::error('Insufficient balance for transfer', [
-    'account_from_id' => $fromAccount->id,
-    'error_message' => 'Insufficient balance',
-    'correlation_id' => $correlationId,
-]);
+## Приклад повного логування в InvoiceService
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services;
+
+use App\DTO\CreateInvoiceDTO;
+use App\Models\Invoice;
+use App\Traits\CorrelationIdTrait;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+class InvoiceService
+{
+    use CorrelationIdTrait;
+
+    public function createInvoice(CreateInvoiceDTO $dto): Invoice
+    {
+        $correlationId = $this->getCorrelationId();
+
+        // 1. Перевірка клієнта
+        $client = Client::find($dto->clientId);
+        if (!$client) {
+            Log::warning('Invoice creation failed: client not found', [
+                'client_id' => $dto->clientId,
+                'correlation_id' => $correlationId,
+            ]);
+            throw new \DomainException("Client not found");
+        }
+
+        // 2. Перевірка послуг
+        foreach ($dto->items as $item) {
+            $service = Service::find($item->serviceId);
+            if (!$service) {
+                Log::warning('Invoice creation failed: service not found', [
+                    'service_id' => $item->serviceId,
+                    'client_id' => $dto->clientId,
+                    'correlation_id' => $correlationId,
+                ]);
+                throw new \DomainException("Service not found");
+            }
+        }
+
+        // 3. Створення інвойсу
+        $invoice = DB::transaction(function () use ($dto) {
+            // ... бізнес-логіка
+        });
+
+        // 4. Логування успіху
+        Log::info('Invoice created successfully', [
+            'invoice_id' => $invoice->id,
+            'client_id' => $dto->clientId,
+            'total_amount' => $invoice->total_amount,
+            'items_count' => count($dto->items),
+            'currency' => $dto->currency,
+            'status' => $invoice->status,
+            'correlation_id' => $correlationId,
+        ]);
+
+        return $invoice;
+    }
+}
 ```
 
 ---
