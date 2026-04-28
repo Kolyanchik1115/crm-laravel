@@ -26,7 +26,10 @@ class AppServiceProvider extends ServiceProvider
         $modulesPath = base_path('modules');
 
         // Migrations
-        foreach (glob($modulesPath . '/*/src/Infrastructure/Database/Migrations', GLOB_ONLYDIR) as $migrationsPath) {
+        foreach (glob(
+            $modulesPath . '/*/src/Infrastructure/Database/Migrations',
+            GLOB_ONLYDIR
+        ) as $migrationsPath) {
             $this->loadMigrationsFrom($migrationsPath);
         }
 
