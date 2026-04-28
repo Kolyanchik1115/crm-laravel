@@ -232,3 +232,91 @@ class InvoiceService
 ## Інвалідація
 
 Логи зберігаються **30 днів**, після чого автоматично видаляються (налаштовується в конфігурації логування).
+
+---
+
+## Налаштування каналів логування
+
+### Конфігурація каналів (`config/logging.php`)
+
+Для структурованого JSON формату додано канал `stderr_json` (для Docker):
+
+```php
+'stderr_json' => [
+    'driver' => 'monolog',
+    'level' => env('LOG_LEVEL', 'debug'),
+    'handler' => Monolog\Handler\StreamHandler::class,
+    'handler_with' => [
+        'stream' => 'php://stderr',
+    ],
+    'formatter' => Monolog\Formatter\JsonFormatter::class,
+    'formatter_with' => [
+        'append_newline' => true,
+    ],
+],
+```
+
+### Змінні середовища (`.env`)
+
+```bash
+# Для Docker (JSON в stdout)
+LOG_CHANNEL=stderr_json
+
+# Рівень логування
+LOG_LEVEL=debug
+```
+
+### Приклад JSON логу з Docker
+
+```json
+{
+    "message": "Transfer completed successfully",
+    "context": {
+        "correlation_id": "83a74f66-2847-4c87-b20a-651947a70529",
+        "transfer_out_id": 30,
+        "transfer_in_id": 31,
+        "account_from_id": 1,
+        "account_to_id": 2,
+        "amount": 100.0,
+        "currency": "UAH",
+        "commission": 0.0
+    },
+    "level": 200,
+    "level_name": "INFO",
+    "channel": "local",
+    "datetime": "2026-04-28T12:42:29.634992+00:00",
+    "extra": {}
+}
+```
+
+### Перегляд логів Docker
+
+```bash
+# Подивитись останні логи
+docker compose logs app --tail=20
+
+# Фільтрація за correlation_id
+docker compose logs app 2>&1 | grep "83a74f66"
+
+# Перегляд в реальному часі
+docker compose logs app -f
+```
+
+### Фільтрація за допомогою jq
+
+```bash
+# Всі логи з рівнем ERROR
+docker compose logs app 2>&1 | jq 'select(.level_name == "ERROR")'
+
+# Пошук за конкретним контекстом
+docker compose logs app 2>&1 | jq 'select(.context.transfer_out_id != null)'
+```
+
+### Переваги JSON формату
+
+| Текстовий формат | JSON формат |
+|-----------------|-------------|
+| `[2026-04-28 12:42:29] local.INFO: Transfer completed` | `{"message":"Transfer completed","level_name":"INFO",...}` |
+| Складно парсити | Легко парситься |
+| Немає структури | Структуровані поля |
+| Погано для агрегації | Ідеально для Fluentd/Filebeat/CloudWatch |
