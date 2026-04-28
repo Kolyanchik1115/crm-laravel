@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>CRM API Documentation</title>
+    <link rel="stylesheet" type="text/css" href="/swagger/swagger-ui.css">
+    <link rel="icon" type="image/png" href="/swagger/favicon-32x32.png">
+</head>
+<body>
+<div id="swagger-ui"></div>
+<script src="/swagger/swagger-ui-bundle.js"></script>
+<script src="/swagger/swagger-ui-standalone-preset.js"></script>
+<script>
+    window.onload = () => {
+        SwaggerUIBundle({
+            url: "/api-docs/openapi.yaml",
+            dom_id: '#swagger-ui',
+            presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIBundle.SwaggerUIStandalonePreset
+            ],
+            layout: "BaseLayout",
+            deepLinking: true,
+        });
+    };
+</script>
+</body>
+</html>
