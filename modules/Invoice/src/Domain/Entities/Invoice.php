@@ -22,9 +22,9 @@ use Modules\Service\src\Domain\Entities\Service;
  * @property \DateTimeInterface|null $issued_at
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
- *
  * @property-read Client|null $client
  * @property-read \Illuminate\Database\Eloquent\Collection<int, InvoiceItem> $items
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Modules\Service\src\Domain\Entities\Service> $services
  * @method static \Modules\Invoice\src\Infrastructure\Database\Factories\InvoiceFactory factory()
  * @method static \Illuminate\Database\Eloquent\Builder|Invoice create(array $attributes)
  * @method static \Illuminate\Database\Eloquent\Builder|Invoice find(int $id)

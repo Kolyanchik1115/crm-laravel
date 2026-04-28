@@ -19,7 +19,7 @@ use Modules\Service\src\Infrastructure\Database\Factories\ServiceFactory;
  * @property bool $is_active
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
- *
+ * @property-read \Modules\Invoice\src\Domain\Entities\InvoiceItem|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection|Invoice[] $invoices
  * @method static \Modules\Service\src\Infrastructure\Database\Factories\ServiceFactory factory()
  * @method static \Illuminate\Database\Eloquent\Builder|Service find(int $id)
