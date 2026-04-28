@@ -1,6 +1,21 @@
-# Карта логування подій
+# LOGGING GUIDE CRM
 
-## Правило
+## Зміст
+
+1. [Карта подій](#1-карта-подій)
+2. [Correlation ID](#2-correlation-id)
+3. [Рівні логування](#3-рівні-логування)
+4. [Структуровані логи (JSON)](#4-структуровані-логи-json)
+5. [Налаштування каналів](#5-налаштування-каналів)
+6. [Логи vs Error Tracking](#6-логи-vs-error-tracking)
+7. [Команди для роботи з логами](#7-команди-для-роботи-з-логами)
+8. [Інциденти](INCIDENT_RUNBOOK.md)
+
+---
+
+## 1. Карта подій
+
+### Правило
 
 > Для кожної нової події одразу визначати **рівень** і **контекст**. Уникати хаотичного логування.
 
@@ -10,9 +25,7 @@
 
 **Обов'язкове поле:** `correlation_id` для всіх подій (зв'язує запит з логами).
 
----
-
-## 1. Transfers
+### 1.1 Transfers
 
 | Подія | Рівень | Контекст |
 |-------|--------|----------|
@@ -22,9 +35,7 @@
 | Помилка валідації при створенні переказу | `warning` | `errors` (масив помилок), `correlation_id` |
 | Неочікуваний exception при створенні переказу | `error` | `transfer_id` (якщо є), `error_message`, `trace`, `correlation_id` |
 
----
-
-## 2. Invoices
+### 1.2 Invoices
 
 | Подія | Рівень | Контекст |
 |-------|--------|----------|
@@ -34,65 +45,7 @@
 | Помилка валідації при створенні інвойсу | `warning` | `errors` (масив помилок), `correlation_id` |
 | Неочікуваний exception при створенні інвойсу | `error` | `invoice_id` (якщо є), `client_id`, `error_message`, `trace`, `correlation_id` |
 
-### Приклади коду для InvoiceService
-
-#### Успішне створення інвойсу (`info`)
-
-```php
-Log::info('Invoice created successfully', [
-    'invoice_id' => $createdInvoice->id,
-    'client_id' => $dto->clientId,
-    'total_amount' => (float)$createdInvoice->total_amount,
-    'items_count' => count($dto->items),
-    'currency' => $dto->currency,
-    'status' => $createdInvoice->status,
-    'correlation_id' => $this->getCorrelationId(),
-]);
-```
-
-#### Клієнт не знайдений (`warning`)
-
-```php
-Log::warning('Invoice creation failed: client not found', [
-    'client_id' => $dto->clientId,
-    'correlation_id' => $this->getCorrelationId(),
-]);
-```
-
-#### Послуга не знайдена (`warning`)
-
-```php
-Log::warning('Invoice creation failed: service not found', [
-    'service_id' => $invoiceItem->serviceId,
-    'client_id' => $dto->clientId,
-    'correlation_id' => $this->getCorrelationId(),
-]);
-```
-
-#### Неочікувана помилка (`error`) - обробляється в ExceptionHandler
-
-```php
-// В глобальному ExceptionHandler (bootstrap/app.php)
-$exceptions->render(function (Throwable $e, Request $request) {
-    if ($request->expectsJson() || $request->is('api/*')) {
-        Log::error('Unexpected server error', [
-            'error_message' => $e->getMessage(),
-            'error_code' => $e->getCode(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => $e->getTraceAsString(),
-            'correlation_id' => $request->attributes->get('correlation_id'),
-        ]);
-        return response()->json([
-            'message' => 'Внутрішня помилка сервера.',
-        ], 500);
-    }
-});
-```
-
----
-
-## 3. Accounts
+### 1.3 Accounts
 
 | Подія | Рівень | Контекст |
 |-------|--------|----------|
@@ -103,7 +56,20 @@ $exceptions->render(function (Throwable $e, Request $request) {
 
 ---
 
-## Trait для отримання correlation_id
+## 2. Correlation ID
+
+### Що це?
+
+Унікальний ідентифікатор для кожного HTTP-запиту. Дозволяє зібрати всі логи одного запиту в ланцюжок.
+
+### Як працює?
+
+1. **Middleware** `AddCorrelationId` перехоплює запит
+2. Генерує унікальний ID: `Str::uuid()->toString()`
+3. Додає в контекст логів: `Log::withContext(['correlation_id' => $id])`
+4. Додає заголовок у відповідь: `X-Correlation-Id`
+
+### Trait для отримання correlation_id
 
 ```php
 <?php
@@ -127,7 +93,7 @@ trait CorrelationIdTrait
 }
 ```
 
-## Використання в сервісах
+### Використання в сервісах
 
 ```php
 <?php
@@ -143,13 +109,11 @@ class InvoiceService
     
     public function createInvoice(CreateInvoiceDTO $dto): Invoice
     {
-        // Через Log::info з correlation_id
         Log::info('Creating invoice', [
             'client_id' => $dto->clientId,
             'correlation_id' => $this->getCorrelationId(),
         ]);
         
-        // Або через скорочений метод log()
         $this->log('info', 'Invoice created successfully', [
             'invoice_id' => $invoice->id,
             'client_id' => $dto->clientId,
@@ -160,82 +124,44 @@ class InvoiceService
 
 ---
 
-## Приклад повного логування в InvoiceService
+## 3. Рівні логування
 
-```php
-<?php
+| Рівень | Коли використовувати | Приклад |
+|--------|---------------------|---------|
+| `info` | Нормальний перебіг події | Переказ створено, інвойс створено |
+| `warning` | Проблема, яка не зупиняє виконання | Недостатньо коштів, клієнт не знайдений |
+| `error` | Критична помилка, exception | Помилка БД, неочікуваний exception |
 
-declare(strict_types=1);
+---
 
-namespace App\Services;
+## 4. Структуровані логи (JSON)
 
-use App\DTO\CreateInvoiceDTO;
-use App\Models\Invoice;
-use App\Traits\CorrelationIdTrait;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+### Приклад JSON логу
 
-class InvoiceService
+```json
 {
-    use CorrelationIdTrait;
-
-    public function createInvoice(CreateInvoiceDTO $dto): Invoice
-    {
-        $correlationId = $this->getCorrelationId();
-
-        // 1. Перевірка клієнта
-        $client = Client::find($dto->clientId);
-        if (!$client) {
-            Log::warning('Invoice creation failed: client not found', [
-                'client_id' => $dto->clientId,
-                'correlation_id' => $correlationId,
-            ]);
-            throw new \DomainException("Client not found");
-        }
-
-        // 2. Перевірка послуг
-        foreach ($dto->items as $item) {
-            $service = Service::find($item->serviceId);
-            if (!$service) {
-                Log::warning('Invoice creation failed: service not found', [
-                    'service_id' => $item->serviceId,
-                    'client_id' => $dto->clientId,
-                    'correlation_id' => $correlationId,
-                ]);
-                throw new \DomainException("Service not found");
-            }
-        }
-
-        // 3. Створення інвойсу
-        $invoice = DB::transaction(function () use ($dto) {
-            // ... бізнес-логіка
-        });
-
-        // 4. Логування успіху
-        Log::info('Invoice created successfully', [
-            'invoice_id' => $invoice->id,
-            'client_id' => $dto->clientId,
-            'total_amount' => $invoice->total_amount,
-            'items_count' => count($dto->items),
-            'currency' => $dto->currency,
-            'status' => $invoice->status,
-            'correlation_id' => $correlationId,
-        ]);
-
-        return $invoice;
-    }
+    "message": "Transfer completed successfully",
+    "context": {
+        "correlation_id": "83a74f66-2847-4c87-b20a-651947a70529",
+        "transfer_out_id": 30,
+        "transfer_in_id": 31,
+        "account_from_id": 1,
+        "account_to_id": 2,
+        "amount": 100.0,
+        "currency": "UAH",
+        "commission": 0.0
+    },
+    "level": 200,
+    "level_name": "INFO",
+    "channel": "local",
+    "datetime": "2026-04-28T12:42:29.634992+00:00",
+    "extra": {}
 }
 ```
 
 ---
 
-## Інвалідація
-
-Логи зберігаються **30 днів**, після чого автоматично видаляються (налаштовується в конфігурації логування).
-
----
-
-## Налаштування каналів логування
+## 5. Налаштування каналів
 
 ### Конфігурація каналів (`config/logging.php`)
 
@@ -266,64 +192,17 @@ LOG_CHANNEL=stderr_json
 LOG_LEVEL=debug
 ```
 
-### Приклад JSON логу з Docker
-
-```json
-{
-    "message": "Transfer completed successfully",
-    "context": {
-        "correlation_id": "83a74f66-2847-4c87-b20a-651947a70529",
-        "transfer_out_id": 30,
-        "transfer_in_id": 31,
-        "account_from_id": 1,
-        "account_to_id": 2,
-        "amount": 100.0,
-        "currency": "UAH",
-        "commission": 0.0
-    },
-    "level": 200,
-    "level_name": "INFO",
-    "channel": "local",
-    "datetime": "2026-04-28T12:42:29.634992+00:00",
-    "extra": {}
-}
-```
-
-### Перегляд логів Docker
-
-```bash
-# Подивитись останні логи
-docker compose logs app --tail=20
-
-# Фільтрація за correlation_id
-docker compose logs app 2>&1 | grep "83a74f66"
-
-# Перегляд в реальному часі
-docker compose logs app -f
-```
-
-### Фільтрація за допомогою jq
-
-```bash
-# Всі логи з рівнем ERROR
-docker compose logs app 2>&1 | jq 'select(.level_name == "ERROR")'
-
-# Пошук за конкретним контекстом
-docker compose logs app 2>&1 | jq 'select(.context.transfer_out_id != null)'
-```
-
 ### Переваги JSON формату
 
 | Текстовий формат | JSON формат |
 |-----------------|-------------|
-| `[2026-04-28 12:42:29] local.INFO: Transfer completed` | `{"message":"Transfer completed","level_name":"INFO",...}` |
 | Складно парсити | Легко парситься |
 | Немає структури | Структуровані поля |
 | Погано для агрегації | Ідеально для Fluentd/Filebeat/CloudWatch |
 
 ---
 
-## Логи vs Error Tracking
+## 6. Логи vs Error Tracking
 
 ### Правило розділення
 
@@ -333,28 +212,19 @@ docker compose logs app 2>&1 | jq 'select(.context.transfer_out_id != null)'
 
 | Тип події | Логувати (Log) | Відправляти в Sentry |
 |-----------|----------------|----------------------|
-| **Переказ успішно** | ✅ `info` | ❌ |
-| **InsufficientBalanceException** | ✅ `warning` | ❌ (очікувана бізнес-помилка) |
-| **SameAccountTransferException** | ✅ `warning` | ❌ |
-| **DomainException (клієнт/послуга не знайдені)** | ✅ `warning` | ❌ |
-| **Помилка валідації (422)** | ❌ (Laravel логує окремо) | ❌ |
-| **Неочікуваний exception у TransferService** | ✅ `error` | ✅ |
-| **Помилка БД при створенні транзакції** | ✅ `error` | ✅ |
-| **ConnectionException (БД недоступна)** | ✅ `error` | ✅ |
-| **ModelNotFoundException (не знайдено ресурс)** | ✅ `warning` | ❌ |
-
----
+| Переказ успішно | ✅ `info` | ❌ |
+| InsufficientBalanceException | ✅ `warning` | ❌ (очікувана бізнес-помилка) |
+| SameAccountTransferException | ✅ `warning` | ❌ |
+| DomainException | ✅ `warning` | ❌ |
+| Помилка валідації (422) | ❌ | ❌ |
+| Неочікуваний exception | ✅ `error` | ✅ |
+| Помилка БД | ✅ `error` | ✅ |
+| ConnectionException | ✅ `error` | ✅ |
+| ModelNotFoundException | ✅ `warning` | ❌ |
 
 ### Які exceptions НЕ відправляти в Sentry
 
-В `bootstrap/app.php` в ExceptionHandler:
-
 ```php
-use App\Exceptions\InsufficientBalanceException;
-use App\Exceptions\SameAccountTransferException;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-
 $exceptions->dontReport([
     InsufficientBalanceException::class,
     SameAccountTransferException::class,
@@ -364,47 +234,35 @@ $exceptions->dontReport([
 ]);
 ```
 
-### Які exceptions відправляти в Sentry
-
-```php
-// Всі інші exception автоматично потрапляють в Sentry
-// Неочікувані помилки: ConnectionException, QueryException, Throwable
-```
-
 ---
 
-### Приклад конфігурації Sentry
+## 7. Команди для роботи з логами
 
-```php
-// config/sentry.php
+### Локальні логи
 
-return [
-    'dsn' => env('SENTRY_LARAVEL_DSN'),
-    'release' => env('APP_VERSION'),
-    'environment' => env('APP_ENV'),
-    
-    // Не відправляти ці винятки
-    'ignore_exceptions' => [
-        InsufficientBalanceException::class,
-        SameAccountTransferException::class,
-        ValidationException::class,
-        ModelNotFoundException::class,
-    ],
-];
+```bash
+# Перегляд в реальному часі
+tail -f storage/logs/laravel.log
+
+# Пошук за correlation_id
+grep "83a74f66" storage/logs/laravel.log
+
+# Фільтр за рівнем
+grep "ERROR" storage/logs/laravel.log
 ```
 
----
+### Docker логи
 
-### Чому важливо розділяти?
+```bash
+# Перегляд останніх логів
+docker compose logs app --tail=20
 
-| Проблема | Якщо все в Sentry | Якщо розділяти |
-|----------|-------------------|----------------|
-| Контрольовані помилки | Засмічують дашборд | Тільки в логах |
-| Справжні баги | Губились серед шуму | Видно одразу |
-| Увага розробника | Розпилюється | Фокус на критичному |
+# Перегляд в реальному часі
+docker compose logs app -f
 
-### Висновок
+# Фільтрація за correlation_id
+docker compose logs app 2>&1 | grep "83a74f66"
 
-- ✅ **Логи** - зберігаємо ВСІ події для аудиту та аналітики
-- ✅ **Sentry** - тільки неочікувані помилки, які потребують фіксу
-- ✅ **Валідація та бізнес-помилки** - не турбують розробника вночі
+# Фільтрація за допомогою jq
+docker compose logs app 2>&1 | jq 'select(.level_name == "ERROR")'
+```
