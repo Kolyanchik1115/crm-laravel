@@ -320,3 +320,91 @@ docker compose logs app 2>&1 | jq 'select(.context.transfer_out_id != null)'
 | Складно парсити | Легко парситься |
 | Немає структури | Структуровані поля |
 | Погано для агрегації | Ідеально для Fluentd/Filebeat/CloudWatch |
+
+---
+
+## Логи vs Error Tracking
+
+### Правило розділення
+
+> **Sentry (Error Tracking) - для неочікуваних exceptions та критичних помилок, що потребують уваги розробника.**
+>
+> **Логи - для всіх подій, включаючи контрольовані бізнес-відмови.**
+
+| Тип події | Логувати (Log) | Відправляти в Sentry |
+|-----------|----------------|----------------------|
+| **Переказ успішно** | ✅ `info` | ❌ |
+| **InsufficientBalanceException** | ✅ `warning` | ❌ (очікувана бізнес-помилка) |
+| **SameAccountTransferException** | ✅ `warning` | ❌ |
+| **DomainException (клієнт/послуга не знайдені)** | ✅ `warning` | ❌ |
+| **Помилка валідації (422)** | ❌ (Laravel логує окремо) | ❌ |
+| **Неочікуваний exception у TransferService** | ✅ `error` | ✅ |
+| **Помилка БД при створенні транзакції** | ✅ `error` | ✅ |
+| **ConnectionException (БД недоступна)** | ✅ `error` | ✅ |
+| **ModelNotFoundException (не знайдено ресурс)** | ✅ `warning` | ❌ |
+
+---
+
+### Які exceptions НЕ відправляти в Sentry
+
+В `bootstrap/app.php` в ExceptionHandler:
+
+```php
+use App\Exceptions\InsufficientBalanceException;
+use App\Exceptions\SameAccountTransferException;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+
+$exceptions->dontReport([
+    InsufficientBalanceException::class,
+    SameAccountTransferException::class,
+    ValidationException::class,
+    ModelNotFoundException::class,
+    \DomainException::class,
+]);
+```
+
+### Які exceptions відправляти в Sentry
+
+```php
+// Всі інші exception автоматично потрапляють в Sentry
+// Неочікувані помилки: ConnectionException, QueryException, Throwable
+```
+
+---
+
+### Приклад конфігурації Sentry
+
+```php
+// config/sentry.php
+
+return [
+    'dsn' => env('SENTRY_LARAVEL_DSN'),
+    'release' => env('APP_VERSION'),
+    'environment' => env('APP_ENV'),
+    
+    // Не відправляти ці винятки
+    'ignore_exceptions' => [
+        InsufficientBalanceException::class,
+        SameAccountTransferException::class,
+        ValidationException::class,
+        ModelNotFoundException::class,
+    ],
+];
+```
+
+---
+
+### Чому важливо розділяти?
+
+| Проблема | Якщо все в Sentry | Якщо розділяти |
+|----------|-------------------|----------------|
+| Контрольовані помилки | Засмічують дашборд | Тільки в логах |
+| Справжні баги | Губились серед шуму | Видно одразу |
+| Увага розробника | Розпилюється | Фокус на критичному |
+
+### Висновок
+
+- ✅ **Логи** - зберігаємо ВСІ події для аудиту та аналітики
+- ✅ **Sentry** - тільки неочікувані помилки, які потребують фіксу
+- ✅ **Валідація та бізнес-помилки** - не турбують розробника вночі
