@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Transaction\src\Domain\Entities;
 
-use Database\Factories\TransactionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Account\src\Domain\Entities\Account;
 use Modules\Client\src\Domain\Entities\Client;
+use Modules\Transaction\src\Infrastructure\Database\Factories\TransactionFactory;
 
 /**
  * @property int $id

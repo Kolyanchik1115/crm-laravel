@@ -1,7 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
-namespace Database\Factories;
+namespace Modules\Client\src\Infrastructure\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -28,7 +29,7 @@ class ClientFactory extends Factory
     // State: active user
     public function active(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'is_active' => true,
         ]);
     }
@@ -36,7 +37,7 @@ class ClientFactory extends Factory
     // State inactive user
     public function inactive(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'is_active' => false,
         ]);
     }
@@ -44,7 +45,7 @@ class ClientFactory extends Factory
     // State: high balance
     public function highBalance(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'balance' => $this->faker->randomFloat(2, 50000, 500000),
         ]);
     }

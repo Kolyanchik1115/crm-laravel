@@ -1,7 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
-namespace Database\Factories;
+namespace Modules\Transaction\src\Infrastructure\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Account\src\Domain\Entities\Account;
@@ -30,7 +31,7 @@ class TransactionFactory extends Factory
     // State: success transaction
     public function completed(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => 'completed',
         ]);
     }
@@ -38,7 +39,7 @@ class TransactionFactory extends Factory
     // State: deposit
     public function deposit(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'type' => 'deposit',
             'amount' => $this->faker->randomFloat(2, 100, 50000),
         ]);
@@ -47,7 +48,7 @@ class TransactionFactory extends Factory
     // State: large amount
     public function large(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'amount' => $this->faker->randomFloat(2, 5000, 100000),
         ]);
     }

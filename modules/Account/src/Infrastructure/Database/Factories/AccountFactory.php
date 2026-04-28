@@ -1,7 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
-namespace Database\Factories;
+namespace Modules\Account\src\Infrastructure\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Account\src\Domain\Entities\Account;
@@ -25,7 +26,7 @@ class AccountFactory extends Factory
 
     public function highBalance(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'balance' => $this->faker->randomFloat(2, 50000, 200000),
         ]);
     }
@@ -33,7 +34,7 @@ class AccountFactory extends Factory
     // State: currency in usd
     public function usd(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'currency' => 'USD',
         ]);
     }

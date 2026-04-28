@@ -13,7 +13,8 @@ use Modules\Invoice\src\Providers\InvoiceServiceProvider;
 use Modules\Service\src\Providers\ServiceServiceProvider;
 use Modules\Transaction\src\Domain\Exceptions\InsufficientBalanceException;
 use Modules\Transaction\src\Domain\Exceptions\SameAccountTransferException;
-use Modules\Transaction\src\Providers\EventServiceProvider;
+use Modules\Transaction\src\Providers\EventServiceProvider as TransactionEventServiceProvider;
+use Modules\Dashboard\src\Providers\EventServiceProvider as DashboardEventServiceProvider;
 use Modules\Transaction\src\Providers\TransactionServiceProvider;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -31,10 +32,10 @@ return Application::configure(basePath: dirname(__DIR__))
         AccountServiceProvider::class,
         //transaction
         TransactionServiceProvider::class,
-        EventServiceProvider::class,
+        TransactionEventServiceProvider::class,
         //dashboard
         DashboardServiceProvider::class,
-        EventServiceProvider::class,
+        DashboardEventServiceProvider::class,
         //invoice
         InvoiceServiceProvider::class,
         //service

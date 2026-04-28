@@ -1,7 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
-namespace Database\Factories;
+namespace Modules\Service\src\Infrastructure\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Service\src\Domain\Entities\Service;
@@ -39,7 +40,7 @@ class ServiceFactory extends Factory
     // State: active service
     public function active(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'is_active' => true,
         ]);
     }
@@ -47,7 +48,7 @@ class ServiceFactory extends Factory
     // State: inactive service
     public function inactive(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'is_active' => false,
         ]);
     }

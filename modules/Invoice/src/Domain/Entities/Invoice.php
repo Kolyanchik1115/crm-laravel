@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Invoice\src\Domain\Entities;
 
-use Database\Factories\InvoiceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Client\src\Domain\Entities\Client;
+use Modules\Invoice\src\Infrastructure\Database\Factories\InvoiceFactory;
 use Modules\Service\src\Domain\Entities\Service;
 
 /**

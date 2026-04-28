@@ -1,7 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
-namespace Database\Factories;
+namespace Modules\Invoice\src\Infrastructure\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Client\src\Domain\Entities\Client;
@@ -29,7 +30,7 @@ class InvoiceFactory extends Factory
     // State: paid
     public function paid(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => 'paid',
         ]);
     }
@@ -37,7 +38,7 @@ class InvoiceFactory extends Factory
     // State: draft
     public function draft(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => 'draft',
         ]);
     }
@@ -45,7 +46,7 @@ class InvoiceFactory extends Factory
     // State: overdue
     public function overdue(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => 'overdue',
             'issued_at' => $this->faker->dateTimeBetween('-2 years', '-1 month'),
         ]);

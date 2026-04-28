@@ -1,7 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
-namespace Database\Seeders;
+namespace Modules\Client\src\Infrastructure\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Modules\Client\src\Domain\Entities\Client;

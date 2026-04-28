@@ -1,7 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
-namespace Database\Seeders;
+namespace Modules\Transaction\src\Infrastructure\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Modules\Transaction\src\Domain\Entities\Transaction;

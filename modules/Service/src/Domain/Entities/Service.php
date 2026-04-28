@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Modules\Service\src\Domain\Entities;
 
-use Database\Factories\ServiceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Modules\Invoice\src\Domain\Entities\Invoice;
+use Modules\Service\src\Infrastructure\Database\Factories\ServiceFactory;
 
 /**
  * @property int $id

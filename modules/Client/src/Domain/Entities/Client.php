@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Client\src\Domain\Entities;
 
-use Database\Factories\ClientFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 use Modules\Account\src\Domain\Entities\Account;
+use Modules\Client\src\Infrastructure\Database\Factories\ClientFactory;
 use Modules\Invoice\src\Domain\Entities\Invoice;
 
 /**

@@ -20,11 +20,17 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
+    // app/Providers/AppServiceProvider.php
     public function boot(): void
     {
-        // All modules registration
         $modulesPath = base_path('modules');
 
+        // Migrations
+        foreach (glob($modulesPath . '/*/src/Infrastructure/Database/Migrations', GLOB_ONLYDIR) as $migrationsPath) {
+            $this->loadMigrationsFrom($migrationsPath);
+        }
+
+        // Views
         foreach (glob($modulesPath . '/*/src/Interfaces/Http/views', GLOB_ONLYDIR) as $viewsPath) {
             $moduleName = basename(dirname($viewsPath, 4));
             View::addNamespace(strtolower($moduleName), $viewsPath);
