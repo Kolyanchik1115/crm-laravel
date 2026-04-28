@@ -10,6 +10,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Illuminate\Support\Facades\Log;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -68,6 +69,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Model not found (404)
         $exceptions->render(function (ModelNotFoundException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
+                Log::warning('Model not found', [
+                    'model' => $e->getModel(),
+                    'ids' => $e->getIds(),
+                    'correlation_id' => $request->attributes->get('correlation_id'),
+                ]);
                 return response()->json([
                     'message' => 'Ресурс не знайдено.',
                 ], 404);
@@ -77,15 +83,28 @@ return Application::configure(basePath: dirname(__DIR__))
         // Http exceptions (404, 403, etc)
         $exceptions->render(function (HttpException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
+                Log::warning('Http exception', [
+                    'status_code' => $e->getStatusCode(),
+                    'message' => $e->getMessage(),
+                    'correlation_id' => $request->attributes->get('correlation_id'),
+                ]);
                 return response()->json([
                     'message' => $e->getMessage() ?: 'Помилка запиту.',
                 ], $e->getStatusCode());
             }
         });
 
-        // Все інше (500)
+        // Все інше (500) - неочікувані помилки
         $exceptions->render(function (Throwable $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
+                Log::error('Unexpected server error', [
+                    'error_message' => $e->getMessage(),
+                    'error_code' => $e->getCode(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString(),
+                    'correlation_id' => $request->attributes->get('correlation_id'),
+                ]);
                 return response()->json([
                     'message' => 'Внутрішня помилка сервера.',
                 ], 500);

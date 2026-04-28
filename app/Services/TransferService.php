@@ -12,6 +12,7 @@ use App\Repositories\Contracts\AccountRepositoryInterface;
 use App\Repositories\Contracts\TransactionRepositoryInterface;
 use App\ValueObjects\Money;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class TransferService
 {
@@ -26,8 +27,15 @@ class TransferService
 
     public function executeTransfer(TransferDTO $dto): array
     {
+        $correlationId = $this->getCorrelationId();
+
         // check if account is not same
         if ($dto->accountFromId === $dto->accountToId) {
+            Log::warning('Transfer failed: same account', [
+                'account_from_id' => $dto->accountFromId,
+                'account_to_id' => $dto->accountToId,
+                'correlation_id' => $correlationId,
+            ]);
             throw new SameAccountTransferException();
         }
 
@@ -43,12 +51,18 @@ class TransferService
             &$transactionIn,
             &$fromAccount,
             &$toAccount,
-            &$commission
+            &$commission,
+            &$correlationId
         ) {
             $fromAccount = $this->accountRepository->findById($dto->accountFromId);
             $toAccount = $this->accountRepository->findById($dto->accountToId);
 
             if (!$fromAccount || !$toAccount) {
+                Log::warning('Transfer failed: account not found', [
+                    'account_from_id' => $dto->accountFromId,
+                    'account_to_id' => $dto->accountToId,
+                    'correlation_id' => $correlationId,
+                ]);
                 throw new \DomainException('Рахунок не знайдено');
             }
 
@@ -59,6 +73,14 @@ class TransferService
 
             // check if balance is enough
             if ($fromAccount->balance < $totalDeduct) {
+                Log::warning('Transfer failed: insufficient balance', [
+                    'account_from_id' => $fromAccount->id,
+                    'amount' => $amount,
+                    'balance' => $fromAccount->balance,
+                    'commission' => $commission,
+                    'total_deduct' => $totalDeduct,
+                    'correlation_id' => $correlationId,
+                ]);
                 throw new InsufficientBalanceException();
             }
 
@@ -83,6 +105,17 @@ class TransferService
                 'description' => "Надходження з рахунку {$fromAccount->account_number}. {$dto->description}",
             ]);
         });
+
+        Log::info('Transfer completed successfully', [
+            'transfer_out_id' => $transactionOut->id,
+            'transfer_in_id' => $transactionIn->id,
+            'account_from_id' => $fromAccount->id,
+            'account_to_id' => $toAccount->id,
+            'amount' => $dto->amount->getValue(),
+            'currency' => $dto->amount->currency,
+            'commission' => $commission,
+            'correlation_id' => $correlationId,
+        ]);
 
         // transfer completed event
         event(new TransferCompleted(
@@ -110,5 +143,10 @@ class TransferService
             return round($amount->getValue() * self::COMMISSION_RATE, 2);
         }
         return 0;
+    }
+
+    private function getCorrelationId(): ?string
+    {
+        return request()->attributes->get('correlation_id');
     }
 }
