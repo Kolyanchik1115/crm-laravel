@@ -229,3 +229,89 @@ curl -X POST http://localhost:8000/api/v1/transfers \
 Після відправки події, перевір що в деталях з'явився `release` (наприклад, `1.0.0` або `local-dev`).
 
 
+## Матриця помилок
+
+### Що відправляти в Sentry, а що ні
+
+| Тип помилки | Відправляти в Sentry | Причина |
+|-------------|---------------------|---------|
+| **ValidationException (422)** | ❌ Ні | Очікувана валідація клієнта |
+| **NotFoundHttpException (404)** | ❌ Ні | Очікувана відмова (ресурс не знайдено) |
+| **InsufficientBalanceException** | ❌ Ні | Контрольована бізнес-відмова |
+| **SameAccountTransferException** | ❌ Ні | Контрольована бізнес-відмова |
+| **ClientNotFoundException (invoice)** | ❌ Ні | Контрольована бізнес-відмова |
+| **ServiceNotFoundException (invoice)** | ❌ Ні | Контрольована бізнес-відмова |
+| **ModelNotFoundException** | ❌ Ні | Очікувана відмова |
+| **DomainException** | ❌ Ні | Контрольована бізнес-помилка |
+| **PDOException / QueryException** | ✅ Так | Критичний збій БД |
+| **RuntimeException в TransferService** | ✅ Так | Неочікувана помилка |
+| **RuntimeException в InvoiceService** | ✅ Так | Неочікувана помилка |
+| **ConnectionException** | ✅ Так | Проблема з підключенням |
+| **Будь-який необроблений Throwable** | ✅ Так | Потенційний баг |
+| **Exception зовнішнього API (timeout, 5xx)** | ✅ Так | Інтеграційний збій |
+
+### Правило
+
+> **Sentry - для неочікуваних і критичних помилок, що потребують уваги розробника.**
+>
+> **Контрольовані бізнес-відмови - тільки в логи.**
+
+### Реалізація в `config/sentry.php`
+
+```php
+'before_send' => function ($event, $hint) {
+    if (app()->environment('local')) {
+        return null;
+    }
+    
+    if ($hint && $hint->exception) {
+        $exception = $hint->exception;
+        
+        // НЕ відправляємо в Sentry
+        $ignoreExceptions = [
+            ValidationException::class,                    // 422
+            NotFoundHttpException::class,                  // 404
+            InsufficientBalanceException::class,           // Бізнес-помилка
+            SameAccountTransferException::class,           // Бізнес-помилка
+            ModelNotFoundException::class,                 // Модель не знайдена
+            \DomainException::class,                       // Доменна помилка
+        ];
+        
+        foreach ($ignoreExceptions as $ignoreClass) {
+            if ($exception instanceof $ignoreClass) {
+                return null;
+            }
+        }
+    }
+    
+    return $event;
+},
+```
+
+### Чому важливо розділяти?
+
+| Проблема | Якщо все в Sentry | Якщо розділяти |
+|----------|-------------------|----------------|
+| Контрольовані помилки | Засмічують дашборд | Тільки в логах |
+| Справжні баги | Губились серед шуму | Видно одразу |
+| Увага розробника | Розпилюється | Фокус на критичному |
+
+### Приклади
+
+**✅ Відправляємо в Sentry (неочікувана помилка БД):**
+```php
+try {
+    DB::transaction(...);
+} catch (\Throwable $e) {
+    $this->errorReporter->report(...); // Відправка в Sentry
+    throw $e;
+}
+```
+
+**❌ Не відправляємо в Sentry (контрольована помилка):**
+```php
+if ($fromAccount->balance < $totalDeduct) {
+    Log::warning('Transfer failed: insufficient balance');
+    throw new InsufficientBalanceException(); // Не потрапляє в Sentry
+}
+```
