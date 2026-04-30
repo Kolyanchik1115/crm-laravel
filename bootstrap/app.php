@@ -3,13 +3,13 @@
 use App\Exceptions\InsufficientBalanceException;
 use App\Exceptions\SameAccountTransferException;
 use App\Http\Middleware\AddCorrelationId;
-use App\Http\Middleware\SentryContextMiddleware;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Sentry\Laravel\Integration;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Support\Facades\Log;
 
@@ -26,7 +26,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-
+        // Sentry
+        Integration::handles($exceptions);
         // Validation errors (422)
         $exceptions->render(function (ValidationException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
