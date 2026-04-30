@@ -152,4 +152,11 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             ], 400);
         }
     });
+
+    //Test sentry controller
+    if (app()->environment('local', 'staging', 'development')) {
+        Route::get('/test-sentry', function () {
+            throw new \RuntimeException('Test Sentry integration - ' . now()->toDateTimeString());
+        });
+    }
 });
