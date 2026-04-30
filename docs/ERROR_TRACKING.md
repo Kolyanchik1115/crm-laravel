@@ -315,3 +315,71 @@ if ($fromAccount->balance < $totalDeduct) {
     throw new InsufficientBalanceException(); // Не потрапляє в Sentry
 }
 ```
+
+## Пріоритизація issues у Sentry
+
+### Критерії пріоритету
+
+| Пріоритет | Назва | Критерії |
+|-----------|-------|----------|
+| **P0** | Критичний | Модуль `transfers` або `invoices` + масові помилки (>10 events/год або >5 users) |
+| **P1** | Високий | Transfers/invoices з одиничними помилками; або інші модулі з масовими помилками |
+| **P2** | Середній | Інші модулі, одиничні помилки |
+| **P3** | Низький | Некритичні, рідкісні помилки |
+
+### Матриця для CRM
+
+| Issue | P0 | P1 | P2 | P3 |
+|-------|----|----|----|-----|
+| **Transfers (execute)** | Масова (>10/год або >5 users) | Одинична | - | - |
+| **Invoices (create)** | Масова (>10/год або >5 users) | Одинична | - | - |
+| **Accounts** | - | Масова | Одинична | - |
+| **Dashboard** | - | - | Масова | Одинична |
+| **404 / Validation** | - | - | - | Не в Sentry |
+
+### Правило порядку виправлень
+
+1. **Спочатку P0** - зупиняє роботу, критичний функціонал
+2. **Потім P1** - впливає на користувачів, але не критично
+3. **Далі P2** - дрібні помилки
+4. **Наостанок P3** - рідкісні, неважливі
+
+### Як використовувати Sentry
+
+**Сортування issues:**
+
+```bash
+# За частотою подій (Events)
+Sentry → Issues → Sort by Frequency
+
+# За кількістю користувачів (Affected Users)
+Sentry → Issues → Sort by Affected Users
+
+# За релізом (First seen)
+Sentry → Issues → Filter by Release
+```
+
+### Приклад прийняття рішення
+
+| Issue | Frequency | Users | Модуль | Пріоритет | Дія |
+|-------|-----------|-------|--------|------------|-----|
+| `RuntimeException in TransferService` | 47/год | 12 | transfers | **P0** | Негайний fix / rollback |
+| `DomainException in InvoiceService` | 3/год | 2 | invoices | **P1** | Виправити сьогодні |
+| `ModelNotFoundException in AccountService` | 15/год | 8 | accounts | **P1** | Виправити сьогодні |
+| `ConnectionException in Dashboard` | 1/год | 1 | dashboard | **P2** | Запланувати в спринт |
+
+### Чеклист пріоритизації
+
+- [ ] Перевірити **модуль** (transfers/invoices → критичні)
+- [ ] Перевірити **frequency** (скільки подій за годину)
+- [ ] Перевірити **affected users** (скільки користувачів)
+- [ ] Визначити **пріоритет** (P0→P3)
+- [ ] Призначити **responsible** (P0/P1 → team lead, P2/P3 → розробник)
+
+### Висновок
+
+> **P0 Issues = Critical = Fix NOW!**
+>
+> **P1 Issues = High priority = Fix today**
+>
+> **P2/P3 Issues = Normal/Low = Plan in sprint**

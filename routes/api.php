@@ -154,7 +154,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
     });
 
     //Test sentry controller
-    if (app()->environment('local', 'staging', 'development')) {
+    if (app()->environment() !== 'production') {
         Route::get('/test-sentry', function () {
             throw new \RuntimeException('Test Sentry integration - ' . now()->toDateTimeString());
         });
