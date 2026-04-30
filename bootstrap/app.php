@@ -1,12 +1,24 @@
 <?php
 
+use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Http\Middleware\HandleCors;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Validation\ValidationException;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Modules\Account\src\Providers\AccountServiceProvider;
+use Modules\Auth\src\Infrastructure\Middleware\RoleMiddleware;
+use Modules\Auth\src\Providers\AuthServiceProvider;
 use Modules\Client\src\Providers\ClientServiceProvider;
 use Modules\Dashboard\src\Providers\DashboardServiceProvider;
 use Modules\Invoice\src\Providers\InvoiceServiceProvider;
@@ -26,6 +38,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withProviders([
+        //auth
+        AuthServiceProvider::class,
         //client
         ClientServiceProvider::class,
         //account
@@ -42,7 +56,32 @@ return Application::configure(basePath: dirname(__DIR__))
         ServiceServiceProvider::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Global middleware
+        $middleware->append([
+            HandleCors::class,
+        ]);
+
+        // API middleware group
+        $middleware->group('api', [
+            SubstituteBindings::class,
+        ]);
+
+        // Web middleware group
+        $middleware->group('web', [
+            EncryptCookies::class,
+            AddQueuedCookiesToResponse::class,
+            StartSession::class,
+            ShareErrorsFromSession::class,
+            ValidateCsrfToken::class,
+            SubstituteBindings::class,
+        ]);
+
+        // Auth middleware aliases
+        $middleware->alias([
+            'auth' => Authenticate::class,
+            'guest' => RedirectIfAuthenticated::class,
+            'role' => RoleMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
 

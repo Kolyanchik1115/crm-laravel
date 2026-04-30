@@ -1,12 +1,138 @@
 {
     "info": {
         "name": "CRM Finance API",
-        "description": "API для фінансової CRM системи",
+        "description": "API для фінансової CRM системи з JWT авторизацією",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
         {
-            "name": "Перекази",
+            "name": "🔐 Авторизація",
+            "item": [
+                {
+                    "name": "Логін (отримати токен)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"admin@crm.com\",\n    \"password\": \"password\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/login",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "auth", "login"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Реєстрація",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"first_name\": \"Test\",\n    \"last_name\": \"User\",\n    \"email\": \"test@crm.com\",\n    \"password\": \"password\",\n    \"password_confirmation\": \"password\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/register",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "auth", "register"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Перевірка токена (Get me)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/me",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "auth", "me"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Оновити токен (Refresh)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/refresh",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "auth", "refresh"]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Вийти (Logout)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/logout",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "auth", "logout"]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "💰 Перекази",
             "item": [
                 {
                     "name": "Успішний переказ без комісії",
@@ -20,6 +146,11 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
                             }
                         ],
                         "body": {
@@ -46,6 +177,11 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
                             }
                         ],
                         "body": {
@@ -72,6 +208,11 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
                             }
                         ],
                         "body": {
@@ -98,6 +239,11 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
                             }
                         ],
                         "body": {
@@ -113,7 +259,7 @@
                     "response": []
                 },
                 {
-                    "name": "Помилка - невірний формат суми (3 знаки)",
+                    "name": "Помилка - невірний формат суми",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -124,6 +270,11 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
                             }
                         ],
                         "body": {
@@ -150,6 +301,11 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
                             }
                         ],
                         "body": {
@@ -165,13 +321,18 @@
                     "response": []
                 },
                 {
-                    "name": "Список переказів (пагінація)",
+                    "name": "Список переказів",
                     "request": {
                         "method": "GET",
                         "header": [
                             {
                                 "key": "Accept",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
                             }
                         ],
                         "url": {
@@ -200,6 +361,11 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
                             }
                         ],
                         "url": {
@@ -213,7 +379,7 @@
             ]
         },
         {
-            "name": "Інвойси",
+            "name": "📄 Інвойси",
             "item": [
                 {
                     "name": "Створення інвойсу - успішно",
@@ -227,89 +393,16 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
                             }
                         ],
                         "body": {
                             "mode": "raw",
                             "raw": "{\n    \"client_id\": 1,\n    \"currency\": \"UAH\",\n    \"items\": [\n        {\n            \"service_id\": 1,\n            \"quantity\": 2,\n            \"unit_price\": \"1000.00\"\n        },\n        {\n            \"service_id\": 2,\n            \"quantity\": 1,\n            \"unit_price\": \"5000.00\"\n        }\n    ]\n}"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/api/v1/invoices",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "invoices"]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Помилка - відсутній client_id",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"items\": [\n        {\n            \"service_id\": 1,\n            \"quantity\": 2,\n            \"unit_price\": \"1000.00\"\n        }\n    ]\n}"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/api/v1/invoices",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "invoices"]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Помилка - пустий масив items",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"client_id\": 1,\n    \"items\": []\n}"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/api/v1/invoices",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "invoices"]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Помилка - невірний формат unit_price",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"client_id\": 1,\n    \"items\": [\n        {\n            \"service_id\": 1,\n            \"quantity\": 2,\n            \"unit_price\": \"1000.123\"\n        }\n    ]\n}"
                         },
                         "url": {
                             "raw": "{{base_url}}/api/v1/invoices",
@@ -327,6 +420,11 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
                             }
                         ],
                         "url": {
@@ -355,6 +453,11 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
                             }
                         ],
                         "url": {
@@ -368,7 +471,7 @@
             ]
         },
         {
-            "name": "Клієнти",
+            "name": "👥 Клієнти",
             "item": [
                 {
                     "name": "Список клієнтів",
@@ -378,6 +481,11 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
                             }
                         ],
                         "url": {
@@ -396,6 +504,11 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
                             }
                         ],
                         "url": {
@@ -405,29 +518,11 @@
                         }
                     },
                     "response": []
-                },
-                {
-                    "name": "Рахунки клієнта",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/api/v1/clients/1/accounts",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "clients", "1", "accounts"]
-                        }
-                    },
-                    "response": []
                 }
             ]
         },
         {
-            "name": "Рахунки",
+            "name": "💳 Рахунки",
             "item": [
                 {
                     "name": "Список рахунків",
@@ -437,6 +532,11 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
                             }
                         ],
                         "url": {
@@ -455,135 +555,17 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
                             }
                         ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/accounts/1",
                             "host": ["{{base_url}}"],
                             "path": ["api", "v1", "accounts", "1"]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Транзакції рахунку",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/api/v1/accounts/1/transactions",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "accounts", "1", "transactions"]
-                        }
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Транзакції",
-            "item": [
-                {
-                    "name": "Список транзакцій",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/api/v1/transactions",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "transactions"]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Деталі транзакції",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/api/v1/transactions/1",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "transactions", "1"]
-                        }
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Послуги",
-            "item": [
-                {
-                    "name": "Список послуг",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/api/v1/services",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "services"]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Деталі послуги",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/api/v1/services/1",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "services", "1"]
-                        }
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Dashboard",
-            "item": [
-                {
-                    "name": "Статистика дашборду (кеш)",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{base_url}}/api/v1/dashboard-stats",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "dashboard-stats"]
                         }
                     },
                     "response": []
@@ -595,6 +577,11 @@
         {
             "key": "base_url",
             "value": "http://localhost:8000",
+            "type": "string"
+        },
+        {
+            "key": "access_token",
+            "value": "",
             "type": "string"
         }
     ]

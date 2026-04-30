@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use Modules\Auth\src\Domain\Entities\User;
 
 return [
 
@@ -40,6 +40,10 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
+            'provider' => 'users',
+        ],
+        'api' => [
+            'driver' => 'jwt',
             'provider' => 'users',
         ],
     ],
