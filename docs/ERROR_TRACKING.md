@@ -169,3 +169,63 @@ $scope->setExtra('correlation_id', $correlationId);
 | Валідація | ValidationException |
 | Ресурс не знайдено | NotFoundHttpException / ModelNotFoundException |
 
+## Release та регресії
+
+### Налаштування release
+
+В `.env`:
+
+```env
+SENTRY_RELEASE=1.0.0
+```
+
+Або автоматично з git:
+
+```php
+'release' => trim(exec('git log --pretty="%h" -n1 HEAD')),
+```
+
+### Як інтерпретувати «First seen in release X»
+
+| Release | Що означає |
+|---------|-------------|
+| `1.0.0` | Помилка з'явилась після деплою версії 1.0.0 |
+| `local-dev` | Помилка виникла локально (не впливає на продакшен) |
+| `2.0.0` | Регресія - потрібно перевірити зміни між 1.0.0 і 2.0.0 |
+
+### Дії при регресії
+
+1. **Визначити release** в якому вперше з'явилась помилка
+2. **Переглянути зміни** між попереднім і цим release
+3. **Прийняти рішення:**
+    - **Rollback** - якщо критична помилка
+    - **Hotfix** - якщо можна швидко виправити
+    - **Відкласти** - якщо некритично
+
+### Приклад в Sentry
+
+В деталях події видно:
+- **First seen:** after release 1.5.0
+- **Last seen:** after release 2.0.0
+
+Це допомагає зрозуміти, що помилка існувала кілька релізів, або з'явилась тільки в новому.
+
+### 5. Перевірка
+
+```bash
+# Переконайся що release додано в конфіг
+php artisan tinker
+>>> config('sentry.release')
+>>> exit
+
+# Зроби тестовий запит
+curl -X POST http://localhost:8000/api/v1/transfers \
+  -H "Content-Type: application/json" \
+  -d '{"account_from_id":1,"account_to_id":2,"amount":"777","currency":"UAH"}'
+```
+
+### 6. В Sentry дашборді
+
+Після відправки події, перевір що в деталях з'явився `release` (наприклад, `1.0.0` або `local-dev`).
+
+
