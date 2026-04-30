@@ -10,6 +10,7 @@ use App\Models\Invoice;
 use App\Repositories\Contracts\InvoiceItemRepositoryInterface;
 use App\Repositories\Contracts\InvoiceRepositoryInterface;
 use App\Repositories\Contracts\ServiceRepositoryInterface;
+use App\Services\Monitoring\InvoiceErrorReporter;
 use App\Traits\CorrelationIdTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -17,10 +18,12 @@ use Illuminate\Support\Facades\Log;
 class InvoiceService
 {
     use CorrelationIdTrait;
+
     public function __construct(
         protected InvoiceRepositoryInterface     $invoiceRepository,
         protected InvoiceItemRepositoryInterface $invoiceItemRepository,
         protected ServiceRepositoryInterface     $serviceRepository,
+        protected InvoiceErrorReporter           $errorReporter,
     ) {
     }
 
@@ -31,10 +34,8 @@ class InvoiceService
         // exists service checking
         foreach ($dto->items as $invoiceItem) {
             if (!$this->serviceRepository->exists($invoiceItem->serviceId)) {
-                $failedServiceId = $invoiceItem->serviceId;
-
                 Log::warning('Invoice creation failed: service not found', [
-                    'service_id' => $failedServiceId,
+                    'service_id' => $invoiceItem->serviceId,
                     'client_id' => $dto->clientId,
                     'correlation_id' => $correlationId,
                 ]);
@@ -44,21 +45,32 @@ class InvoiceService
 
         $createdInvoice = null;
 
-        DB::transaction(function () use ($dto, &$createdInvoice) {
-            $invoiceTotalAmount = collect($dto->items)->sum(
-                fn ($item) => $item->quantity * $item->unitPrice
+        try {
+            DB::transaction(function () use ($dto, &$createdInvoice) {
+                $invoiceTotalAmount = collect($dto->items)->sum(
+                    fn ($item) => $item->quantity * $item->unitPrice
+                );
+
+                $createdInvoice = $this->invoiceRepository->create([
+                    'client_id' => $dto->clientId,
+                    'invoice_number' => $this->generateInvoiceNumber(),
+                    'total_amount' => $invoiceTotalAmount,
+                    'status' => 'draft',
+                    'issued_at' => now(),
+                ]);
+
+                $this->invoiceItemRepository->createMany($createdInvoice->id, $dto->items);
+            });
+        } catch (\Throwable $e) {
+            $this->errorReporter->report(
+                e: $e,
+                clientId: $dto->clientId,
+                invoiceId: $createdInvoice->id ?? null,
+                totalAmount: isset($createdInvoice) ? (string)$createdInvoice->total_amount : null,
+                correlationId: $correlationId,
             );
-
-            $createdInvoice = $this->invoiceRepository->create([
-                'client_id' => $dto->clientId,
-                'invoice_number' => $this->generateInvoiceNumber(),
-                'total_amount' => $invoiceTotalAmount,
-                'status' => 'draft',
-                'issued_at' => now(),
-            ]);
-
-            $this->invoiceItemRepository->createMany($createdInvoice->id, $dto->items);
-        });
+            throw $e;
+        }
 
         Log::info('Invoice created successfully', [
             'invoice_id' => $createdInvoice->id,
@@ -69,19 +81,13 @@ class InvoiceService
             'status' => $createdInvoice->status,
             'correlation_id' => $correlationId,
         ]);
-        // event invoice created instead jobs
+
         event(new InvoiceCreated(
             invoiceId: $createdInvoice->id,
             clientId: $dto->clientId,
             totalAmount: (string)$createdInvoice->total_amount,
             currency: $dto->currency,
         ));
-
-        // // Async log writing
-        // LogInvoiceAuditJob::dispatch($invoice->id)->onQueue('audit');
-        //
-        // // Cache update with 30 sec delay
-        // UpdateDashboardCacheJob::dispatch()->onQueue('low')->delay(now()->addSeconds(30));
 
         return $createdInvoice;
     }

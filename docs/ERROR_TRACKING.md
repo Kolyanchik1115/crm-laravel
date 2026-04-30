@@ -128,3 +128,44 @@ php artisan tinker
 # Перевірка останнього event
 >>> app('sentry')->getLastEventId()
 ```
+## Контекст для transfers та invoices
+
+### Transfers
+
+При неочікуваній помилці в TransferService відправляється:
+
+```php
+$scope->setTag('module', 'transfers');
+$scope->setTag('action', 'execute');
+$scope->setExtra('account_from_id', $accountFromId);
+$scope->setExtra('account_to_id', $accountToId);
+$scope->setExtra('amount', $amount);
+$scope->setExtra('currency', $currency);
+$scope->setExtra('transfer_id', $transferId);
+$scope->setExtra('correlation_id', $correlationId);
+```
+
+### Invoices
+
+При неочікуваній помилці в InvoiceService відправляється:
+
+```php
+$scope->setTag('module', 'invoices');
+$scope->setTag('action', 'create');
+$scope->setExtra('client_id', $clientId);
+$scope->setExtra('invoice_id', $invoiceId);
+$scope->setExtra('total_amount', $totalAmount);
+$scope->setExtra('correlation_id', $correlationId);
+```
+
+### Контрольовані помилки (не відправляються в Sentry)
+
+| Помилка | Тип |
+|---------|-----|
+| Недостатньо коштів | InsufficientBalanceException |
+| Однакові рахунки | SameAccountTransferException |
+| Клієнт не знайдений | DomainException |
+| Послуга не знайдена | DomainException |
+| Валідація | ValidationException |
+| Ресурс не знайдено | NotFoundHttpException / ModelNotFoundException |
+
