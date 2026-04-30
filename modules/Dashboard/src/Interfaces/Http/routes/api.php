@@ -5,8 +5,8 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cache;
 
-Route::prefix('v1')->group(function () {
-    // test job controller
+Route::prefix('v1')->middleware(['auth:api', 'role:ADMIN,MANAGER,USER'])->group(function () {
+    // dashboard stats
     Route::get('/dashboard-stats', function () {
         $stats = Cache::get('crm:dashboard:stats');
 

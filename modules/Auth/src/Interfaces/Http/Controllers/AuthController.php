@@ -6,10 +6,12 @@ namespace Modules\Auth\src\Interfaces\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
-use Modules\Auth\src\Application\Services\AuthService;
 use Modules\Auth\src\Interfaces\Http\Requests\V1\LoginRequest;
 use Modules\Auth\src\Interfaces\Http\Requests\V1\RegisterRequest;
+use Modules\Auth\src\Application\Services\AuthService;
+use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
@@ -25,16 +27,15 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): RedirectResponse
     {
-        $dto = $request->toLoginDTO();
-        $result = $this->authService->login($dto);
+        $credentials = $request->only('email', 'password');
 
-        if (!$result) {
+        if (!Auth::attempt($credentials)) {
             return back()->withErrors([
-                'email' => 'The provided credentials do not match our records.',
-            ])->onlyInput('email');
+                'email' => 'Invalid credentials',
+            ]);
         }
 
-        session(['jwt_token' => $result['access_token']]);
+        $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard'));
     }
@@ -60,11 +61,12 @@ class AuthController extends Controller
         return redirect()->route('dashboard');
     }
 
-    public function logout(): RedirectResponse
+    public function logout(Request $request): RedirectResponse
     {
-        $this->authService->logout();
-        session()->forget('jwt_token');
-        session()->flush();
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return redirect()->route('login');
     }

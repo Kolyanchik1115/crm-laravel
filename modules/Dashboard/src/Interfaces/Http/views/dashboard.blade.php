@@ -6,6 +6,13 @@
     <div class="row">
         <div class="col-12 mb-4">
             <h1>Статистика CRM</h1>
+            <!-- Кнопка выхода -->
+            <form method="POST" action="{{ route('logout') }}" class="d-inline float-end mt-2">
+                @csrf
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-sign-out-alt me-2"></i> Вийти
+                </button>
+            </form>
         </div>
     </div>
 
@@ -72,7 +79,7 @@
                             <tbody>
                             @foreach($topClients as $index => $client)
                                 <tr>
-                                    <td>{{ $index }}</td>
+                                    <td>{{ $index + 1 }}</td>
                                     <td>{{ $client->full_name }}</td>
                                     <td class="text-end">{{ number_format($client->balance, 2) }}</td>
                                     <td>{{ $client->currency }}</td>
@@ -98,7 +105,7 @@
                             <th>Тип</th>
                             <th class="text-end">Кількість</th>
                             <th class="text-end">Сума</th>
-                            </tr>
+                            <tr>
                             </thead>
                             <tbody>
                             @foreach($amountByType as $type => $data)

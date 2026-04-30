@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -12,12 +13,14 @@ use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Http\Middleware\HandleCors;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings;
-use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Modules\Account\src\Providers\AccountServiceProvider;
+use Modules\Auth\src\Domain\Exceptions\ForbiddenException;
+use Modules\Auth\src\Domain\Exceptions\InsufficientRoleException;
 use Modules\Auth\src\Infrastructure\Middleware\RoleMiddleware;
+use Modules\Auth\src\Infrastructure\Middleware\WebRoleMiddleware;
 use Modules\Auth\src\Providers\AuthServiceProvider;
 use Modules\Client\src\Providers\ClientServiceProvider;
 use Modules\Dashboard\src\Providers\DashboardServiceProvider;
@@ -81,9 +84,45 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth' => Authenticate::class,
             'guest' => RedirectIfAuthenticated::class,
             'role' => RoleMiddleware::class,
+            'web.role' => WebRoleMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
+
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthenticated',
+                ], 401);
+            }
+
+            return redirect()->route('login');
+        });
+
+        // Forbidden (403)
+        $exceptions->render(function (ForbiddenException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ], 403);
+            }
+            abort(403, $e->getMessage());
+        });
+
+        //  Insufficient Role (403)
+        $exceptions->render(function (InsufficientRoleException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'required_roles' => $e->getRequiredRoles(),
+                    'user_roles' => $e->getUserRoles(),
+                ], 403);
+            }
+            abort(403, $e->getMessage());
+        });
 
         // Validation errors (422)
         $exceptions->render(function (ValidationException $e, Request $request) {
@@ -151,5 +190,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], 500);
             }
         });
+
+
     })
     ->create();
