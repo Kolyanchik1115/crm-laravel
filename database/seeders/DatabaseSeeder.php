@@ -6,6 +6,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Modules\Account\src\Infrastructure\Database\Seeders\AccountSeeder;
+use Modules\Auth\src\Infrastructure\Database\Seeders\RolePermissionSeeder;
 use Modules\Client\src\Infrastructure\Database\Seeders\ClientSeeder;
 use Modules\Invoice\src\Infrastructure\Database\Seeders\InvoiceItemSeeder;
 use Modules\Invoice\src\Infrastructure\Database\Seeders\InvoiceSeeder;
@@ -21,14 +22,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        //TODO: when you need this user table, uncommit below
-
-        // User::factory(10)->create();
-        // User::factory()->create([
-        // 'name' => 'Test User',
-        // 'email' => 'test@example.com', ]);
 
         $this->call([
+            RolePermissionSeeder::class,
             ClientSeeder::class,
             AccountSeeder::class,
             ServiceSeeder::class,

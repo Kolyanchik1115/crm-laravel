@@ -70,7 +70,7 @@ class InvoiceService
 
     private function generateInvoiceNumber(): string
     {
-        $maxId = $this->invoiceRepository->getMaxId();
+        $maxId = Invoice::max('id');
 
         if ($maxId === null) {
             return 'INV-' . date('Ymd') . '-0001';
