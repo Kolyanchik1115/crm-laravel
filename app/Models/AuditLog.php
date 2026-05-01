@@ -7,6 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Invoice\src\Domain\Entities\Invoice;
+use Modules\Auth\src\Domain\Entities\User;
 
 /**
  * @property int $id

@@ -13,7 +13,8 @@ class ServiceService
 {
     public function __construct(
         protected ServiceRepositoryInterface $serviceRepository
-    ) {}
+    ) {
+    }
 
     public function getAllServices(): Collection
     {

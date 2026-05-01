@@ -19,7 +19,8 @@ class ClientService
 
     public function __construct(
         protected ClientRepositoryInterface $repository
-    ) {}
+    ) {
+    }
 
     /**
      * Get all clients (with cache)

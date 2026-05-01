@@ -19,7 +19,8 @@ class InvoiceService
         protected InvoiceRepositoryInterface $invoiceRepository,
         protected InvoiceItemRepositoryInterface $invoiceItemRepository,
         protected ServiceRepositoryInterface $serviceRepository,
-    ) {}
+    ) {
+    }
 
     public function createInvoice(CreateInvoiceDTO $dto): Invoice
     {
@@ -34,7 +35,7 @@ class InvoiceService
 
         DB::transaction(function () use ($dto, &$createdInvoice) {
             $invoiceTotalAmount = collect($dto->items)->sum(
-                fn($item) => $item->quantity * $item->unitPrice
+                fn ($item) => $item->quantity * $item->unitPrice
             );
 
             $createdInvoice = $this->invoiceRepository->create([
@@ -85,10 +86,10 @@ class InvoiceService
         $newNumber = $lastNumber + 1;
 
         return 'INV-' . date('Ymd') . '-' . str_pad(
-                (string)$newNumber,
-                4,
-                '0',
-                STR_PAD_LEFT
-            );
+            (string)$newNumber,
+            4,
+            '0',
+            STR_PAD_LEFT
+        );
     }
 }

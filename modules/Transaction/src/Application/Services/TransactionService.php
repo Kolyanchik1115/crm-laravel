@@ -13,7 +13,8 @@ class TransactionService
 {
     public function __construct(
         protected TransactionRepositoryInterface $repository
-    ) {}
+    ) {
+    }
 
     public function getAllTransactions(): Collection
     {

@@ -9,7 +9,9 @@ use Illuminate\Support\ServiceProvider;
 use Modules\Invoice\src\Application\Listeners\LogInvoiceAuditListener;
 use Modules\Invoice\src\Application\Listeners\SendInvoiceCreatedNotificationListener;
 use Modules\Invoice\src\Application\Services\InvoiceService;
+use Modules\Invoice\src\Domain\Entities\Invoice;
 use Modules\Invoice\src\Domain\Events\InvoiceCreated;
+use Modules\Invoice\src\Domain\Observers\InvoiceObserver;
 use Modules\Invoice\src\Domain\Repositories\InvoiceItemRepositoryInterface;
 use Modules\Invoice\src\Domain\Repositories\InvoiceRepositoryInterface;
 use Modules\Invoice\src\Infrastructure\Repositories\InvoiceItemRepository;
@@ -39,19 +41,10 @@ class InvoiceServiceProvider extends ServiceProvider
                 $app->make(ServiceRepositoryInterface::class)
             );
         });
-    }
 
-    public function boot(): void
-    {
-        // Events
-        Event::listen(
-            InvoiceCreated::class,
-            LogInvoiceAuditListener::class
-        );
-
-        Event::listen(
-            InvoiceCreated::class,
-            SendInvoiceCreatedNotificationListener::class
-        );
+        //Observer
+        $this->app->booted(function () {
+            Invoice::observe(InvoiceObserver::class);
+        });
     }
 }

@@ -14,8 +14,7 @@ class ClientController extends Controller
 {
     public function __construct(
         private ClientService $clientService
-    )
-    {
+    ) {
     }
 
     /**

@@ -21,8 +21,17 @@ interface TransactionRepositoryInterface
     public function getAccountTransactionsPaginated(int $accountId, int $perPage = 15): LengthAwarePaginator;
     public function findAccountForUpdate(int $accountId): ?Account;
     public function updateAccountBalance(Account $account, float $newBalance): bool;
-    public function createTransferOut(int $accountId, float $amount, string $toAccountNumber,
-                                      ?string $description = null): Transaction;
-    public function createTransferIn(int $accountId, float $amount, string $fromAccountNumber,
-                                     ?string $description = null, ?int $transactionOutId = null): Transaction;
+    public function createTransferOut(
+        int $accountId,
+        float $amount,
+        string $toAccountNumber,
+        ?string $description = null
+    ): Transaction;
+    public function createTransferIn(
+        int $accountId,
+        float $amount,
+        string $fromAccountNumber,
+        ?string $description = null,
+        ?int $transactionOutId = null
+    ): Transaction;
 }

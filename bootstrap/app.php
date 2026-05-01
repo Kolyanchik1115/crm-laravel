@@ -5,7 +5,6 @@ use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -30,6 +29,7 @@ use Modules\Transaction\src\Domain\Exceptions\InsufficientBalanceException;
 use Modules\Transaction\src\Domain\Exceptions\SameAccountTransferException;
 use Modules\Transaction\src\Providers\EventServiceProvider as TransactionEventServiceProvider;
 use Modules\Dashboard\src\Providers\EventServiceProvider as DashboardEventServiceProvider;
+use Modules\Invoice\src\Providers\EventServiceProvider as InvoiceEventServiceProvider;
 use Modules\Transaction\src\Providers\TransactionServiceProvider;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -50,6 +50,7 @@ return Application::configure(basePath: dirname(__DIR__))
         DashboardServiceProvider::class,
         DashboardEventServiceProvider::class,
         InvoiceServiceProvider::class,
+        InvoiceEventServiceProvider::class,
         ServiceServiceProvider::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {

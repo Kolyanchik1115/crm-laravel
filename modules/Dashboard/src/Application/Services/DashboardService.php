@@ -10,7 +10,8 @@ class DashboardService
 {
     public function __construct(
         protected DashboardRepositoryInterface $repository
-    ) {}
+    ) {
+    }
 
     public function getDashboardData(): array
     {

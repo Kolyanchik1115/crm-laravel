@@ -60,9 +60,12 @@ class TransactionRepository implements TransactionRepositoryInterface
         return $account->save();
     }
 
-    public function createTransferOut(int $accountId, float $amount, string $toAccountNumber,
-                                      ?string $description = null): Transaction
-    {
+    public function createTransferOut(
+        int $accountId,
+        float $amount,
+        string $toAccountNumber,
+        ?string $description = null
+    ): Transaction {
         return Transaction::create([
             'account_id' => $accountId,
             'amount' => -$amount,
@@ -72,9 +75,13 @@ class TransactionRepository implements TransactionRepositoryInterface
         ]);
     }
 
-    public function createTransferIn(int $accountId, float $amount, string $fromAccountNumber,
-                                     ?string $description = null, ?int $transactionOutId = null): Transaction
-    {
+    public function createTransferIn(
+        int $accountId,
+        float $amount,
+        string $fromAccountNumber,
+        ?string $description = null,
+        ?int $transactionOutId = null
+    ): Transaction {
         $desc = "Надходження з рахунку {$fromAccountNumber}. {$description}";
         if ($transactionOutId) {
             $desc .= " (transfer_out_id: {$transactionOutId})";

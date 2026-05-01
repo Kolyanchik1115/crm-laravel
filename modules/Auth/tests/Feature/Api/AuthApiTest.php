@@ -62,7 +62,7 @@ class AuthApiTest extends TestCase
         }
     }
 
-   #[Test]
+    #[Test]
     public function user_can_login_with_valid_credentials(): void
     {
         $response = $this->postJson('/api/v1/auth/login', [
