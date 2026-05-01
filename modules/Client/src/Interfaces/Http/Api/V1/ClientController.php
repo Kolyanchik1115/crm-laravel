@@ -16,7 +16,7 @@ class ClientController extends Controller
     {
         $clients = Client::with(['accounts', 'invoices'])
             ->orderBy('full_name')
-            ->get();
+            ->paginate(15);
 
         return ClientResource::collection($clients)
             ->response()

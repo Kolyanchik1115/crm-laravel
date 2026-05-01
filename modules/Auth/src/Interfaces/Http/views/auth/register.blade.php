@@ -1,4 +1,4 @@
-@extends('shared::layouts.app')
+@extends('shared::layouts.auth')
 
 @section('title', 'Реєстрація')
 

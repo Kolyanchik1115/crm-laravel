@@ -6,13 +6,6 @@
     <div class="row">
         <div class="col-12 mb-4">
             <h1>Статистика CRM</h1>
-            <!-- Кнопка выхода -->
-            <form method="POST" action="{{ route('logout') }}" class="d-inline float-end mt-2">
-                @csrf
-                <button type="submit" class="btn btn-danger">
-                    <i class="fas fa-sign-out-alt me-2"></i> Вийти
-                </button>
-            </form>
         </div>
     </div>
 
@@ -219,12 +212,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-12">
-            <a href="/" class="btn btn-secondary">На головну</a>
         </div>
     </div>
 @endsection
