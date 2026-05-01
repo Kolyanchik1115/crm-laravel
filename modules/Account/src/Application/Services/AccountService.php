@@ -6,6 +6,7 @@ namespace Modules\Account\src\Application\Services;
 
 use DomainException;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Modules\Account\src\Domain\Entities\Account;
 use Modules\Account\src\Infrastructure\Repositories\AccountRepository;
 
@@ -34,21 +35,8 @@ class AccountService
         return $this->repository->findOrFail($id);
     }
 
-    public function decrementBalance(int $id, string $amount): void
+    public function getAllAccountsPaginated(int $perPage = 15): LengthAwarePaginator
     {
-        $account = $this->getAccountById($id);
-        $amountValue = (float)$amount;
-
-        if ($account->balance < $amountValue) {
-            throw new DomainException('Insufficient funds');
-        }
-
-        $this->repository->decrementBalance($id, $amount);
+        return $this->repository->getAllPaginated($perPage);
     }
-
-    public function incrementBalance(int $id, string $amount): void
-    {
-        $this->repository->incrementBalance($id, $amount);
-    }
-
 }

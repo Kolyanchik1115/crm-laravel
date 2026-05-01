@@ -4,24 +4,22 @@ declare(strict_types=1);
 
 namespace Modules\Client\src\Application\Services;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 use Modules\Client\src\Domain\Entities\Client;
-use Modules\Client\src\Infrastructure\Repositories\ClientRepository;
+use Modules\Client\src\Domain\Repositories\ClientRepositoryInterface;
 
 class ClientService
 {
-    protected ClientRepository $repository;
-
     // Cache key
     private const string CACHE_KEY_CLIENTS = 'crm:clients:list';
     // TTL - 2 min
     private const int CACHE_TTL = 120;
 
-    public function __construct(ClientRepository $repository)
-    {
-        $this->repository = $repository;
-    }
+    public function __construct(
+        protected ClientRepositoryInterface $repository
+    ) {}
 
     /**
      * Get all clients (with cache)
@@ -42,7 +40,15 @@ class ClientService
     }
 
     /**
-     * Get clients by ID
+     * Get all clients with pagination
+     */
+    public function getAllClientsPaginated(int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->repository->getAllPaginated($perPage);
+    }
+
+    /**
+     * Get client by ID
      */
     public function getClientById(int $id): Client
     {
@@ -50,7 +56,15 @@ class ClientService
     }
 
     /**
-     * Create new clients and invalidate cache
+     * Get client accounts
+     */
+    public function getClientAccounts(int $clientId): Collection
+    {
+        return $this->repository->getClientAccounts($clientId);
+    }
+
+    /**
+     * Create new client and invalidate cache
      */
     public function createClient(array $data): Client
     {

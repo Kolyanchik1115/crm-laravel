@@ -32,6 +32,7 @@ use Modules\Transaction\src\Providers\EventServiceProvider as TransactionEventSe
 use Modules\Dashboard\src\Providers\EventServiceProvider as DashboardEventServiceProvider;
 use Modules\Transaction\src\Providers\TransactionServiceProvider;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -41,35 +42,23 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withProviders([
-        //auth
         AuthServiceProvider::class,
-        //client
         ClientServiceProvider::class,
-        //account
         AccountServiceProvider::class,
-        //transaction
         TransactionServiceProvider::class,
         TransactionEventServiceProvider::class,
-        //dashboard
         DashboardServiceProvider::class,
         DashboardEventServiceProvider::class,
-        //invoice
         InvoiceServiceProvider::class,
-        //service
         ServiceServiceProvider::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
-        // Global middleware
-        $middleware->append([
-            HandleCors::class,
-        ]);
+        $middleware->append([HandleCors::class]);
 
-        // API middleware group
         $middleware->group('api', [
             SubstituteBindings::class,
         ]);
 
-        // Web middleware group
         $middleware->group('web', [
             EncryptCookies::class,
             AddQueuedCookiesToResponse::class,
@@ -79,7 +68,6 @@ return Application::configure(basePath: dirname(__DIR__))
             SubstituteBindings::class,
         ]);
 
-        // Auth middleware aliases
         $middleware->alias([
             'auth' => Authenticate::class,
             'guest' => RedirectIfAuthenticated::class,
@@ -89,34 +77,37 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
 
+        // ===== 401 Unauthenticated =====
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unauthenticated',
+                    'message' => 'Unauthenticated. Please log in.',
+                    'code' => 'UNAUTHENTICATED',
                 ], 401);
             }
-
             return redirect()->route('login');
         });
 
-        // Forbidden (403)
+        // ===== 403 Forbidden =====
         $exceptions->render(function (ForbiddenException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
                     'success' => false,
                     'message' => $e->getMessage(),
+                    'code' => 'FORBIDDEN',
                 ], 403);
             }
             abort(403, $e->getMessage());
         });
 
-        //  Insufficient Role (403)
+        // ===== 403 Insufficient Role =====
         $exceptions->render(function (InsufficientRoleException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
                     'success' => false,
                     'message' => $e->getMessage(),
+                    'code' => 'INSUFFICIENT_ROLE',
                     'required_roles' => $e->getRequiredRoles(),
                     'user_roles' => $e->getUserRoles(),
                 ], 403);
@@ -124,73 +115,94 @@ return Application::configure(basePath: dirname(__DIR__))
             abort(403, $e->getMessage());
         });
 
-        // Validation errors (422)
+        // ===== 404 Not Found =====
+        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ресурс не знайдено',
+                    'code' => 'RESOURCE_NOT_FOUND',
+                ], 404);
+            }
+            abort(404);
+        });
+
+        // ===== 422 Validation Error =====
         $exceptions->render(function (ValidationException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
-                    'message' => $e->getMessage(),
+                    'success' => false,
+                    'message' => 'Помилка валідації',
+                    'code' => 'VALIDATION_ERROR',
                     'errors' => $e->errors(),
                 ], 422);
             }
         });
 
-        // InsufficientBalanceException (422)
+        // ===== 422 Insufficient Balance =====
         $exceptions->render(function (InsufficientBalanceException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
-                    'message' => $e->getMessage() ?: 'Недостатньо коштів на рахунку.',
+                    'success' => false,
+                    'message' => $e->getMessage(),
                     'code' => 'INSUFFICIENT_BALANCE',
                 ], 422);
             }
+            abort(422, $e->getMessage());
         });
 
-        // SameAccountTransferException (422)
+        // ===== 422 Same Account Transfer =====
         $exceptions->render(function (SameAccountTransferException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
-                    'message' => $e->getMessage() ?: 'Рахунок відправника і одержувача не можуть збігатися.',
+                    'success' => false,
+                    'message' => $e->getMessage(),
                     'code' => 'SAME_ACCOUNT_TRANSFER',
                 ], 422);
             }
+            abort(422, $e->getMessage());
         });
 
-        // DomainException (422)
+        // ===== 422 Domain Exception =====
         $exceptions->render(function (DomainException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
+                    'success' => false,
                     'message' => $e->getMessage(),
                     'code' => 'DOMAIN_ERROR',
                 ], 422);
             }
+            abort(422, $e->getMessage());
         });
 
-        // Model not found (404)
-        $exceptions->render(function (ModelNotFoundException $e, Request $request) {
-            if ($request->expectsJson() || $request->is('api/*')) {
-                return response()->json([
-                    'message' => 'Ресурс не знайдено.',
-                ], 404);
-            }
-        });
-
-        // Http exceptions (404, 403, etc)
+        // ===== Other Http Exceptions (4xx, 5xx) =====
         $exceptions->render(function (HttpException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
-                    'message' => $e->getMessage() ?: 'Помилка запиту.',
+                    'success' => false,
+                    'message' => $e->getMessage() ?: 'Помилка запиту',
+                    'code' => 'HTTP_ERROR',
                 ], $e->getStatusCode());
             }
         });
 
-        // Other (500)
+        // ===== 500 Internal Server Error =====
         $exceptions->render(function (Throwable $e, Request $request) {
-            if ($request->expectsJson() || $request->is('api/*')) {
+            // Логируем ошибку
+            \Log::error('Internal Server Error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            if (($request->expectsJson() || $request->is('api/*')) && !config('app.debug')) {
                 return response()->json([
-                    'message' => 'Внутрішня помилка сервера.',
+                    'success' => false,
+                    'message' => 'Внутрішня помилка сервера',
+                    'code' => 'INTERNAL_SERVER_ERROR',
                 ], 500);
             }
         });
-
-
     })
     ->create();

@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace Modules\Invoice\src\Domain\Repositories;
 
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Modules\Invoice\src\Domain\Entities\Invoice;
 
 interface InvoiceRepositoryInterface
 {
-    /**
-     * @return Collection<int, Invoice>
-     */
-    public function getAll(): Collection;
-
     public function create(array $data): Invoice;
 
     public function findById(int $id): ?Invoice;
+
+    public function findOrFail(int $id): Invoice;
+
+    public function getAllPaginated(int $perPage = 15): LengthAwarePaginator;
+
+    public function getMaxId(): ?int;
 }

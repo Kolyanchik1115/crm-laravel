@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Invoice\src\Application\Services;
 
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Modules\Invoice\src\Application\DTO\CreateInvoiceDTO;
 use Modules\Invoice\src\Domain\Entities\Invoice;
@@ -15,15 +16,14 @@ use Modules\Service\src\Domain\Repositories\ServiceRepositoryInterface;
 class InvoiceService
 {
     public function __construct(
-        protected InvoiceRepositoryInterface     $invoiceRepository,
+        protected InvoiceRepositoryInterface $invoiceRepository,
         protected InvoiceItemRepositoryInterface $invoiceItemRepository,
-        protected ServiceRepositoryInterface     $serviceRepository,
-    ) {
-    }
+        protected ServiceRepositoryInterface $serviceRepository,
+    ) {}
 
     public function createInvoice(CreateInvoiceDTO $dto): Invoice
     {
-        // exists service checking
+        // Check services exist
         foreach ($dto->items as $invoiceItem) {
             if (!$this->serviceRepository->exists($invoiceItem->serviceId)) {
                 throw new \DomainException("Service with ID {$invoiceItem->serviceId} not found");
@@ -34,7 +34,7 @@ class InvoiceService
 
         DB::transaction(function () use ($dto, &$createdInvoice) {
             $invoiceTotalAmount = collect($dto->items)->sum(
-                fn ($item) => $item->quantity * $item->unitPrice
+                fn($item) => $item->quantity * $item->unitPrice
             );
 
             $createdInvoice = $this->invoiceRepository->create([
@@ -48,7 +48,6 @@ class InvoiceService
             $this->invoiceItemRepository->createMany($createdInvoice->id, $dto->items);
         });
 
-        // event invoice created instead jobs
         event(new InvoiceCreated(
             invoiceId: $createdInvoice->id,
             clientId: $dto->clientId,
@@ -56,18 +55,22 @@ class InvoiceService
             currency: $dto->currency,
         ));
 
-        // // Async log writing
-        // LogInvoiceAuditJob::dispatch($invoice->id)->onQueue('audit');
-        //
-        // // Cache update with 30 sec delay
-        // UpdateDashboardCacheJob::dispatch()->onQueue('low')->delay(now()->addSeconds(30));
-
         return $createdInvoice;
+    }
+
+    public function getInvoiceById(int $id): Invoice
+    {
+        return $this->invoiceRepository->findOrFail($id);
+    }
+
+    public function getAllInvoicesPaginated(int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->invoiceRepository->getAllPaginated($perPage);
     }
 
     private function generateInvoiceNumber(): string
     {
-        $maxId = Invoice::max('id');
+        $maxId = $this->invoiceRepository->getMaxId();
 
         if ($maxId === null) {
             return 'INV-' . date('Ymd') . '-0001';
@@ -82,10 +85,10 @@ class InvoiceService
         $newNumber = $lastNumber + 1;
 
         return 'INV-' . date('Ymd') . '-' . str_pad(
-            (string)$newNumber,
-            4,
-            '0',
-            STR_PAD_LEFT
-        );
+                (string)$newNumber,
+                4,
+                '0',
+                STR_PAD_LEFT
+            );
     }
 }

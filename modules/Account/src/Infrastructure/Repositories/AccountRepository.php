@@ -6,6 +6,7 @@ namespace Modules\Account\src\Infrastructure\Repositories;
 
 use DomainException;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Modules\Account\src\Domain\Entities\Account;
 use Modules\Account\src\Domain\Repositories\AccountRepositoryInterface;
 
@@ -19,6 +20,13 @@ class AccountRepository implements AccountRepositoryInterface
         return Account::with('client')
             ->orderBy('account_number')
             ->get();
+    }
+
+    public function getAllPaginated(int $perPage = 15): LengthAwarePaginator
+    {
+        return Account::with(['client', 'transactions'])
+            ->orderBy('account_number')
+            ->paginate($perPage);
     }
 
     /**

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Invoice\src\Infrastructure\Repositories;
 
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Modules\Invoice\src\Domain\Entities\Invoice;
 use Modules\Invoice\src\Domain\Repositories\InvoiceRepositoryInterface;
 
@@ -15,13 +15,25 @@ class InvoiceRepository implements InvoiceRepositoryInterface
         return Invoice::create($data);
     }
 
-    public function getAll(): Collection
-    {
-        return Invoice::with('client')->orderBy('created_at', 'desc')->get();
-    }
-
     public function findById(int $id): ?Invoice
     {
         return Invoice::find($id);
+    }
+
+    public function findOrFail(int $id): Invoice
+    {
+        return Invoice::with(['client', 'items.service'])->findOrFail($id);
+    }
+
+    public function getAllPaginated(int $perPage = 15): LengthAwarePaginator
+    {
+        return Invoice::with(['client', 'items.service'])
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+    }
+
+    public function getMaxId(): ?int
+    {
+        return Invoice::max('id');
     }
 }

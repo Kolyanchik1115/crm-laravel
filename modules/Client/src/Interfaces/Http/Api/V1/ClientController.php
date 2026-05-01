@@ -6,28 +6,41 @@ namespace Modules\Client\src\Interfaces\Http\Api\V1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
-use Modules\Account\src\Interfaces\Http\Resources\V1\AccountResource;
-use Modules\Client\src\Domain\Entities\Client;
+use Modules\Client\src\Application\Services\ClientService;
 use Modules\Client\src\Interfaces\Http\Resources\V1\ClientResource;
+use Modules\Account\src\Interfaces\Http\Resources\V1\AccountResource;
 
 class ClientController extends Controller
 {
+    public function __construct(
+        private ClientService $clientService
+    )
+    {
+    }
+
+    /**
+     * Display a listing of clients
+     */
     public function index(): JsonResponse
     {
-        $clients = Client::with(['accounts', 'invoices'])
-            ->orderBy('full_name')
-            ->paginate(15);
+        $clients = $this->clientService
+            ->getAllClientsPaginated(5);
 
         return ClientResource::collection($clients)
+            ->additional(['success' => true])
             ->response()
             ->setStatusCode(200);
     }
 
+    /**
+     * Display the specified client
+     */
     public function show(int $id): JsonResponse
     {
-        $client = Client::with(['accounts', 'invoices'])->findOrFail($id);
+        $client = $this->clientService->getClientById($id);
 
         return (new ClientResource($client))
+            ->additional(['success' => true])
             ->response()
             ->setStatusCode(200);
     }
@@ -37,17 +50,13 @@ class ClientController extends Controller
      */
     public function accounts(int $id): JsonResponse
     {
-        $client = Client::with('accounts')->find($id);
+        $client = $this->clientService->getClientById($id);
 
-        if (!$client) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Client not found',
-            ], 404);
-        }
+        $accounts = $this->clientService->getClientAccounts($id);
 
-        return AccountResource::collection($client->accounts)
+        return AccountResource::collection($accounts)
             ->additional([
+                'success' => true,
                 'client_id' => $client->id,
                 'client_name' => $client->full_name,
             ])

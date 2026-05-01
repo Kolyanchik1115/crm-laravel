@@ -10,11 +10,9 @@ use Modules\Dashboard\src\Application\Services\DashboardService;
 
 class DashboardController extends Controller
 {
-    protected DashboardService $dashboardService;
-
-    public function __construct(DashboardService $dashboardService)
-    {
-        $this->dashboardService = $dashboardService;
+    public function __construct(
+        private DashboardService $dashboardService
+    ) {
     }
 
     public function index(): View
@@ -22,12 +20,14 @@ class DashboardController extends Controller
         $data = $this->dashboardService->getDashboardData();
 
         return view('dashboard::dashboard', [
-            // Client stats
+            // Client stats - используем имена из вьюхи
             'clientsCount' => $data['clients']['total'],
             'activeClientsCount' => $data['clients']['active'],
             'inactiveClientsCount' => $data['clients']['inactive'],
             'totalBalance' => $data['clients']['total_balance'],
             'totalAccountsBalance' => $data['clients']['total_accounts_balance'],
+
+            // Top clients
             'topClients' => $data['clients']['top_clients'],
 
             // Transaction stats

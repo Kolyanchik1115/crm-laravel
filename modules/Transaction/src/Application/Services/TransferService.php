@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Transaction\src\Application\Services;
 
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Modules\Account\src\Domain\Repositories\AccountRepositoryInterface;
 use Modules\Shared\src\Domain\ValueObjects\Money;
 use Modules\Transaction\src\Application\DTO\TransferDTO;
+use Modules\Transaction\src\Domain\Entities\Transaction;
 use Modules\Transaction\src\Domain\Events\TransferCompleted;
 use Modules\Transaction\src\Domain\Exceptions\InsufficientBalanceException;
 use Modules\Transaction\src\Domain\Exceptions\SameAccountTransferException;
@@ -101,6 +103,16 @@ class TransferService
             'amount' => $dto->amount->getValue(),
             'commission' => $commission,
         ];
+    }
+
+    public function getTransfersPaginated(int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->transactionRepository->getTransfersPaginated($perPage);
+    }
+
+    public function getTransferById(int $id): Transaction
+    {
+        return $this->transactionRepository->getTransferById($id);
     }
 
     // function for calculate commission

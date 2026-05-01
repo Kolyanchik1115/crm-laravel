@@ -6,12 +6,19 @@ namespace Modules\Client\src\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Modules\Client\src\Application\Services\ClientService;
+use Modules\Client\src\Domain\Repositories\ClientRepositoryInterface;
 use Modules\Client\src\Infrastructure\Repositories\ClientRepository;
 
 class ClientServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        //Repository
+        $this->app->bind(
+            ClientRepositoryInterface::class,
+            ClientRepository::class
+        );
+
         // Service
         $this->app->singleton(ClientService::class, function ($app) {
             return new ClientService($app->make(ClientRepository::class));
