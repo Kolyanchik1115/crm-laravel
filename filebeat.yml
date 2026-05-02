@@ -1,0 +1,25 @@
+# I have tested filebeat but unfortunately got low space on my disk,
+#so I commented out the filebeat configuration for now.
+
+#filebeat.inputs:
+#  - type: container
+#    paths:
+#      - /var/lib/docker/containers/*/*.log
+#    json.keys_under_root: true
+#    json.add_error_key: true
+#
+#processors:
+#  - add_docker_metadata:
+#      host: "unix:///var/run/docker.sock"
+#
+#output.elasticsearch:
+#  hosts: ['elasticsearch:9200']
+#  indices:
+#    - index: "crm-logs-%{+yyyy.MM.dd}"
+#      when.contains:
+#        docker.container.name: "crm_laravel_app"
+#
+#setup.template.name: "crm-logs"
+#setup.template.pattern: "crm-logs-*"
+#
+#logging.level: debug
