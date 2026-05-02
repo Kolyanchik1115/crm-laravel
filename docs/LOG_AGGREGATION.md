@@ -293,3 +293,122 @@ App (JSON logs) → Docker (stdout) → Collector → Storage → Kibana/Grafana
 | Transfer failed: same account | `warning` | ✅ Так |
 | Transfer failed: account not found | `warning` | ✅ Так |
 | Unexpected error | `error` | ✅ Так (через TransferErrorReporter) |
+
+## Схема логів: Invoices
+
+### Обов'язкові поля (верхній рівень JSON)
+
+| Поле | Тип | Опис | Приклад |
+|------|-----|------|---------|
+| `level` | string | Рівень логування | `debug`, `info`, `warning`, `error`, `critical` |
+| `message` | string | Короткий опис події | `"Invoice created successfully"` |
+| `timestamp` | string | Час події (ISO 8601) | `"2026-03-01T14:00:00.000000Z"` |
+| `env` | string | Середовище виконання | `production`, `staging`, `local` |
+| `module` | string | Модуль, що генерує лог | `invoices` |
+
+### Контекст (в об'єкті `context`)
+
+| Поле | Тип | Обов'язковість | Опис |
+|------|-----|----------------|------|
+| `correlation_id` | string | ✅ Завжди | Унікальний ID запиту |
+| `invoice_id` | int | ⚠️ Якщо є | ID створеного інвойсу |
+| `client_id` | int | ✅ Завжди | ID клієнта |
+| `total_amount` | float | ⚠️ Якщо є | Загальна сума інвойсу |
+| `items_count` | int | ⚠️ Якщо є | Кількість позицій в інвойсі |
+| `currency` | string | ⚠️ Якщо є | Валюта (UAH, USD, EUR) |
+| `status` | string | ⚠️ Якщо є | Статус інвойсу (`draft`, `pending`, `paid`) |
+| `endpoint` | string | ✅ Завжди | HTTP метод та шлях |
+
+---
+
+### Приклад 1: Invoice created (успішне створення)
+
+```json
+{
+    "level": "info",
+    "message": "Invoice created successfully",
+    "timestamp": "2026-03-01T14:00:00.000000Z",
+    "env": "local",
+    "module": "invoices",
+    "context": {
+        "correlation_id": "83a74f66-2847-4c87-b20a-651947a70529",
+        "invoice_id": 22,
+        "client_id": 1,
+        "total_amount": 1000.0,
+        "items_count": 2,
+        "currency": "UAH",
+        "status": "draft",
+        "endpoint": "POST /api/v1/invoices"
+    }
+}
+```
+
+### Приклад 2: Invoice creation failed: service not found
+
+```json
+{
+    "level": "warning",
+    "message": "Invoice creation failed: service not found",
+    "timestamp": "2026-03-01T14:00:00.000000Z",
+    "env": "production",
+    "module": "invoices",
+    "context": {
+        "correlation_id": "req-abc-123",
+        "client_id": 1,
+        "service_id": 99999,
+        "endpoint": "POST /api/v1/invoices"
+    }
+}
+```
+
+### Приклад 3: Invoice creation failed: client not found
+
+```json
+{
+    "level": "warning",
+    "message": "Invoice creation failed: client not found",
+    "timestamp": "2026-03-01T14:00:00.000000Z",
+    "env": "production",
+    "module": "invoices",
+    "context": {
+        "correlation_id": "req-abc-456",
+        "client_id": 99999,
+        "endpoint": "POST /api/v1/invoices"
+    }
+}
+```
+
+### Приклад 4: Invoice creation failed: unexpected error
+
+```json
+{
+    "level": "error",
+    "message": "Invoice creation failed: unexpected error",
+    "timestamp": "2026-03-01T14:00:00.000000Z",
+    "env": "production",
+    "module": "invoices",
+    "context": {
+        "correlation_id": "req-abc-789",
+        "client_id": 1,
+        "invoice_id": null,
+        "total_amount": null,
+        "items_count": 2,
+        "error_message": "Database connection failed",
+        "endpoint": "POST /api/v1/invoices"
+    }
+}
+```
+
+---
+
+## Перевірка відповідності InvoiceService
+
+### Поточне логування в InvoiceService
+
+| Сценарій | Рівень | Чи відповідає схемі |
+|----------|--------|---------------------|
+| Invoice created | `info` | ✅ Так |
+| Invoice creation failed: client not found | `warning` | ✅ Так |
+| Invoice creation failed: service not found | `warning` | ✅ Так |
+| Unexpected error | `error` | ✅ Так (через InvoiceErrorReporter) |
+
