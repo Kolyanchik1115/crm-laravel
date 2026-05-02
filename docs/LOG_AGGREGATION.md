@@ -565,3 +565,40 @@ amount: > 1000 AND commission: > 0
 | **Transfers Overview** | Графік кількості переказів за часом, статуси, комісії |
 | **Error Rate** | Частота помилок по модулях |
 | **Top Clients by Invoices** | Клієнти з найбільшою кількістю інвойсів |
+
+## Production-Ready Checklist
+
+Перед деплоєм в production переконайся, що всі пункти виконані.
+
+👉 **Повний чеклист:** [LOGGING_CHECKLIST.md](./LOGGING_CHECKLIST.md)
+
+# Типові запити в Kibana / Elasticsearch
+
+### Таблиця типових запитів (оновлена)
+
+| Сценарій | Запит (KQL) |
+|----------|-------------|
+| **Усі логи одного запиту** | `correlation_id: "83a74f66-2847-4c87-b20a-651947a70529"` |
+| **Усі помилки transfers за годину** | `module: transfers AND level: error AND @timestamp: now-1h` |
+| **Усі warnings за endpoint** | `endpoint: "POST /api/v1/transfers" AND level: warning` |
+| **Логи по transfer_id** | `transfer_id: 12345` |
+| **Логи по invoice_id** | `invoice_id: 67890` |
+| **Логи по client_id (invoices)** | `client_id: 1 AND module: invoices` |
+| **Логи по account_from_id (transfers)** | `account_from_id: 10 AND module: transfers` |
+| **Логи за певним endpoint** | `endpoint: "POST /api/v1/invoices"` |
+| **Логи за модулем** | `module: transfers OR module: invoices` |
+
+## Перевірка
+
+```bash
+# Зробити запит
+curl -X POST http://localhost:8000/api/v1/transfers \
+  -H "Content-Type: application/json" \
+  -d '{"account_from_id":1,"account_to_id":2,"amount":"100","currency":"UAH"}'
+
+# Перевірити логи (мають містити endpoint)
+docker compose logs app --tail=10
+
+# Перевірити в Elasticsearch
+curl -X GET "http://localhost:9200/filebeat-*/_search?q=endpoint:POST&pretty"
+```

@@ -17,11 +17,6 @@ use function Sentry\configureScope;
 
 class AddCorrelationId
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param Closure(Request): (Response) $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
         $correlationId = $request->header('X-Correlation-Id');
@@ -30,11 +25,14 @@ class AddCorrelationId
         }
 
         $request->attributes->set('correlation_id', $correlationId);
+        $endpoint = $request->method() . ' ' . $request->path();
+        $module = $this->getModuleFromPath($request->path());
 
         if ($correlationId && class_exists(Integration::class)) {
-            configureScope(function (Scope $scope) use ($request, $correlationId): void {
+            configureScope(function (Scope $scope) use ($correlationId, $endpoint, $module): void {
                 $scope->setTag('correlation_id', $correlationId);
-                $scope->setTag('endpoint', $request->method() . ' ' . $request->path());
+                $scope->setTag('endpoint', $endpoint);
+                $scope->setTag('module', $module);
                 $scope->setExtra('correlation_id', $correlationId);
 
                 if (Auth::check()) {
@@ -43,12 +41,29 @@ class AddCorrelationId
             });
         }
 
-        Log::withContext(['correlation_id' => $correlationId]);
+        Log::withContext([
+            'correlation_id' => $correlationId,
+            'endpoint' => $endpoint,
+            'module' => $module,
+        ]);
 
         $response = $next($request);
 
         $response->headers->set('X-Correlation-Id', $correlationId);
 
         return $response;
+    }
+
+    private function getModuleFromPath(string $path): string
+    {
+        return match (true) {
+            str_contains($path, 'transfers') => 'transfers',
+            str_contains($path, 'invoices') => 'invoices',
+            str_contains($path, 'accounts') => 'accounts',
+            str_contains($path, 'clients') => 'clients',
+            str_contains($path, 'services') => 'services',
+            str_contains($path, 'dashboard') => 'dashboard',
+            default => 'api',
+        };
     }
 }
