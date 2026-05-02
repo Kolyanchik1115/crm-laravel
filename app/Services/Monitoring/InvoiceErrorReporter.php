@@ -11,7 +11,7 @@ use Throwable;
 use function Sentry\captureException;
 use function Sentry\withScope;
 
-final class InvoiceErrorReporter
+class InvoiceErrorReporter
 {
     public function report(
         Throwable $e,

@@ -11,6 +11,7 @@ use App\Repositories\Contracts\InvoiceItemRepositoryInterface;
 use App\Repositories\Contracts\InvoiceRepositoryInterface;
 use App\Repositories\Contracts\ServiceRepositoryInterface;
 use App\Services\InvoiceService;
+use App\Services\Monitoring\InvoiceErrorReporter;
 use Illuminate\Support\Facades\DB;
 use Mockery;
 use Mockery\MockInterface;
@@ -23,6 +24,7 @@ class InvoiceServiceTest extends TestCase
     private MockInterface $invoiceItemRepository;
     private MockInterface $serviceRepository;
     private InvoiceService $invoiceService;
+    private MockInterface $errorReporter;
 
     protected function setUp(): void
     {
@@ -32,10 +34,12 @@ class InvoiceServiceTest extends TestCase
         $this->invoiceItemRepository = Mockery::mock(InvoiceItemRepositoryInterface::class);
         $this->serviceRepository = Mockery::mock(ServiceRepositoryInterface::class);
 
+        $this->errorReporter = Mockery::mock(InvoiceErrorReporter::class);
         $this->invoiceService = new InvoiceService(
             $this->invoiceRepository,
             $this->invoiceItemRepository,
-            $this->serviceRepository
+            $this->serviceRepository,
+            $this->errorReporter
         );
     }
 

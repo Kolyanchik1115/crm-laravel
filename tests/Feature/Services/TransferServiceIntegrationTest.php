@@ -11,6 +11,7 @@ use App\Models\Account;
 use App\Models\Client;
 use App\Repositories\AccountRepository;
 use App\Repositories\TransactionRepository;
+use App\Services\Monitoring\TransferErrorReporter;
 use App\Services\TransferService;
 use App\ValueObjects\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -25,15 +26,21 @@ class TransferServiceIntegrationTest extends TestCase
     private AccountRepository $accountRepository;
     private TransactionRepository $transactionRepository;
 
+    private TransferErrorReporter $errorReporter;
+
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->accountRepository = new AccountRepository();
         $this->transactionRepository = new TransactionRepository();
+        $this->errorReporter = new TransferErrorReporter();
+
         $this->transferService = new TransferService(
             $this->accountRepository,
-            $this->transactionRepository
+            $this->transactionRepository,
+            $this->errorReporter
         );
     }
 

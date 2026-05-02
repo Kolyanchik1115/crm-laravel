@@ -11,6 +11,7 @@ use App\Models\Account;
 use App\Models\Transaction;
 use App\Repositories\Contracts\AccountRepositoryInterface;
 use App\Repositories\Contracts\TransactionRepositoryInterface;
+use App\Services\Monitoring\TransferErrorReporter;
 use App\Services\TransferService;
 use App\ValueObjects\Money;
 use Illuminate\Support\Facades\DB;
@@ -31,9 +32,12 @@ class TransferServiceTest extends TestCase
 
         $this->accountRepository = Mockery::mock(AccountRepositoryInterface::class);
         $this->transactionRepository = Mockery::mock(TransactionRepositoryInterface::class);
+        $this->errorReporter = Mockery::mock(TransferErrorReporter::class);
+
         $this->transferService = new TransferService(
             $this->accountRepository,
-            $this->transactionRepository
+            $this->transactionRepository,
+            $this->errorReporter
         );
     }
 
