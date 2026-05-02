@@ -368,4 +368,208 @@ Stack trace:
 | 6 | Post-mortem: звіт |
 
 **Головне правило:** Sentry дає проблему, correlation_id зв'язує з логами, разом дають повну картину. 🔗
+
+---
+# INCIDENT RUNBOOK
+
+## Повний цикл інциденту
+
+### Сценарій: «Після деплою перекази падають» (з використанням лог-агрегації)
+
+---
+
+### Крок 1. Виявлення
+
+**Симптоми:** Користувачі повідомляють про помилки при створенні переказів. API повертає 500.
+
+**Перевірка в Sentry:**
+- Чи з'явився новий issue?
+- Чи є сплеск подій за останні 5-10 хвилин?
+- Який release? `2.1.0`
+
+**Перевірка в Kibana:**
 ```
+module: transfers AND level: error AND @timestamp: now-10m
+```
+
+**Ознаки інциденту:**
+- >10 помилок за 5 хвилин
+- >5 постраждалих користувачів
+
+---
+
+### Крок 2. Підтвердження
+
+**Визначити:**
+- Стійкий тренд чи одноразовий спайк?
+- Які типи помилок домінують?
+
+**Запити в Kibana:**
+
+```kql
+# Кількість помилок за останню годину
+module: transfers AND level: error AND @timestamp: now-1h
+
+# Топ помилок
+module: transfers AND level: error
+| count by message
+
+# Статуси помилок по часу
+module: transfers AND level: error
+| stats count by @timestamp
+```
+
+---
+
+### Крок 3. Локалізація
+
+**Отримати correlation_id:**
+
+1. **З Sentry:** Відкрити issue → знайти тег `correlation_id`
+2. **Від користувача:** Заголовок `X-Correlation-Id` з його запиту
+
+**Пошук в лог-агрегації:**
+
+```kql
+correlation_id: "83a74f66-2847-4c87-b20a-651947a70529"
+```
+
+**Що переглянути:**
+- Хронологію подій (відсортувати за часом)
+- Контекст перед помилкою
+- Стан рахунку (balance, amount)
+
+**Приклад результатів:**
+```
+14:00:00 - Transfer started (account_from_id: 1, amount: 1000)
+14:00:01 - Balance check (balance: 500, total_deduct: 1000)
+14:00:01 - Transfer failed: insufficient balance
+```
+
+---
+
+### Крок 4. Аналіз масштабу
+
+**Визначити вплив:**
+
+```kql
+# Унікальні transfer_id
+module: transfers AND level: error
+| stats count(distinct transfer_id)
+
+# Унікальні account_from_id
+module: transfers AND level: error
+| stats count(distinct account_from_id)
+
+# Унікальні user_id (через correlation_id)
+module: transfers AND level: error
+| stats count(distinct correlation_id)
+
+# Сума втрачених коштів (якщо критично)
+module: transfers AND level: error
+| sum amount
+```
+
+**Рівень інциденту:**
+
+| Кількість постраждалих | Пріоритет |
+|------------------------|-----------|
+| >10 users / >50 events | **P0 (Critical)** |
+| 5-10 users / 20-50 events | **P1 (High)** |
+| 1-5 users / 5-20 events | **P2 (Medium)** |
+| <5 events | **P3 (Low)** |
+
+---
+
+### Крок 5. Тимчасові дії
+
+| Ситуація | Дія |
+|----------|-----|
+| Помилка в коді | **Rollback** до попереднього релізу |
+| Проблема з БД | Перезапуск контейнера: `docker compose restart mysql` |
+| Зовнішній API недоступний | Ввімкнути fallback або чергу |
+| Масова помилка валідації | Вимкнути фічу через feature flag (якщо є) |
+
+**Повідомлення підтримці:**
+> Інцидент з переказами. Постраждало X користувачів. Причина: недостатньо коштів (баг в розрахунку комісії). Rollback виконано. Очікуйте виправлення протягом 30 хвилин.
+
+---
+
+### Крок 6. Виправлення та деплой
+
+**Фікс:**
+1. Відтворити проблему локально
+2. Написати тест, що падає
+3. Виправити код
+4. Запушити PR, отримати review
+
+**Перевірка після деплою:**
+
+```kql
+# Перевірити логи на наявність помилок
+module: transfers AND level: error AND @timestamp: now-10m
+
+# Перевірити успішні перекази
+module: transfers AND level: info AND @timestamp: now-10m
+```
+
+**Перевірка в Sentry:** Жодних нових issues за останні 10 хвилин.
+
+---
+
+### Крок 7. Post-mortem
+
+**Шаблон звіту:**
+
+```markdown
+## Post-mortem: [Назва інциденту]
+
+**Дата:** 2026-05-02
+**Тривалість:** 14:00 - 15:30 (1.5 години)
+**Вплив:** 12 користувачів, 47 failed transfers
+**Причина:** Баг в розрахунку комісії для сум >10000 UAH
+
+### Хронологія
+- 14:00 - Алерт в Sentry
+- 14:05 - Підтвердження інциденту в Kibana
+- 14:15 - Локалізація проблеми (correlation_id: req-abc-123)
+- 14:30 - Rollback до версії 2.0.0
+- 15:00 - Фікс та деплой
+- 15:30 - Інцидент закрито
+
+### Як уникнути
+- Додати тести на розрахунок комісії
+- Додати monitoring для великих сум
+- Додати feature flag для нових фіч
+```
+
+---
+
+## Чеклист для on-call
+
+При інциденті:
+
+- [ ] **Sentry:** перевірити нові issues (frequency, affected users, release)
+- [ ] **Sentry:** взяти `correlation_id` з тегів
+- [ ] **Kibana:** пошук за `correlation_id`
+- [ ] **Kibana:** перевірити лог перед помилкою (баланс, сума)
+- [ ] **Kibana:** визначити масштаб (`count distinct account_from_id`)
+- [ ] **Рішення:** rollback / hotfix
+- [ ] **Деплой:** виконати та перевірити (`level: error` за останні 5 хв)
+- [ ] **Post-mortem:** написати звіт
+
+---
+
+## Шпаргалка по Kibana
+
+| Дія | Запит (KQL) |
+|-----|-------------|
+| Помилки transfers за останню годину | `module: transfers AND level: error AND @timestamp: now-1h` |
+| Пошук за correlation_id | `correlation_id: "req-abc-123"` |
+| Пошук за transfer_id | `transfer_id: 12345` |
+| Статистика по account_from_id | `module: transfers AND level: error | stats count by account_from_id` |
+
+**Посилання:** [Типові запити в LOG_AGGREGATION.md](./LOG_AGGREGATION.md)
+
+---
+
