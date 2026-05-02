@@ -412,3 +412,156 @@ App (JSON logs) → Docker (stdout) → Collector → Storage → Kibana/Grafana
 | Invoice creation failed: service not found | `warning` | ✅ Так |
 | Unexpected error | `error` | ✅ Так (через InvoiceErrorReporter) |
 
+
+## Типові запити в Kibana / Elasticsearch
+
+### Синтаксис
+
+Використовується **KQL (Kibana Query Language)** або Lucene синтаксис.
+
+| Оператор | Значення | Приклад |
+|----------|----------|---------|
+| `:` | Дорівнює | `module: transfers` |
+| `AND` | Логічне І | `level: error AND module: transfers` |
+| `OR` | Логічне АБО | `level: warning OR level: error` |
+| `*` | Wildcard | `message: *insufficient*` |
+| `>` `>=` `<` `<=` | Порівняння | `amount: > 1000` |
+| `[]` | Діапазон | `@timestamp: [now-1h TO now]` |
+
+---
+
+### Таблиця типових запитів
+
+| Сценарій | Запит (KQL) |
+|----------|-------------|
+| **Усі логи одного запиту** | `correlation_id: "83a74f66-2847-4c87-b20a-651947a70529"` |
+| **Усі помилки transfers за останню годину** | `module: transfers AND level: error AND @timestamp: now-1h` |
+| **Усі warnings за endpoint** | `endpoint: "POST /api/v1/transfers" AND level: warning` |
+| **Логи по transfer_id** | `transfer_id: 12345` |
+| **Логи по invoice_id** | `invoice_id: 67890` |
+| **Логи по client_id (invoices)** | `client_id: 1 AND module: invoices` |
+| **Логи по account_from_id (transfers)** | `account_from_id: 10 AND module: transfers` |
+| **Логи за діапазоном сум** | `amount: [100 TO 500] AND module: transfers` |
+| **Логи з commission > 0** | `commission: > 0 AND module: transfers` |
+| **Логи за певною валютою** | `currency: "UAH" AND module: transfers` |
+
+---
+
+### Сценарій 1: Пошук за correlation_id (від користувача)
+
+**Ситуація:** Користувач повідомив, що переказ не пройшов. У відповіді API є заголовок `X-Correlation-Id: 83a74f66-2847-4c87-b20a-651947a70529`.
+
+**Дії в Kibana:**
+
+1. Відкрити **Discover**
+2. Ввести в пошуковий рядок:
+```
+correlation_id: "83a74f66-2847-4c87-b20a-651947a70529"
+```
+3. Відсортувати за `@timestamp` (за зростанням)
+
+**Результат:** Всі логи цього запиту в хронологічному порядку:
+- Вхідний запит (endpoint)
+- Валідація
+- TransferService
+- Репозиторій
+- Відповідь
+
+---
+
+### Сценарій 2: Зв'язок Sentry ↔ лог-агрегація
+
+**Ситуація:** У Sentry з'явився issue з тегом `correlation_id: 83a74f66-2847-4c87-b20a-651947a70529`
+
+**Дії в Kibana:**
+
+1. Скопіювати `correlation_id` з Sentry
+2. Відкрити **Discover** в Kibana
+3. Ввести запит:
+```
+correlation_id: "83a74f66-2847-4c87-b20a-651947a70529"
+```
+4. Переглянути хронологію подій до помилки
+
+**Що можна побачити:**
+- Попередні успішні операції того ж користувача
+- Стан рахунку до помилки (`balance` в контексті)
+- Інші помилки в тому ж запиті
+
+---
+
+### Сценарій 3: Аналіз помилок після деплою
+
+**Ситуація:** Після деплою release 2.1.0 з'явилося багато помилок.
+
+**Дії в Kibana:**
+
+1. Знайти всі помилки за останню годину:
+```
+level: error AND @timestamp: now-1h
+```
+2. Згрупувати по модулях:
+```
+module: transfers OR module: invoices
+```
+3. Подивитись деталі конкретної помилки:
+```
+level: error AND module: transfers AND @timestamp: now-1h
+```
+
+---
+
+### Сценарій 4: Розслідування конкретного переказу
+
+**Ситуація:** Відома помилка з transfer_id = 12345.
+
+**Дії в Kibana:**
+
+1. Знайти всі логи по transfer_id:
+```
+transfer_id: 12345
+```
+2. Переглянути контекст:
+- `account_from_id` та `account_to_id`
+- `amount` та `currency`
+- `error_message` (якщо є)
+
+---
+
+### Сценарій 5: Моніторинг комісій
+
+**Ситуація:** Перевірити чи правильно нараховуються комісії для великих переказів.
+
+**Дії в Kibana:**
+
+1. Знайти перекази з комісією:
+```
+commission: > 0 AND module: transfers
+```
+2. Перевірити суми:
+```
+amount: > 1000 AND commission: > 0
+```
+
+---
+
+### Збережені пошуки (Saved Searches)
+
+Рекомендується зберегти наступні пошуки в Kibana:
+
+| Назва | Запит |
+|-------|-------|
+| `Transfer Errors` | `module: transfers AND level: error` |
+| `Invoice Errors` | `module: invoices AND level: error` |
+| `Transfers Last Hour` | `module: transfers AND @timestamp: now-1h` |
+| `High Commission Transfers` | `commission: > 0 AND module: transfers` |
+
+---
+
+### Візуалізації (Dashboards)
+
+| Дашборд | Опис |
+|---------|------|
+| **Transfers Overview** | Графік кількості переказів за часом, статуси, комісії |
+| **Error Rate** | Частота помилок по модулях |
+| **Top Clients by Invoices** | Клієнти з найбільшою кількістю інвойсів |
