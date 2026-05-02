@@ -163,3 +163,133 @@ App (JSON logs) → Docker (stdout) → Collector → Storage → Kibana/Grafana
 ```
 
 Головне правило: **всі логи в одному місці, пошук за correlation_id за секунди.** 🔗
+
+## Схема логів: Transfers
+
+### Обов'язкові поля (верхній рівень JSON)
+
+| Поле | Тип | Опис | Приклад |
+|------|-----|------|---------|
+| `level` | string | Рівень логування | `debug`, `info`, `warning`, `error`, `critical` |
+| `message` | string | Короткий опис події | `"Transfer completed successfully"` |
+| `timestamp` | string | Час події (ISO 8601) | `"2026-03-01T14:00:00.000000Z"` |
+| `env` | string | Середовище виконання | `production`, `staging`, `local` |
+| `module` | string | Модуль, що генерує лог | `transfers` |
+
+### Контекст (в об'єкті `context`)
+
+| Поле | Тип | Обов'язковість | Опис |
+|------|-----|----------------|------|
+| `correlation_id` | string | ✅ Завжди | Унікальний ID запиту |
+| `transfer_id` | int | ⚠️ Якщо є | ID створеного переказу |
+| `transfer_out_id` | int | ⚠️ Якщо є | ID вихідної транзакції |
+| `transfer_in_id` | int | ⚠️ Якщо є | ID вхідної транзакції |
+| `account_from_id` | int | ✅ Завжди | ID рахунку відправника |
+| `account_to_id` | int | ✅ Завжди | ID рахунку отримувача |
+| `amount` | float | ✅ Завжди | Сума переказу |
+| `currency` | string | ✅ Завжди | Валюта (UAH, USD, EUR) |
+| `commission` | float | ⚠️ Якщо є | Сума комісії |
+| `balance` | float | ⚠️ Для помилок | Баланс рахунку при недостатньо коштів |
+| `endpoint` | string | ✅ Завжди | HTTP метод та шлях |
+
+---
+
+### Приклад 1: Transfer completed (успішний переказ)
+
+```json
+{
+    "level": "info",
+    "message": "Transfer completed successfully",
+    "timestamp": "2026-03-01T14:00:00.000000Z",
+    "env": "local",
+    "module": "transfers",
+    "context": {
+        "correlation_id": "83a74f66-2847-4c87-b20a-651947a70529",
+        "transfer_out_id": 30,
+        "transfer_in_id": 31,
+        "account_from_id": 1,
+        "account_to_id": 2,
+        "amount": 100.0,
+        "currency": "UAH",
+        "commission": 0,
+        "endpoint": "POST /api/v1/transfers"
+    }
+}
+```
+
+### Приклад 2: Transfer failed: insufficient balance
+
+```json
+{
+    "level": "warning",
+    "message": "Transfer failed: insufficient balance",
+    "timestamp": "2026-03-01T14:00:00.000000Z",
+    "env": "production",
+    "module": "transfers",
+    "context": {
+        "correlation_id": "req-abc-123",
+        "account_from_id": 10,
+        "account_to_id": 20,
+        "amount": 1000.00,
+        "currency": "UAH",
+        "balance": 500.00,
+        "commission": 0,
+        "endpoint": "POST /api/v1/transfers"
+    }
+}
+```
+
+### Приклад 3: Transfer failed: same account
+
+```json
+{
+    "level": "warning",
+    "message": "Transfer failed: same account",
+    "timestamp": "2026-03-01T14:00:00.000000Z",
+    "env": "production",
+    "module": "transfers",
+    "context": {
+        "correlation_id": "req-abc-456",
+        "account_from_id": 10,
+        "account_to_id": 10,
+        "amount": 100.00,
+        "currency": "UAH",
+        "endpoint": "POST /api/v1/transfers"
+    }
+}
+```
+
+### Приклад 4: Unexpected error (неочікувана помилка)
+
+```json
+{
+    "level": "error",
+    "message": "Transfer failed: unexpected error",
+    "timestamp": "2026-03-01T14:00:00.000000Z",
+    "env": "production",
+    "module": "transfers",
+    "context": {
+        "correlation_id": "req-abc-789",
+        "account_from_id": 10,
+        "account_to_id": 20,
+        "amount": 100.00,
+        "currency": "UAH",
+        "error_message": "Class \"Sentry\\Laravel\\Integration\" not found",
+        "endpoint": "POST /api/v1/transfers"
+    }
+}
+```
+
+---
+
+## Перевірка відповідності TransferService
+
+### Поточне логування в TransferService
+
+| Сценарій | Рівень | Чи відповідає схемі |
+|----------|--------|---------------------|
+| Transfer completed | `info` | ✅ Так |
+| Transfer failed: insufficient balance | `warning` | ✅ Так |
+| Transfer failed: same account | `warning` | ✅ Так |
+| Transfer failed: account not found | `warning` | ✅ Так |
+| Unexpected error | `error` | ✅ Так (через TransferErrorReporter) |
