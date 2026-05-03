@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Modules\Invoice\src\Application\Services\InvoiceService;
 use Modules\Invoice\src\Interfaces\Http\Requests\V1\StoreInvoiceRequest;
+use Modules\Invoice\src\Interfaces\Http\Requests\V1\UpdateInvoiceRequest;
 use Modules\Invoice\src\Interfaces\Http\Resources\V1\InvoiceResource;
 
 class InvoiceController extends Controller
@@ -55,5 +56,18 @@ class InvoiceController extends Controller
         $response->header('Location', $location);
 
         return $response;
+    }
+
+    public function update(UpdateInvoiceRequest $request, int $id): JsonResponse
+    {
+        $invoice = $this->invoiceService->updateInvoiceStatus($id, $request->input('status'));
+
+        return (new InvoiceResource($invoice))
+            ->additional([
+                'success' => true,
+                'message' => 'Статус рахунку-фактури оновлено',
+            ])
+            ->response()
+            ->setStatusCode(200);
     }
 }

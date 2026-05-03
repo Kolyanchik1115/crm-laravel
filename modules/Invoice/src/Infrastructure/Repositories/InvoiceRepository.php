@@ -36,4 +36,13 @@ class InvoiceRepository implements InvoiceRepositoryInterface
     {
         return Invoice::max('id');
     }
+
+    public function updateStatus(int $id, string $status): Invoice
+    {
+        $invoice = $this->findOrFail($id);
+        $invoice->update(['status' => $status]);
+        return $invoice;
+    }
+
+
 }

@@ -50,6 +50,7 @@ class InvoiceApiTest extends TestCase
         if (!$this->app->routesAreCached()) {
             Route::post('/api/v1/invoices', [InvoiceController::class, 'store']);
             Route::get('/api/v1/invoices/{id}', [InvoiceController::class, 'show']);
+            Route::patch('/api/v1/invoices/{id}', [InvoiceController::class, 'update']);
         }
     }
 
@@ -121,6 +122,41 @@ class InvoiceApiTest extends TestCase
 
         $response->assertStatus(404);
         $response->assertJsonStructure(['message']);
+    }
+
+    #[Test]
+    public function invoice_update_returns_200_when_valid(): void
+    {
+        $response = $this->postJson('/api/v1/invoices', [
+            'client_id' => $this->client->id,
+            'items' => [
+                [
+                    'service_id' => $this->service1->id,
+                    'quantity' => 1,
+                    'unit_price' => (string)$this->service1->base_price,
+                ],
+            ],
+        ]);
+
+        $invoiceId = $response->json('data.id');
+
+        $response = $this->patchJson("/api/v1/invoices/{$invoiceId}", [
+            'status' => 'paid',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.status', 'paid');
+    }
+
+    #[Test]
+    public function invoice_update_returns_422_when_invalid_status(): void
+    {
+        $response = $this->patchJson("/api/v1/invoices/1", [
+            'status' => 'invalid_status',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['status']);
     }
 
 }

@@ -12,6 +12,7 @@ Route::prefix('v1')->middleware(['auth:api', 'role:ADMIN,MANAGER'])->group(funct
     Route::get('/invoices', [InvoiceController::class, 'index']);
     Route::get('/invoices/{id}', [InvoiceController::class, 'show']);
     Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+    Route::patch('/invoices/{id}', [InvoiceController::class, 'update']);
 });
 
 Route::prefix('v1')->middleware(['auth:api', 'role:ADMIN'])->group(function () {

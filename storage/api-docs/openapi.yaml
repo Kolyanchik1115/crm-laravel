@@ -262,7 +262,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BusinessError'
-
+  /api/v1/invoices/{id}:
+    patch:
+      summary: Оновити статус рахунку-фактури
+      tags:
+        - Invoices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [draft, sent, paid, overdue, cancelled]
+      responses:
+        '200':
+          description: Статус оновлено
+        '404':
+          description: Інвойс не знайдено
+        '422':
+          description: Помилка валідації
   # ACCOUNTS
   /api/v1/accounts:
     get:

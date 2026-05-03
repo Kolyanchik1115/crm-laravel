@@ -124,4 +124,17 @@ class InvoiceService
             STR_PAD_LEFT
         );
     }
+
+    public function updateInvoiceStatus(int $id, string $status): Invoice
+    {
+        $invoice = $this->invoiceRepository->findOrFail($id);
+
+        if ($invoice->status === 'paid') {
+            throw new \DomainException('Cannot update status of paid invoice');
+        }
+
+        $invoice->update(['status' => $status]);
+
+        return $invoice;
+    }
 }

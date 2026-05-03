@@ -18,4 +18,7 @@ interface InvoiceRepositoryInterface
     public function getAllPaginated(int $perPage = 15): LengthAwarePaginator;
 
     public function getMaxId(): ?int;
+
+    public function updateStatus(int $id, string $status): Invoice;
+
 }
