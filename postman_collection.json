@@ -1,15 +1,32 @@
 {
     "info": {
+        "_postman_id": "0c0d44fd-a74a-4a57-bf5a-20a45bbc0b0f",
         "name": "CRM Finance API",
         "description": "API для фінансової CRM системи з JWT авторизацією",
-        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_exporter_id": "51803844",
+        "_collection_link": "https://go.postman.co/collection/51803844-0c0d44fd-a74a-4a57-bf5a-20a45bbc0b0f?source=collection_link"
     },
     "item": [
         {
             "name": "🔐 Авторизація",
             "item": [
                 {
-                    "name": "Логін (отримати токен)",
+                    "name": "Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const r = pm.response.json();",
+                                    "pm.globals.set('jwt_token', r.token || r.access_token || r.jwt || (r.data && (r.data.token || r.data.access_token)));"
+                                ],
+                                "type": "text/javascript",
+                                "packages": {},
+                                "requests": {}
+                            }
+                        }
+                    ],
                     "request": {
                         "method": "POST",
                         "header": [
@@ -28,14 +45,35 @@
                         },
                         "url": {
                             "raw": "{{base_url}}/api/v1/auth/login",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "auth", "login"]
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "login"
+                            ]
                         }
                     },
                     "response": []
                 },
                 {
                     "name": "Реєстрація",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const r = pm.response.json();",
+                                    "pm.globals.set('jwt_token', r.token || r.access_token || r.jwt || (r.data && (r.data.token || r.data.access_token)));"
+                                ],
+                                "type": "text/javascript",
+                                "packages": {},
+                                "requests": {}
+                            }
+                        }
+                    ],
                     "request": {
                         "method": "POST",
                         "header": [
@@ -54,8 +92,15 @@
                         },
                         "url": {
                             "raw": "{{base_url}}/api/v1/auth/register",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "auth", "register"]
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "register"
+                            ]
                         }
                     },
                     "response": []
@@ -63,13 +108,18 @@
                 {
                     "name": "Перевірка токена (Get me)",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "GET",
                         "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{access_token}}",
-                                "type": "text"
-                            },
                             {
                                 "key": "Accept",
                                 "value": "application/json"
@@ -77,8 +127,15 @@
                         ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/auth/me",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "auth", "me"]
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "me"
+                            ]
                         }
                     },
                     "response": []
@@ -86,13 +143,18 @@
                 {
                     "name": "Оновити токен (Refresh)",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "POST",
                         "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{access_token}}",
-                                "type": "text"
-                            },
                             {
                                 "key": "Accept",
                                 "value": "application/json"
@@ -100,8 +162,15 @@
                         ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/auth/refresh",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "auth", "refresh"]
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "refresh"
+                            ]
                         }
                     },
                     "response": []
@@ -109,13 +178,18 @@
                 {
                     "name": "Вийти (Logout)",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "POST",
                         "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{access_token}}",
-                                "type": "text"
-                            },
                             {
                                 "key": "Accept",
                                 "value": "application/json"
@@ -123,8 +197,15 @@
                         ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/auth/logout",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "auth", "logout"]
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "logout"
+                            ]
                         }
                     },
                     "response": []
@@ -137,6 +218,16 @@
                 {
                     "name": "Успішний переказ без комісії",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "POST",
                         "header": [
                             {
@@ -146,11 +237,6 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
-                            },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{access_token}}",
-                                "type": "text"
                             }
                         ],
                         "body": {
@@ -159,8 +245,14 @@
                         },
                         "url": {
                             "raw": "{{base_url}}/api/v1/transfers",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "transfers"]
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "transfers"
+                            ]
                         }
                     },
                     "response": []
@@ -168,6 +260,16 @@
                 {
                     "name": "Успішний переказ з комісією (>10000)",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "POST",
                         "header": [
                             {
@@ -177,11 +279,6 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
-                            },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{access_token}}",
-                                "type": "text"
                             }
                         ],
                         "body": {
@@ -190,8 +287,14 @@
                         },
                         "url": {
                             "raw": "{{base_url}}/api/v1/transfers",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "transfers"]
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "transfers"
+                            ]
                         }
                     },
                     "response": []
@@ -199,6 +302,16 @@
                 {
                     "name": "Помилка - недостатньо коштів",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "POST",
                         "header": [
                             {
@@ -208,11 +321,6 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
-                            },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{access_token}}",
-                                "type": "text"
                             }
                         ],
                         "body": {
@@ -221,8 +329,14 @@
                         },
                         "url": {
                             "raw": "{{base_url}}/api/v1/transfers",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "transfers"]
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "transfers"
+                            ]
                         }
                     },
                     "response": []
@@ -230,6 +344,16 @@
                 {
                     "name": "Помилка - однакові рахунки",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "POST",
                         "header": [
                             {
@@ -239,11 +363,6 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
-                            },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{access_token}}",
-                                "type": "text"
                             }
                         ],
                         "body": {
@@ -252,8 +371,14 @@
                         },
                         "url": {
                             "raw": "{{base_url}}/api/v1/transfers",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "transfers"]
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "transfers"
+                            ]
                         }
                     },
                     "response": []
@@ -261,6 +386,16 @@
                 {
                     "name": "Помилка - невірний формат суми",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "POST",
                         "header": [
                             {
@@ -270,11 +405,6 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
-                            },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{access_token}}",
-                                "type": "text"
                             }
                         ],
                         "body": {
@@ -283,8 +413,14 @@
                         },
                         "url": {
                             "raw": "{{base_url}}/api/v1/transfers",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "transfers"]
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "transfers"
+                            ]
                         }
                     },
                     "response": []
@@ -292,6 +428,16 @@
                 {
                     "name": "Помилка - невірна валюта",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "POST",
                         "header": [
                             {
@@ -301,11 +447,6 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
-                            },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{access_token}}",
-                                "type": "text"
                             }
                         ],
                         "body": {
@@ -314,8 +455,14 @@
                         },
                         "url": {
                             "raw": "{{base_url}}/api/v1/transfers",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "transfers"]
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "transfers"
+                            ]
                         }
                     },
                     "response": []
@@ -323,22 +470,33 @@
                 {
                     "name": "Список переказів",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "GET",
                         "header": [
                             {
                                 "key": "Accept",
                                 "value": "application/json"
-                            },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{access_token}}",
-                                "type": "text"
                             }
                         ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/transfers?page=1&per_page=5",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "transfers"],
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "transfers"
+                            ],
                             "query": [
                                 {
                                     "key": "page",
@@ -356,22 +514,34 @@
                 {
                     "name": "Деталі переказу",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "GET",
                         "header": [
                             {
                                 "key": "Accept",
                                 "value": "application/json"
-                            },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{access_token}}",
-                                "type": "text"
                             }
                         ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/transfers/1",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "transfers", "1"]
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "transfers",
+                                "1"
+                            ]
                         }
                     },
                     "response": []
@@ -384,6 +554,16 @@
                 {
                     "name": "Створення інвойсу - успішно",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "POST",
                         "header": [
                             {
@@ -393,11 +573,6 @@
                             {
                                 "key": "Accept",
                                 "value": "application/json"
-                            },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{access_token}}",
-                                "type": "text"
                             }
                         ],
                         "body": {
@@ -406,8 +581,14 @@
                         },
                         "url": {
                             "raw": "{{base_url}}/api/v1/invoices",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "invoices"]
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "invoices"
+                            ]
                         }
                     },
                     "response": []
@@ -415,31 +596,32 @@
                 {
                     "name": "Список інвойсів",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "GET",
                         "header": [
                             {
                                 "key": "Accept",
                                 "value": "application/json"
-                            },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{access_token}}",
-                                "type": "text"
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}/api/v1/invoices?page=1&per_page=10",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "invoices"],
-                            "query": [
-                                {
-                                    "key": "page",
-                                    "value": "1"
-                                },
-                                {
-                                    "key": "per_page",
-                                    "value": "10"
-                                }
+                            "raw": "{{base_url}}/api/v1/invoices",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "invoices"
                             ]
                         }
                     },
@@ -448,22 +630,34 @@
                 {
                     "name": "Деталі інвойсу",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "GET",
                         "header": [
                             {
                                 "key": "Accept",
                                 "value": "application/json"
-                            },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{access_token}}",
-                                "type": "text"
                             }
                         ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/invoices/1",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "invoices", "1"]
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "invoices",
+                                "1"
+                            ]
                         }
                     },
                     "response": []
@@ -476,22 +670,33 @@
                 {
                     "name": "Список клієнтів",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "GET",
                         "header": [
                             {
                                 "key": "Accept",
                                 "value": "application/json"
-                            },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{access_token}}",
-                                "type": "text"
                             }
                         ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/clients",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "clients"]
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "clients"
+                            ]
                         }
                     },
                     "response": []
@@ -499,22 +704,34 @@
                 {
                     "name": "Деталі клієнта",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "GET",
                         "header": [
                             {
                                 "key": "Accept",
                                 "value": "application/json"
-                            },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{access_token}}",
-                                "type": "text"
                             }
                         ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/clients/1",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "clients", "1"]
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "clients",
+                                "1"
+                            ]
                         }
                     },
                     "response": []
@@ -527,22 +744,33 @@
                 {
                     "name": "Список рахунків",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "GET",
                         "header": [
                             {
                                 "key": "Accept",
                                 "value": "application/json"
-                            },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{access_token}}",
-                                "type": "text"
                             }
                         ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/accounts",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "accounts"]
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "accounts"
+                            ]
                         }
                     },
                     "response": []
@@ -550,22 +778,34 @@
                 {
                     "name": "Деталі рахунку",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "GET",
                         "header": [
                             {
                                 "key": "Accept",
                                 "value": "application/json"
-                            },
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{access_token}}",
-                                "type": "text"
                             }
                         ],
                         "url": {
                             "raw": "{{base_url}}/api/v1/accounts/1",
-                            "host": ["{{base_url}}"],
-                            "path": ["api", "v1", "accounts", "1"]
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "accounts",
+                                "1"
+                            ]
                         }
                     },
                     "response": []

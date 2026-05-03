@@ -44,7 +44,7 @@ declare(strict_types=1);  // Обов'язково після <?php
 
 ```php
 // ✅ Обов'язкові type hints
-use Modules\Shared\src\Domain\ValueObjects\Money;public function executeTransfer(TransferDTO $dto): array
+public function executeTransfer(TransferDTO $dto): array
 public function findById(int $id): ?Account
 private function calculateCommission(Money $amount): float
 

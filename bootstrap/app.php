@@ -25,12 +25,14 @@ use Modules\Client\src\Providers\ClientServiceProvider;
 use Modules\Dashboard\src\Providers\DashboardServiceProvider;
 use Modules\Invoice\src\Providers\InvoiceServiceProvider;
 use Modules\Service\src\Providers\ServiceServiceProvider;
+use Modules\Shared\src\Infrastructure\Middleware\AddCorrelationId;
 use Modules\Transaction\src\Domain\Exceptions\InsufficientBalanceException;
 use Modules\Transaction\src\Domain\Exceptions\SameAccountTransferException;
 use Modules\Transaction\src\Providers\EventServiceProvider as TransactionEventServiceProvider;
 use Modules\Dashboard\src\Providers\EventServiceProvider as DashboardEventServiceProvider;
 use Modules\Invoice\src\Providers\EventServiceProvider as InvoiceEventServiceProvider;
 use Modules\Transaction\src\Providers\TransactionServiceProvider;
+use Sentry\Laravel\Integration;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -58,6 +60,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->group('api', [
             SubstituteBindings::class,
+            AddCorrelationId::class,
         ]);
 
         $middleware->group('web', [
@@ -77,6 +80,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
+        // Sentry
+        Integration::handles($exceptions);
 
         // ===== 401 Unauthenticated =====
         $exceptions->render(function (AuthenticationException $e, Request $request) {

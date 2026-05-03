@@ -10,6 +10,19 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Auth\src\Infrastructure\Database\Factories\UserFactory;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
+/**
+ * @property int $id
+ * @property string $first_name
+ * @property string $last_name
+ * @property string $email
+ * @property string $password
+ * @property string|null $delivery_address
+ * @property bool $is_active
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Role> $roles
+ */
 class User extends Authenticatable implements JWTSubject
 {
     use HasFactory;

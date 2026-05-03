@@ -10,6 +10,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Modules\Auth\src\Domain\Enums\RoleName;
 use Modules\Auth\src\Infrastructure\Database\Factories\RoleFactory;
 
+/**
+ * @property int $id
+ * @property RoleName|string $name
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, User> $users
+ */
 class Role extends Model
 {
     use HasFactory;

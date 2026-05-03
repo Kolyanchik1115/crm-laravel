@@ -10,6 +10,7 @@ use Mockery\MockInterface;
 use Modules\Invoice\src\Application\DTO\CreateInvoiceDTO;
 use Modules\Invoice\src\Application\DTO\InvoiceItemDTO;
 use Modules\Invoice\src\Application\Services\InvoiceService;
+use Modules\Invoice\src\Application\Services\Monitoring\InvoiceErrorReporter;
 use Modules\Invoice\src\Domain\Entities\Invoice;
 use Modules\Invoice\src\Domain\Repositories\InvoiceItemRepositoryInterface;
 use Modules\Invoice\src\Domain\Repositories\InvoiceRepositoryInterface;
@@ -23,6 +24,8 @@ class InvoiceServiceTest extends TestCase
     private MockInterface $invoiceItemRepository;
     private MockInterface $serviceRepository;
 
+    private MockInterface $errorReporter;
+
     private InvoiceService $invoiceService;
 
     protected function setUp(): void
@@ -33,10 +36,12 @@ class InvoiceServiceTest extends TestCase
         $this->invoiceItemRepository = Mockery::mock(InvoiceItemRepositoryInterface::class);
         $this->serviceRepository = Mockery::mock(ServiceRepositoryInterface::class);
 
+        $this->errorReporter = Mockery::mock(InvoiceErrorReporter::class);
         $this->invoiceService = new InvoiceService(
             $this->invoiceRepository,
             $this->invoiceItemRepository,
-            $this->serviceRepository
+            $this->serviceRepository,
+            $this->errorReporter
         );
     }
 

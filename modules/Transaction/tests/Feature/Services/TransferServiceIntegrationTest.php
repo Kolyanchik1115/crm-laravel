@@ -10,6 +10,7 @@ use Modules\Account\src\Infrastructure\Repositories\AccountRepository;
 use Modules\Client\src\Domain\Entities\Client;
 use Modules\Shared\src\Domain\ValueObjects\Money;
 use Modules\Transaction\src\Application\DTO\TransferDTO;
+use Modules\Transaction\src\Application\Services\Monitoring\TransferErrorReporter;
 use Modules\Transaction\src\Application\Services\TransferService;
 use Modules\Transaction\src\Domain\Exceptions\InsufficientBalanceException;
 use Modules\Transaction\src\Domain\Exceptions\SameAccountTransferException;
@@ -25,15 +26,20 @@ class TransferServiceIntegrationTest extends TestCase
     private AccountRepository $accountRepository;
     private TransactionRepository $transactionRepository;
 
+    private TransferErrorReporter $errorReporter;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->accountRepository = new AccountRepository();
         $this->transactionRepository = new TransactionRepository();
+        $this->errorReporter = new TransferErrorReporter();
+
         $this->transferService = new TransferService(
             $this->accountRepository,
-            $this->transactionRepository
+            $this->transactionRepository,
+            $this->errorReporter
         );
     }
 

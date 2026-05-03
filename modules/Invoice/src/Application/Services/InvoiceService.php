@@ -6,48 +6,80 @@ namespace Modules\Invoice\src\Application\Services;
 
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Modules\Invoice\src\Application\DTO\CreateInvoiceDTO;
+use Modules\Invoice\src\Application\Services\Monitoring\InvoiceErrorReporter;
 use Modules\Invoice\src\Domain\Entities\Invoice;
 use Modules\Invoice\src\Domain\Events\InvoiceCreated;
 use Modules\Invoice\src\Domain\Repositories\InvoiceItemRepositoryInterface;
 use Modules\Invoice\src\Domain\Repositories\InvoiceRepositoryInterface;
 use Modules\Service\src\Domain\Repositories\ServiceRepositoryInterface;
+use Modules\Shared\src\Domain\Traits\CorrelationIdTrait;
 
 class InvoiceService
 {
+    use CorrelationIdTrait;
     public function __construct(
-        protected InvoiceRepositoryInterface $invoiceRepository,
+        protected InvoiceRepositoryInterface     $invoiceRepository,
         protected InvoiceItemRepositoryInterface $invoiceItemRepository,
-        protected ServiceRepositoryInterface $serviceRepository,
+        protected ServiceRepositoryInterface     $serviceRepository,
+        protected InvoiceErrorReporter           $errorReporter,
     ) {
     }
 
     public function createInvoice(CreateInvoiceDTO $dto): Invoice
     {
-        // Check services exist
+        $correlationId = $this->getCorrelationId();
+
+        // exists service checking
         foreach ($dto->items as $invoiceItem) {
             if (!$this->serviceRepository->exists($invoiceItem->serviceId)) {
+                Log::warning('Invoice creation failed: service not found', [
+                    'service_id' => $invoiceItem->serviceId,
+                    'client_id' => $dto->clientId,
+                    'correlation_id' => $correlationId,
+                ]);
                 throw new \DomainException("Service with ID {$invoiceItem->serviceId} not found");
             }
         }
 
         $createdInvoice = null;
+        try {
+            DB::transaction(function () use ($dto, &$createdInvoice) {
+                $invoiceTotalAmount = collect($dto->items)->sum(
+                    fn ($item) => $item->quantity * $item->unitPrice
+                );
 
-        DB::transaction(function () use ($dto, &$createdInvoice) {
-            $invoiceTotalAmount = collect($dto->items)->sum(
-                fn ($item) => $item->quantity * $item->unitPrice
+                $createdInvoice = $this->invoiceRepository->create([
+                    'client_id' => $dto->clientId,
+                    'invoice_number' => $this->generateInvoiceNumber(),
+                    'total_amount' => $invoiceTotalAmount,
+                    'status' => 'draft',
+                    'issued_at' => now(),
+                ]);
+
+                $this->invoiceItemRepository->createMany($createdInvoice->id, $dto->items);
+            });
+        } catch (\Throwable $e) {
+            $this->errorReporter->report(
+                e: $e,
+                clientId: $dto->clientId,
+                invoiceId: $createdInvoice->id ?? null,
+                totalAmount: isset($createdInvoice) ? (string)$createdInvoice->total_amount : null,
+                correlationId: $correlationId,
             );
+            throw $e;
+        }
 
-            $createdInvoice = $this->invoiceRepository->create([
-                'client_id' => $dto->clientId,
-                'invoice_number' => $this->generateInvoiceNumber(),
-                'total_amount' => $invoiceTotalAmount,
-                'status' => 'draft',
-                'issued_at' => now(),
-            ]);
-
-            $this->invoiceItemRepository->createMany($createdInvoice->id, $dto->items);
-        });
+        Log::info('Invoice created successfully', [
+            'invoice_id' => $createdInvoice->id,
+            'client_id' => $dto->clientId,
+            'total_amount' => (float)$createdInvoice->total_amount,
+            'items_count' => count($dto->items),
+            'currency' => $dto->currency,
+            'status' => $createdInvoice->status,
+            'correlation_id' => $correlationId,
+        ]);
 
         event(new InvoiceCreated(
             invoiceId: $createdInvoice->id,

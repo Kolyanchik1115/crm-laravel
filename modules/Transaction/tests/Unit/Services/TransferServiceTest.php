@@ -11,6 +11,7 @@ use Modules\Account\src\Domain\Entities\Account;
 use Modules\Account\src\Domain\Repositories\AccountRepositoryInterface;
 use Modules\Shared\src\Domain\ValueObjects\Money;
 use Modules\Transaction\src\Application\DTO\TransferDTO;
+use Modules\Transaction\src\Application\Services\Monitoring\TransferErrorReporter;
 use Modules\Transaction\src\Application\Services\TransferService;
 use Modules\Transaction\src\Domain\Entities\Transaction;
 use Modules\Transaction\src\Domain\Exceptions\InsufficientBalanceException;
@@ -31,9 +32,12 @@ class TransferServiceTest extends TestCase
 
         $this->accountRepository = Mockery::mock(AccountRepositoryInterface::class);
         $this->transactionRepository = Mockery::mock(TransactionRepositoryInterface::class);
+        $this->errorReporter = Mockery::mock(TransferErrorReporter::class);
+
         $this->transferService = new TransferService(
             $this->accountRepository,
-            $this->transactionRepository
+            $this->transactionRepository,
+            $this->errorReporter
         );
     }
 
