@@ -24,7 +24,7 @@ class InvoiceServiceTest extends TestCase
     private MockInterface $invoiceItemRepository;
     private MockInterface $serviceRepository;
     private InvoiceService $invoiceService;
-    private MockInterface $errorReporter;
+    private InvoiceErrorReporter $errorReporter;
 
     protected function setUp(): void
     {
@@ -34,7 +34,7 @@ class InvoiceServiceTest extends TestCase
         $this->invoiceItemRepository = Mockery::mock(InvoiceItemRepositoryInterface::class);
         $this->serviceRepository = Mockery::mock(ServiceRepositoryInterface::class);
 
-        $this->errorReporter = Mockery::mock(InvoiceErrorReporter::class);
+        $this->errorReporter = new InvoiceErrorReporter();
         $this->invoiceService = new InvoiceService(
             $this->invoiceRepository,
             $this->invoiceItemRepository,

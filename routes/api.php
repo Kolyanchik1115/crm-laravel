@@ -46,7 +46,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
     Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
     Route::get('/invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
     Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
-
+    Route::patch('/invoices/{id}', [InvoiceController::class, 'update']);
     //Transfers
     Route::get('/transfers', [TransferController::class, 'index'])->name('transfers.index');
     Route::get('/transfers/{id}', [TransferController::class, 'show'])->name('transfers.show');

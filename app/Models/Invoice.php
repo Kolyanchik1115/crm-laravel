@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static mixed max(string $column)
  * @method static mixed sum(string $column)
  * @method static \Illuminate\Database\Eloquent\Builder|Invoice whereIn(string $column, array $values)
+ * @method static \Illuminate\Database\Eloquent\Builder|Invoice findOrFail(int $id)
  */
 class Invoice extends Model
 {
