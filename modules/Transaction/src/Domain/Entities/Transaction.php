@@ -25,6 +25,11 @@ use Modules\Transaction\src\Infrastructure\Database\Factories\TransactionFactory
  * @property-read Account $account
  * @property-read Client|null $client
  *
+ * @method static \Illuminate\Database\Eloquent\Builder|Transaction count()
+ * @method static \Illuminate\Database\Eloquent\Builder|Transaction select(array|string $columns)
+ * @method static \Illuminate\Database\Eloquent\Builder|Transaction orderBy(string $column, string $direction = 'asc')
+ * @method static \Illuminate\Database\Eloquent\Builder|Transaction groupBy(string $column)
+ * @method static \Illuminate\Database\Eloquent\Builder|Transaction where(string $column, $value)
  * @method static \Modules\Transaction\src\Infrastructure\Database\Factories\TransactionFactory factory()
  * @method static \Illuminate\Database\Eloquent\Builder|Transaction create(array $attributes)
  * @method static \Illuminate\Database\Eloquent\Builder|Transaction find(int $id)

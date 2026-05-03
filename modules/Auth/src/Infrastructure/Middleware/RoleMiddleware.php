@@ -9,12 +9,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Modules\Auth\src\Domain\Enums\RoleName;
 use Modules\Auth\src\Domain\Exceptions\InsufficientRoleException;
-use Modules\Auth\src\Domain\Exceptions\UnauthenticatedException;
+use Modules\Auth\src\Domain\Entities\User;
 
 class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, ...$roles)
     {
+        /** @var User $user */
         $user = Auth::user();
 
         $user->load('roles');

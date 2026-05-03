@@ -22,6 +22,12 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Role> $roles
+ * @method static \Modules\Auth\src\Infrastructure\Database\Factories\UserFactory factory()
+ * @method static \Illuminate\Database\Eloquent\Builder where(string $column, mixed $value)
+ * @method static self|null find(int $id)
+ *
+ * @method bool hasRole(string $role)
+ * @method static int countByRole(string $roleName)
  */
 class User extends Authenticatable implements JWTSubject
 {

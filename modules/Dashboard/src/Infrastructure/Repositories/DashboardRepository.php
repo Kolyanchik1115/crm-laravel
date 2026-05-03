@@ -41,25 +41,38 @@ class DashboardRepository implements DashboardRepositoryInterface
         return [
             'total_count' => Transaction::count(),
             'total_amount' => Transaction::sum('amount'),
-            'amount_by_type' => Transaction::select(
+
+            'amount_by_type' => Transaction::select([
                 'type',
-                DB::raw('count(*) as count'),
-                DB::raw('sum(amount) as total')
-            )
+                DB::raw('COUNT(*) as count'),
+                DB::raw('SUM(amount) as total'),
+            ])
                 ->groupBy('type')
                 ->get()
-                ->keyBy('type')
-                ->map(fn ($item) => ['count' => $item->count, 'total' => $item->total]),
-            'status_stats' => Transaction::select(
+                ->mapWithKeys(fn ($item) => [
+                    $item->type => [
+                        'count' => (int) $item->count,
+                        'total' => (float) $item->total,
+                    ],
+                ]),
+
+            'status_stats' => Transaction::select([
                 'status',
-                DB::raw('count(*) as count'),
-                DB::raw('sum(amount) as total')
-            )
+                DB::raw('COUNT(*) as count'),
+                DB::raw('SUM(amount) as total'),
+            ])
                 ->groupBy('status')
                 ->get()
-                ->keyBy('status')
-                ->map(fn ($item) => ['count' => $item->count, 'total' => $item->total]),
-            'recent' => Transaction::orderBy('created_at', 'desc')->limit(10)->get(),
+                ->mapWithKeys(fn ($item) => [
+                    $item->status => [
+                        'count' => (int) $item->count,
+                        'total' => (float) $item->total,
+                    ],
+                ]),
+
+            'recent' => Transaction::orderBy('created_at', 'desc')
+                ->limit(10)
+                ->get(),
         ];
     }
 }

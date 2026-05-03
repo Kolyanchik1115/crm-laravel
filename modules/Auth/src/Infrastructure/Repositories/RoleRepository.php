@@ -14,16 +14,24 @@ class RoleRepository implements RoleRepositoryInterface
     public function findBySlug(RoleName|string $slug): ?Role
     {
         $slugValue = $slug instanceof RoleName ? $slug->value : $slug;
-        return Role::where('name', $slugValue)->first();
+
+        /** @var Role|null $role */
+        $role = Role::where('name', $slugValue)->first();
+
+        return $role;
     }
 
     public function getDefaultUserRole(): ?Role
     {
-        return Role::where('name', RoleName::USER->value)->first();
+        /** @var Role|null $role */
+        $role = Role::where('name', RoleName::USER->value)->first();
+
+        return $role;
     }
 
     public function assignRoleToUser(int $userId, int $roleId): void
     {
+        /** @var User|null $user */
         $user = User::find($userId);
         if ($user) {
             $user->roles()->syncWithoutDetaching([$roleId]);

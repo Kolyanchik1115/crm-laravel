@@ -11,28 +11,41 @@ class UserRepository implements UserRepositoryInterface
 {
     public function create(array $data): User
     {
-        return User::create($data);
+        return User::query()->create($data);
     }
 
     public function findByEmail(string $email): ?User
     {
-        return User::where('email', $email)->first();
+        /** @var User|null $user */
+        $user = User::query()
+            ->where('email', $email)
+            ->first();
+
+        return $user;
     }
 
     public function findById(int $id): ?User
     {
-        return User::with('roles')->find($id);
+        /** @var User|null $user */
+        $user = User::query()
+            ->with('roles')
+            ->find($id);
+
+        return $user;
     }
 
     public function update(int $id, array $data): User
     {
-        $user = User::findOrFail($id);
+        /** @var User $user */
+        $user = User::query()->findOrFail($id);
+
         $user->update($data);
+
         return $user;
     }
 
     public function delete(int $id): bool
     {
-        return User::destroy($id) > 0;
+        return User::query()->whereKey($id)->delete() > 0;
     }
 }

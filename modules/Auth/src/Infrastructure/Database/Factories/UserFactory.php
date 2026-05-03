@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Modules\Auth\src\Domain\Entities\User;
 
+/**
+ * @extends Factory<\Modules\Auth\src\Domain\Entities\User>
+ */
 class UserFactory extends Factory
 {
     protected $model = User::class;

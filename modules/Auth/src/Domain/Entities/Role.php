@@ -15,7 +15,9 @@ use Modules\Auth\src\Infrastructure\Database\Factories\RoleFactory;
  * @property RoleName|string $name
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
+ * @method static \Modules\Auth\src\Infrastructure\Database\Factories\RoleFactory factory()
  * @property-read \Illuminate\Database\Eloquent\Collection<int, User> $users
+ * @method static \Illuminate\Database\Eloquent\Builder where(string $column, mixed $value)
  */
 class Role extends Model
 {

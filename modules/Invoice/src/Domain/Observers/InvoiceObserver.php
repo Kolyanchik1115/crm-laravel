@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Invoice\src\Domain\Observers;
 
+use Illuminate\Support\Facades\Auth;
 use Modules\Invoice\src\Domain\Entities\Invoice;
 use Illuminate\Support\Facades\Log;
 
@@ -76,8 +77,8 @@ class InvoiceObserver
         Log::info('Invoice deleted', [
             'invoice_id' => $invoice->id,
             'invoice_number' => $invoice->invoice_number,
-            'deleted_by' => auth()->id(),
-        ]);
+            'deleted_by' => Auth::id(),
+            ]);
     }
 
     /**

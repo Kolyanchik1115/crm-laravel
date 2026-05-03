@@ -12,6 +12,9 @@ use Modules\Transaction\src\Domain\Repositories\TransactionRepositoryInterface;
 
 class TransactionRepository implements TransactionRepositoryInterface
 {
+    /**
+     * @return Collection<int, Transaction>
+     */
     public function getAll(): Collection
     {
         return Transaction::with('account.client')
@@ -51,7 +54,12 @@ class TransactionRepository implements TransactionRepositoryInterface
 
     public function findAccountForUpdate(int $accountId): ?Account
     {
-        return Account::lockForUpdate()->find($accountId);
+        /** @var Account|null $account */
+        $account = Account::query()
+            ->lockForUpdate()
+            ->find($accountId);
+
+        return $account;
     }
 
     public function updateAccountBalance(Account $account, float $newBalance): bool

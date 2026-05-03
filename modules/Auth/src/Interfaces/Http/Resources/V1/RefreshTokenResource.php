@@ -12,9 +12,9 @@ class RefreshTokenResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'access_token' => $this->access_token,
-            'token_type' => $this->token_type,
-            'expires_in' => $this->expires_in,
+            'access_token' => $this->resource['access_token'],
+            'token_type' => $this->resource['token_type'],
+            'expires_in' => $this->resource['expires_in'],
         ];
     }
 }

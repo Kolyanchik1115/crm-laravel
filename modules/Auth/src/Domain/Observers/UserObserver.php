@@ -6,7 +6,7 @@ namespace Modules\Auth\src\Domain\Observers;
 
 use Modules\Auth\src\Domain\Entities\User;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
 
 class UserObserver
 {
@@ -23,7 +23,6 @@ class UserObserver
      */
     public function created(User $user): void
     {
-
         Log::info('User created', [
             'user_id' => $user->id,
             'email' => $user->email,
@@ -50,12 +49,10 @@ class UserObserver
     public function deleting(User $user): void
     {
         if ($user->hasRole('ADMIN')) {
-            $adminCount = User::whereHas('roles', function ($q) {
-                $q->where('name', 'ADMIN');
-            })->count();
+            $adminCount = User::countByRole('ADMIN');
 
             if ($adminCount <= 1) {
-                throw new \Exception('Нельзя удалить последнего администратора');
+                throw new \Exception('Cannot delete the last administrator');
             }
         }
     }
@@ -65,10 +62,12 @@ class UserObserver
      */
     public function deleted(User $user): void
     {
+        $deletedBy = Auth::check() ? Auth::id() : null;
+
         Log::info('User deleted', [
             'user_id' => $user->id,
             'email' => $user->email,
-            'deleted_by' => auth()->id(),
+            'deleted_by' => $deletedBy,
         ]);
     }
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Auth\tests\Feature\Api;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Modules\Auth\src\Domain\Entities\User;
 use Modules\Auth\src\Domain\Entities\Role;
@@ -27,27 +28,24 @@ class AuthApiTest extends TestCase
         $this->registerAuthRoutes();
 
         // Create roles
-        $userRole = Role::create(['name' => RoleName::USER->value]);
-        $adminRole = Role::create(['name' => RoleName::ADMIN->value]);
+        $userRole = Role::factory()->create(['name' => RoleName::USER->value]);
+        $adminRole = Role::factory()->create(['name' => RoleName::ADMIN->value]);
 
-        // User
-        $this->user = User::create([
+        $this->user = User::factory()->create([
             'first_name' => 'Regular',
             'last_name' => 'User',
             'email' => 'user@example.com',
             'password' => bcrypt('password'),
-            'is_active' => true,
         ]);
-        $this->user->roles()->attach($userRole);
 
-        // Admin
-        $this->admin = User::create([
+        $this->admin = User::factory()->create([
             'first_name' => 'Admin',
             'last_name' => 'User',
             'email' => 'admin@example.com',
             'password' => bcrypt('password'),
-            'is_active' => true,
         ]);
+
+        $this->user->roles()->attach($userRole);
         $this->admin->roles()->attach($adminRole);
     }
 
@@ -109,7 +107,6 @@ class AuthApiTest extends TestCase
     #[Test]
     public function user_can_get_own_profile_with_token(): void
     {
-        // Сначала логинимся
         $loginResponse = $this->postJson('/api/v1/auth/login', [
             'email' => 'user@example.com',
             'password' => 'password',
@@ -117,7 +114,6 @@ class AuthApiTest extends TestCase
 
         $token = $loginResponse->json('data.access_token');
 
-        // Запрашиваем профиль
         $response = $this->getJson('/api/v1/auth/me', [
             'Authorization' => 'Bearer ' . $token,
         ]);

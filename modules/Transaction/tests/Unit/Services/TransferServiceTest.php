@@ -24,6 +24,7 @@ class TransferServiceTest extends TestCase
 {
     private MockInterface $accountRepository;
     private MockInterface $transactionRepository;
+    private MockInterface $errorReporter;
     private TransferService $transferService;
 
     protected function setUp(): void

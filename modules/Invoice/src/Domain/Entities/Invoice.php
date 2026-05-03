@@ -32,6 +32,7 @@ use Modules\Service\src\Domain\Entities\Service;
  * @method static \Illuminate\Database\Eloquent\Builder|Invoice count()
  * @method static mixed max(string $column)
  * @method static mixed sum(string $column)
+ * @method static \Illuminate\Database\Eloquent\Builder|Invoice where($column, $operator = null, $value = null, $boolean = 'and')
  * @method static \Illuminate\Database\Eloquent\Builder|Invoice whereIn(string $column, array $values)
  */
 class Invoice extends Model

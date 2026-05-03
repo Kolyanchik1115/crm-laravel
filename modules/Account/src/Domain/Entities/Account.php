@@ -24,7 +24,7 @@ use Modules\Transaction\src\Domain\Entities\Transaction;
  * @method static \Modules\Account\src\Infrastructure\Database\Factories\AccountFactory factory()
  * @property-read \Modules\Client\src\Domain\Entities\Client $client
  * @property-read \Illuminate\Database\Eloquent\Collection $transactions
- *
+ * @method static \Modules\Account\src\Domain\Entities\Account create(array $attributes)
  * @method static \Illuminate\Database\Eloquent\Builder|Account find(int $id)
  * @method static \Illuminate\Database\Eloquent\Builder|Account findOrFail(int $id)
  * @method static \Illuminate\Database\Eloquent\Builder|Account lockForUpdate()

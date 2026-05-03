@@ -11,16 +11,18 @@ class UserResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $user = $this->resource;
+
         return [
-            'id' => $this->id,
-            'email' => $this->email,
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
-            'delivery_address' => $this->delivery_address,
-            'roles' => $this->whenLoaded('roles', fn () => $this->roles->pluck('name')),
-            'is_active' => $this->is_active,
-            'created_at' => $this->created_at?->toISOString(),
-            'updated_at' => $this->updated_at?->toISOString(),
+            'id' => $user->id,
+            'email' => $user->email,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'delivery_address' => $user->delivery_address,
+            'roles' => $this->whenLoaded('roles', fn () => $user->roles->pluck('name')),
+            'is_active' => $user->is_active,
+            'created_at' => $user->created_at?->toISOString(),
+            'updated_at' => $user->updated_at?->toISOString(),
         ];
     }
 }

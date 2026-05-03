@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Transaction\src\Application\Services;
 
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Account\src\Domain\Repositories\AccountRepositoryInterface;

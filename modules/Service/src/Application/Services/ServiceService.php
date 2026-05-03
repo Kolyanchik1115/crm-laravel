@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Modules\Service\src\Application\Services;
 
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Modules\Service\src\Domain\Entities\Service;
 use Modules\Service\src\Domain\Repositories\ServiceRepositoryInterface;
 

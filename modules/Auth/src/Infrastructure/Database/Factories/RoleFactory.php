@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Auth\src\Infrastructure\Database\Factories;
 
+/**
+ * @extends Factory<\Modules\Auth\src\Domain\Entities\Role>
+ */
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Auth\src\Domain\Entities\Role;
 use Modules\Auth\src\Domain\Enums\RoleName;

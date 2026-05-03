@@ -12,7 +12,7 @@ use Modules\Client\src\Domain\Repositories\ClientRepositoryInterface;
 class ClientRepository implements ClientRepositoryInterface
 {
     /**
-     * Get all clients with accounts
+     * @return Collection<int, Client>
      */
     public function getAll(): Collection
     {

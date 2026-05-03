@@ -9,6 +9,7 @@ use Modules\Account\src\Domain\Entities\Account;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class ClientObserver
 {
@@ -81,7 +82,7 @@ class ClientObserver
         Log::info('Client deleted', [
             'client_id' => $client->id,
             'email' => $client->email,
-            'deleted_by' => auth()->id(),
+            'deleted_by' => Auth::id(),
         ]);
     }
 
