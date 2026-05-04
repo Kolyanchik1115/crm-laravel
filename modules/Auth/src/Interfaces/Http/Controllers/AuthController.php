@@ -7,7 +7,7 @@ namespace Modules\Auth\src\Interfaces\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
+use Illuminate\Contracts\View\View;
 use Modules\Auth\src\Interfaces\Http\Requests\V1\LoginRequest;
 use Modules\Auth\src\Interfaces\Http\Requests\V1\RegisterRequest;
 use Modules\Auth\src\Application\Services\AuthService;

@@ -12,7 +12,6 @@ use Modules\Auth\src\Interfaces\Http\Resources\V1\RefreshTokenResource;
 use Modules\Auth\src\Interfaces\Http\Resources\V1\UserResource;
 use Modules\Auth\src\Interfaces\Http\Requests\V1\LoginRequest;
 use Modules\Auth\src\Interfaces\Http\Requests\V1\RegisterRequest;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -86,13 +85,10 @@ class AuthController extends Controller
 
     public function refresh(): JsonResponse
     {
-        //add get token method in controller due to error with finding token in service
-        $token = JWTAuth::getToken();
+        $refreshTokenDTO = $this->authService->refresh();
 
-        $refreshTokenDTO = $this->authService->refresh($token);
-
-        return (new RefreshTokenResource($refreshTokenDTO))
-            ->additional(['success' => true])
+        return (new RefreshTokenResource($refreshTokenDTO->toArray()))
+        ->additional(['success' => true])
             ->response()
             ->setStatusCode(200);
     }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Auth\src\Application\Services;
 
-use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\JWTAuth;
 use Modules\Auth\src\Application\DTO\LoginDTO;
 use Modules\Auth\src\Application\DTO\RegisterDTO;
 use Modules\Auth\src\Application\DTO\RefreshTokenDTO;
@@ -18,67 +18,59 @@ class AuthService
     public function __construct(
         protected UserRepositoryInterface $userRepository,
         protected RoleRepositoryInterface $roleRepository,
+        protected JWTAuth $jwt
     ) {
     }
 
     public function login(LoginDTO $dto): ?array
     {
         $credentials = $dto->toArray();
-
-        if (!$token = JWTAuth::attempt($credentials)) {
+        $token = $this->jwt->attempt($credentials);
+        if (!$token) {
             return null;
         }
-
         $user = $this->userRepository->findByEmail($dto->email);
         $user?->load('roles');
-
         return [
             'access_token' => $token,
+            'token_type' => 'bearer',
             'expires_in' => config('jwt.ttl', 60) * 60,
-            'user' => $user,
+            'user' => $user
         ];
     }
 
     public function register(RegisterDTO $dto): ?array
     {
-        // Check if user exists
         $existingUser = $this->userRepository->findByEmail($dto->email);
         if ($existingUser) {
             return null;
         }
-
-        // Create user
         $user = $this->userRepository->create($dto->toArray());
-
-        // Assign default role
         $defaultRole = $this->roleRepository->getDefaultUserRole();
         if ($defaultRole) {
             $this->roleRepository->assignRoleToUser($user->id, $defaultRole->id);
         }
-
-        // Auto login after registration
-        $loginDTO = new LoginDTO($dto->email, $dto->password);
-        return $this->login($loginDTO);
+        return $this->login(new LoginDTO($dto->email, $dto->password));
     }
 
     public function me(): ?User
     {
-        $user = Auth::user();
-        if ($user) {
-            return $this->userRepository->findById($user->id);
+        $authUser = Auth::user();
+        if (!$authUser instanceof User) {
+            return null;
         }
-        return null;
+        return $this->userRepository->findById($authUser->id);
     }
 
     public function logout(): void
     {
-        JWTAuth::invalidate(JWTAuth::getToken());
+        $token = $this->jwt->parseToken()->invalidate();
     }
 
-    public function refresh($token): RefreshTokenDTO
+    public function refresh(): RefreshTokenDTO
     {
-        $newToken = JWTAuth::refresh($token);
+        $token = $this->jwt->parseToken()->refresh();
 
-        return RefreshTokenDTO::fromToken($newToken);
+        return RefreshTokenDTO::fromToken($token);
     }
 }
