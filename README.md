@@ -201,6 +201,80 @@ docker compose exec app php artisan test modules/Transaction/tests/Feature/Api/T
 
 ---
 
+## 📊 Логування та моніторинг
+
+### Обсервери (Observers)
+
+Автоматичні дії при подіях з моделями:
+
+| Обсервер | Подія | Дія |
+|----------|-------|-----|
+| **UserObserver** | `created` | Логування створення користувача |
+| | `updated` | Логування змін |
+| | `deleting` | Захист від видалення останнього адміна |
+| **ClientObserver** | `created` | Автоматичне створення рахунку для клієнта |
+| | `deleted` | Логування видалення |
+| **InvoiceObserver** | `creating` | Генерація унікального номера інвойса |
+| | `deleting` | Заборона видалення оплачених інвойсів |
+
+### Логування
+
+#### Локальні логи
+
+```bash
+# Перегляд логів
+tail -f storage/logs/laravel.log
+
+# Логи в Docker
+docker compose logs app -f
+docker compose logs queue -f
+```
+
+#### Структура логування
+
+```php
+Log::info('User created', [
+    'user_id' => $user->id,
+    'email' => $user->email,
+    'correlation_id' => $correlationId,
+]);
+```
+
+### Sentry (Помилки)
+
+Помилки автоматично відправляються в Sentry:
+
+```env
+SENTRY_LARAVEL_DSN=https://your-dsn@sentry.io/project
+```
+
+#### Тестовий ендпоінт для Sentry
+
+```bash
+# Тільки в dev середовищі
+GET /test-sentry
+```
+
+### Correlation ID
+
+Кожен запит отримує унікальний `X-Correlation-Id` для трекінгу:
+
+- Автоматично генерується, якщо не переданий
+- Додається в логи всіх запитів
+- Передається у відповідь
+
+### Моніторинг черг (Queues)
+
+```bash
+# Перевірка статусу черг
+docker compose exec app php artisan queue:failed
+docker compose exec app php artisan queue:monitor redis,default
+
+# Health check
+GET /health
+```
+---
+
 ## 📚 Документація
 
 ### 🏗️ Архітектура
@@ -231,6 +305,9 @@ docker compose exec app php artisan test modules/Transaction/tests/Feature/Api/T
 - [🔄 API_STATUS_CODES.md](docs/API_STATUS_CODES.md) - статус коди
 - [🔄 API_MAINTENANCE.md](docs/API_MAINTENANCE.md) - обслуговування API
 
+### 🚀 Логування та моніторинг
+
+- [🔄 LOGGING_GUIDE.md](docs/LOGGING_GUIDE.md) - гайд з логування
 ---
 
 ## 📝 Команди для розробки
