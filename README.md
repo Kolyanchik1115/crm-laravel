@@ -1,17 +1,46 @@
-# CRM Finance - Laravel Project
+# CRM Finance
 
 ## 📬 Postman колекція
 
 ### Документація API (перегляд)
 
-- [Postman Documentation](https://whitebit.docs.buildwithfern.com/crm-finance-api/introduction)
 - [Swagger Documentation](http://localhost:8000/swagger)
+- [Swagger YAML](http://localhost:8000/api-docs/openapi.yaml)
+- [Health Check](http://localhost:8000/health)
 
 ### Імпорт колекції через файл
 
-1. Завантаж файл [postman_collection.json](postman/postman_collection.json)
+1. Завантаж файл [postman_collection.json](postman_collection.json)
 2. Відкрий Postman → **Import** → обрати файл
 3. Встанови змінну `base_url` (локально: `http://localhost:8000`, на сервері: `https://your-domain.com`)
+
+## 🏗️ Архітектура проекту
+
+Проект побудовано на **Clean Modular Monolith** архітектурі - гібрид модульного моноліту та чистої архітектури.
+
+### Що змінилося?
+
+| Компонент | Раніше | Тепер |
+|-----------|--------|-------|
+| **Структура** | Монолітна (app/Models, app/Http) | Модульна (modules/) |
+| **Бізнес-логіка** | В контролерах/моделях | В Domain/Application шарах |
+| **Аутентифікація** | Sanctum/Session | JWT + Roles |
+| **Роути** | В routes/web.php | В кожному модулі |
+| **Тести** | В tests/ | В модулях (tests/) |
+
+### Структура модулів
+
+```
+modules/
+├── Auth/          # Аутентифікація, JWT, ролі (ADMIN, MANAGER, USER)
+├── Client/        # Управління клієнтами
+├── Account/       # Банківські рахунки
+├── Transaction/   # Транзакції та перекази (+ комісія 0.5%)
+├── Invoice/       # Інвойси, рахунки-фактури
+├── Service/       # Справочник послуг
+├── Dashboard/     # Дашборд та статистика (кэш)
+└── Shared/        # Спільні компоненти (Value Objects, Traits, Middleware)
+```
 
 ## 🚀 Як створити проект
 
@@ -23,6 +52,19 @@ composer create-project laravel/laravel crm-laravel
 cd crm-laravel
 ```
 
+## 🐳 Docker
+
+### Запуск контейнерів
+
+```bash
+docker compose up -d
+```
+
+### Міграції в Docker
+
+```bash
+docker compose exec app php artisan migrate
+```
 ---
 
 ## ⚙️ Як налаштувати .env
@@ -58,112 +100,46 @@ DB_PASSWORD=
 
 ```env
 DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
+DB_HOST=mysql
 DB_PORT=3306
 DB_DATABASE=crm_db
-DB_USERNAME=crm_user
-DB_PASSWORD=crm_password
+DB_USERNAME=root
+DB_PASSWORD=root
 ```
 
+### 4. JWT налаштування
+
+```bash
+# Згенерувати JWT секрет
+docker compose exec app php artisan jwt:secret
+```
 ---
 
 ## 🗄️ Міграції та сидери
 
-### Створення таблиць (міграції)
-
-Міграції створюють структуру таблиць в базі даних:
-
 ```bash
 # Виконати всі міграції
-php artisan migrate
+docker compose exec app php artisan migrate
 
-# Очистити базу і виконати всі міграції заново
-php artisan migrate:fresh
-```
-
-### Заповнення даними (сидери)
-
-Сидери наповнюють таблиці тестовими даними:
-
-```bash
-# Виконати всі сидери
-php artisan db:seed
+# Очистити базу, міграції + сидери
+docker compose exec app php artisan migrate:fresh --seed
 
 # Виконати конкретний сидер
-php artisan db:seed --class=ClientsTableSeeder
-
-# Очистити базу, виконати міграції та сидери (все разом)
-php artisan migrate:fresh --seed
+docker compose exec app php artisan db:seed --class=RolePermissionSeeder
 ```
 
 ## 🏃 Як запустити проект
 
 ```bash
-php artisan serve
+docker compose exec app php artisan serve
 ```
 
 Сервер буде доступний за адресою: **http://localhost:8000**
 
-Щоб зупинити сервер, натисніть `Ctrl + C`.
-
----
-
-## 🌐 Маршрути проекту
-
-| URL             | Опис                                |
-|-----------------|-------------------------------------|
-| `/`             | Головна сторінка (Laravel welcome)  |
-| `/clients`      | Сторінка клієнтів (заглушка)        |
-| `/accounts`     | Сторінка рахунків (заглушка)        |
-| `/transactions` | Сторінка транзакцій (заглушка)      |
-| `/invoices`     | Сторінка рахунків-фактур (заглушка) |
-| `/crm-settings` | Перевірка CRM налаштувань (JSON)    |
-
----
-
-### Перевірка маршрутів:
-
-```bash
-php artisan route:list
-```
-
----
-
-## 📁 Структура проекту
-
-| Папка        | Призначення                                   |
-|--------------|-----------------------------------------------|
-| `app/`       | Ядро додатку (контролери, моделі, middleware) |
-| `bootstrap/` | Завантажувач фреймворку                       |
-| `config/`    | Конфігураційні файли                          |
-| `database/`  | Міграції, сіди, фабрики                       |
-| `public/`    | Точка входу (index.php)                       |
-| `resources/` | Шаблони (Blade), мови, assets                 |
-| `routes/`    | Визначення маршрутів                          |
-| `storage/`   | Логи, кеш, завантажені файли                  |
-| `tests/`     | Тести                                         |
-
----
-
-## 🐳 Docker
-
-### Запуск контейнерів
-
-```bash
-# Запустити всі сервіси (MySQL, Redis, Laravel, Queue)
-docker compose up -d
-```
-
-### Виконання міграцій в Docker
-
-```bash
-docker compose exec app php artisan migrate
-```
-
 ### Запуск worker (обробка черг)
 
 ```bash
-docker compose exec app php artisan queue:work redis --sleep=3 --tries=3
+docker compose exec app php artisan queue:work --sleep=3 --tries=3
 ```
 
 ### Перевірка Redis
@@ -182,10 +158,46 @@ docker compose down
 ### Перегляд логів
 
 ```bash
-docker compose logs app
-docker compose logs queue
-docker compose logs redis
+docker compose logs app -f
+docker compose logs queue -f
 ```
+
+---
+
+## 🧪 Тестування
+
+```bash
+# Всі тести
+docker compose exec app php artisan test
+
+# Тест модуля
+docker compose exec app php artisan test modules/Transaction/tests/Feature/Api/TransferApiTest.php
+```
+
+---
+
+## 🔐 API Ендпоінти
+
+### Аутентифікація
+
+| Метод | URL | Опис |
+|-------|-----|------|
+| POST | `/api/v1/auth/login` | Логін |
+| POST | `/api/v1/auth/register` | Реєстрація |
+| GET | `/api/v1/auth/me` | Поточний користувач |
+| POST | `/api/v1/auth/logout` | Вихід |
+| POST | `/api/v1/auth/refresh` | Оновити токен |
+
+### Ресурси (захищені JWT)
+
+| Метод | URL | Ролі |
+|-------|-----|------|
+| GET | `/api/v1/clients` | ADMIN, MANAGER |
+| GET | `/api/v1/accounts` | ADMIN, MANAGER, USER |
+| POST | `/api/v1/transfers` | ADMIN, MANAGER, USER |
+| GET | `/api/v1/invoices` | ADMIN, MANAGER |
+| PATCH | `/api/v1/invoices/{id}` | ADMIN, MANAGER |
+| GET | `/api/v1/services` | ADMIN, MANAGER, USER |
 
 ---
 
@@ -194,10 +206,10 @@ docker compose logs redis
 ### 🏗️ Архітектура
 
 - [📐 STRUCTURE.md](docs/STRUCTURE.md) - детальний опис структури проекту
-- [🔄 LIFECYCLE.md](docs/LIFECYCLE.md) - життєвий цикл HTTP-запиту в Laravel
+- [📐 ARCHITECTURE.md](docs/ARCHITECTURE.md) - Архітектура CRM
+- [🔄 LIFECYCLE.md](docs/LIFECYCLE.md) - життєвий цикл HTTP-запиту
 - [⚖️ SYMFONY_VS_LARAVEL.md](docs/SYMFONY_VS_LARAVEL.md) - порівняння Laravel та Symfony
 - [📡 ASYNC_ARCHITECTURE.md](docs/ASYNC_ARCHITECTURE.md) - Jobs vs Events vs Notifications
-- [📐ARCHITECTURE.md](docs/ARCHITECTURE.md) - Архітектура CRM
 
 ### 📨 Черги (Queues)
 
@@ -206,16 +218,33 @@ docker compose logs redis
 - [⚙️ QUEUE_SETUP.md](docs/QUEUE_SETUP.md) - налаштування черг у CRM
 - [🚀 QUEUE_DRIVERS.md](docs/QUEUE_DRIVERS.md) - порівняння драйверів черг
 - [⚠️ QUEUE_ANTIPATTERNS.md](docs/QUEUE_ANTIPATTERNS.md) - коли НЕ використовувати черги
-- [🔄 JOB_LIFECYCLE.md](docs/JOB_LIFECYCLE.md) - життєвий цикл Job у Laravel
+- [🔄 JOB_LIFECYCLE.md](docs/JOB_LIFECYCLE.md) - життєвий цикл Job
 - [🏭 QUEUE_PRODUCTION.md](docs/QUEUE_PRODUCTION.md) - налаштування worker'ів у production
 
-### 📨 Тестування
+### 🧪 Тестування
 
-- [🔄 TESTING.md](docs/TESTING.md) - iнструкцiї до тестування
+- [🔄 TESTING.md](docs/TESTING.md) - інструкції до тестування
 
 ### 🏗️ API
 
-- [🔄 API_CONTRACT](docs/API_CONTRACT.md) - iнструкцiї до api
-- [🔄 API_STATUS_CODES](docs/API_STATUS_CODES.md) - cтатус коди
-- [🔄 API_MAINTENANCE](docs/API_MAINTENANCE.md) - обслуговування API
+- [🔄 API_CONTRACT.md](docs/API_CONTRACT.md) - контракти API
+- [🔄 API_STATUS_CODES.md](docs/API_STATUS_CODES.md) - статус коди
+- [🔄 API_MAINTENANCE.md](docs/API_MAINTENANCE.md) - обслуговування API
 
+---
+
+## 📝 Команди для розробки
+
+```bash
+# Очистити кеш
+docker compose exec app php artisan optimize:clear
+docker compose exec app php artisan view:clear
+docker compose exec app php artisan route:clear
+docker compose exec app php artisan config:clear
+
+# Перевірити роути
+docker compose exec app php artisan route:list
+
+# Обновити автолоадинг
+docker compose exec app composer dump-autoload
+```
