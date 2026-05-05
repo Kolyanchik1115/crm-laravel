@@ -144,14 +144,14 @@ public function handle($request, $next)
 
 ### Потік даних
 
-```mermaid
-flowchart LR
-    A[Client Request] --> B[TransferController@index]
-    B --> C[TransactionRepository::getTransfersPaginated]
-    C --> D[SQL Query]
-    D --> E[TransactionResource]
-    E --> F[JSON Response]
-```
+| Крок | Компонент | Дія |
+|------|-----------|-----|
+| 1 | TransferController | Отримує HTTP запит |
+| 2 | TransactionService | Викликає сервіс |
+| 3 | TransactionRepository | Формує запит |
+| 4 | Database | Виконує SQL |
+| 5 | TransactionResource | Трансформує дані |
+| 6 | Response | Повертає JSON |
 
 ### Поточна реалізація
 
@@ -331,3 +331,215 @@ $query->when($dateTo, fn($q) => $q->whereDate('created_at', '<=', $dateTo));
 2. Додати композитні індекси
 3. Реалізувати фільтрацію по датах та рахунку
 4. Впровадити cursor pagination для великих наборів
+
+# Глибокий аналіз GET /api/v1/invoices та N+1 проблема
+
+### Модель даних та зв'язки
+
+```mermaid
+### Схема зв'язків
+
++---------+          +-------------+          +---------+
+| CLIENT  |          |   INVOICE    |          | SERVICE |
++---------+          +-------------+          +---------+
+| id(PK)  |◄─────────| client_id(FK)|          | id(PK)  |
+| name    |   (belongs to)           |          | name    |
+| email   |          | id(PK)       |          | price   |
++---------+          | amount       |          +---------+
+                     | status       |              ▲
+                     +-------------+              │
+                           │                      │
+                           │ (has many)           │ (belongs to)
+                           ▼                      │
+                     +-----------------+          │
+                     |  INVOICE_ITEM   |          │
+                     +-----------------+          │
+                     | invoice_id(FK)  |──────────┘
+                     | service_id(FK)  |
+                     | quantity        |
+                     | unit_price      |
+                     +-----------------+
+```
+
+**Структура зв'язків:**
+
+| Модель | Зв'язок | Тип | Зовнішній ключ |
+|--------|---------|-----|----------------|
+| Invoice | `belongsTo(Client::class)` | N:1 | `client_id` |
+| Invoice | `hasMany(InvoiceItem::class)` | 1:N | `invoice_id` |
+| InvoiceItem | `belongsTo(Service::class)` | N:1 | `service_id` |
+
+### Сценарій N+1 проблеми
+
+#### Поганий код (без eager loading):
+```php
+// InvoiceController.php
+public function index(): JsonResponse
+{
+    $invoices = Invoice::paginate(50);
+    
+    foreach ($invoices as $invoice) {
+        // Додатковий запит для кожного invoice
+        $clientName = $invoice->client->name;     // N запитів
+        $items = $invoice->items;                 // N запитів
+        
+        foreach ($items as $item) {
+            // Додатковий запит для кожного item
+            $serviceName = $item->service->name;  // N*M запитів
+        }
+    }
+}
+```
+
+#### Кількість SQL запитів:
+
+| Етап | Запит | Кількість |
+|------|-------|-----------|
+| 1 | `SELECT * FROM invoices LIMIT 50` | 1 |
+| 2 | `SELECT * FROM clients WHERE id = ?` | 50 (для кожного invoice) |
+| 3 | `SELECT * FROM invoice_items WHERE invoice_id = ?` | 50 (для кожного invoice) |
+| 4 | `SELECT * FROM services WHERE id = ?` | M (для кожного item) |
+
+### Оцінка кількості запитів
+
+#### При 10 invoices (середня кількість items = 5)
+
+| Сценарій | Без eager loading | З eager loading |
+|----------|-------------------|-----------------|
+| Запит на invoices | 1 | 1 |
+| Запити на clients | 10 | 0 (включено в JOIN) |
+| Запити на items | 10 | 0 (включено в JOIN) |
+| Запити на services | 10 × 5 = 50 | 0 (включено в JOIN) |
+| **ВСЬОГО** | **≈ 71** | **≈ 2-3** |
+
+#### При 50 invoices (середня кількість items = 5)
+
+| Сценарій | Без eager loading | З eager loading |
+|----------|-------------------|-----------------|
+| Запит на invoices | 1 | 1 |
+| Запити на clients | 50 | 0 |
+| Запити на items | 50 | 0 |
+| Запити на services | 50 × 5 = 250 | 0 |
+| **ВСЬОГО** | **≈ 351** | **≈ 2-3** |
+
+#### При 500 invoices (середня кількість items = 5)
+
+| Сценарій | Без eager loading | З eager loading |
+|----------|-------------------|-----------------|
+| Запит на invoices | 1 | 1 |
+| Запити на clients | 500 | 0 |
+| Запити на items | 500 | 0 |
+| Запити на services | 500 × 5 = 2500 | 0 |
+| **ВСЬОГО** | **≈ 3501** | **≈ 2-3** |
+
+### Порівняльна таблиця
+
+| Кількість invoices | Без eager loading | З eager loading | Різниця |
+|--------------------|-------------------|-----------------|---------|
+| 10 | ~71 запитів | ~2-3 запити | **~24x** |
+| 50 | ~351 запитів | ~2-3 запити | **~117x** |
+| 100 | ~701 запитів | ~2-3 запити | **~234x** |
+| 500 | ~3501 запитів | ~2-3 запити | **~1167x** |
+| 1000 | ~7001 запитів | ~2-3 запити | **~2334x** |
+
+### Поточна реалізація (перевірка)
+
+**Контролер:**
+```php
+// InvoiceController.php
+public function index(): JsonResponse
+{
+    $invoices = $this->invoiceService->getAllInvoicesPaginated(5);
+    return InvoiceResource::collection($invoices)->response();
+}
+```
+
+**Репозиторій:**
+```php
+public function getAllPaginated(int $perPage = 15): LengthAwarePaginator
+{
+    return Invoice::with(['client', 'items.service'])  // ← Вже є eager loading!
+        ->orderBy('created_at', 'desc')
+        ->paginate($perPage);
+}
+```
+
+**Поточний стан:**
+- ✅ Eager loading вже налаштовано
+- ✅ Завантажується `client`, `items`, `items.service`
+- ✅ Кількість запитів: ~2-3 (основний + зв'язки)
+
+### Що відбувається при `with(['client', 'items.service'])`:
+
+```sql
+-- 1. Основний запит
+SELECT * FROM invoices ORDER BY created_at DESC LIMIT 15;
+
+-- 2. Запит для client (одним запитом)
+SELECT * FROM clients WHERE id IN (1,2,3,...);
+
+-- 3. Запит для items (одним запитом)
+SELECT * FROM invoice_items WHERE invoice_id IN (1,2,3,...);
+
+-- 4. Запит для services (одним запитом)
+SELECT * FROM services WHERE id IN (1,2,3,...);
+```
+
+### Висновок
+
+| Питання | Відповідь |
+|---------|-----------|
+| **Чи потрібен eager loading для invoices?** | **ТАК, критично важливо** |
+| **Які зв'язки завантажувати?** | `with(['client', 'items.service'])` |
+| **Чи є N+1 в поточному коді?** | Ні, вже використовується eager loading |
+| **Чи можна покращити?** | Так, використовувати `cursorPaginate()` |
+
+### Рекомендації
+
+#### 1. Додаткові індекси
+```sql
+CREATE INDEX idx_invoices_client_id ON invoices(client_id);
+CREATE INDEX idx_invoices_status ON invoices(status);
+CREATE INDEX idx_invoices_created_at ON invoices(created_at);
+CREATE INDEX idx_invoice_items_invoice_id ON invoice_items(invoice_id);
+CREATE INDEX idx_invoice_items_service_id ON invoice_items(service_id);
+```
+
+#### 2. Покращена реалізація
+```php
+public function getAllPaginated(int $perPage = 15): LengthAwarePaginator
+{
+    return Invoice::with([
+        'client:id,full_name,email',
+        'items:id,invoice_id,service_id,quantity,unit_price',
+        'items.service:id,name,base_price'
+    ])
+    ->select(['id', 'client_id', 'invoice_number', 'total_amount', 'status', 'created_at'])
+    ->orderBy('created_at', 'desc')
+    ->paginate($perPage);
+}
+```
+
+#### 3. Альтернатива - Resource колекція
+```php
+class InvoiceResource extends JsonResource
+{
+    public function toArray($request): array
+    {
+        return [
+            'id' => $this->id,
+            'client' => new ClientResource($this->whenLoaded('client')),
+            'items' => InvoiceItemResource::collection($this->whenLoaded('items')),
+        ];
+    }
+}
+```
+
+### Висновок щодо N+1
+
+| Показник | Оцінка |
+|----------|--------|
+| **Поточний стан** | ✅ Оптимальний (eager loading є) |
+| **Ризик N+1** | 🟢 Низький |
+| **Рекомендація** | Залишити поточну реалізацію, додати `select()` для оптимізації |
+```
