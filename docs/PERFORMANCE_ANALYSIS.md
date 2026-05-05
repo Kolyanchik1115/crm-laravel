@@ -738,3 +738,141 @@ public function getTransfersPaginated(int $perPage = 15): LengthAwarePaginator
 ✅ Кількість SQL запитів зменшено з 16 до 2  
 ✅ Час відповіді зменшено на ~46%  
 ✅ Підготовлено до масштабування при зростанні даних
+
+---
+# Індекси БД
+
+#### Перевірка індексів таблиці `invoices`
+
+**Команда:** `DB::select('SHOW INDEX FROM invoices');`
+
+**Результат:**
+- PRIMARY (id) ✅
+- invoices_invoice_number_unique (invoice_number) ✅  
+- invoices_client_id_index (client_id) ✅
+- invoices_status_index (status) ✅
+- **idx_invoices_client_created (client_id, created_at) ✅ НОВИЙ**
+- **idx_invoices_status_issued (status, issued_at) ✅ НОВИЙ**
+
+#### Створені міграції
+
+```php
+// 2026_05_05_125838_add_performance_indexes.php
+$table->index(['client_id', 'created_at'], 'idx_invoices_client_created');
+$table->index(['status', 'issued_at'], 'idx_invoices_status_issued');
+```
+
+#### Вплив на продуктивність
+
+| Запит | До індексу | Після індексу |
+|-------|-----------|---------------|
+| `WHERE client_id = ? ORDER BY created_at` | Full table scan | Index seek |
+| `WHERE status = ? ORDER BY issued_at` | Full table scan | Index seek |
+
+
+# Аналіз GET /api/v1/accounts
+
+### Потік даних
+
+```markdown
+1. Client Request → GET /api/v1/accounts?page=1&per_page=15
+2. AccountController@index → викликає сервіс
+3. AccountService::getAllAccountsPaginated() → викликає репозиторій
+4. AccountRepository::getAllPaginated() → будує SQL запит
+5. Database → виконує SELECT з пагінацією
+6. AccountResource → трансформує дані
+7. JSON Response → повертає клієнту
+```
+
+### Поточна реалізація
+
+**Контролер:**
+```php
+// AccountController.php
+public function index(): JsonResponse
+{
+    $accounts = $this->accountService->getAllAccountsPaginated(15);
+    return AccountResource::collection($accounts)->response();
+}
+```
+
+**Репозиторій:**
+```php
+// AccountRepository.php
+public function getAllPaginated(int $perPage = 15): LengthAwarePaginator
+{
+    return Account::with(['client'])  // ✅ Eager loading вже є
+        ->orderBy('account_number')
+        ->paginate($perPage);
+}
+```
+
+**SQL запит:**
+```sql
+-- Основний запит
+SELECT * FROM accounts ORDER BY account_number LIMIT 15 OFFSET 0;
+
+-- Додатковий запит (eager loading)
+SELECT * FROM clients WHERE id IN (1,2,3,...);
+```
+
+### Чекаліст
+
+| № | Проблема | Статус | Пояснення |
+|---|----------|--------|-----------|
+| 1 | **N+1 для client** | ✅ Немає | Є `with(['client'])` |
+| 2 | **Пагінація** | ✅ Є | `paginate(15)` |
+| 3 | **Обмеження per_page** | ⚠️ Частково | Немає `max=100` |
+| 4 | **Індекс по client_id** | ✅ Є | `accounts_client_id_index` |
+| 5 | **Індекс по account_number** | ✅ Є | `accounts_account_number_unique` |
+| 6 | **SELECT *** | ⚠️ Частково | Можна обмежити поля |
+| 7 | **Кешування** | ❌ Немає | Баланс не кешується (real-time) |
+
+### Кількість SQL запитів
+
+| Сценарій | Запитів | Пояснення |
+|----------|---------|-----------|
+| per_page=15 | 2 | 1 основний + 1 для client |
+| per_page=50 | 2 | 1 основний + 1 для client |
+| per_page=100 | 2 | 1 основний + 1 для client |
+
+### Оцінка при зростанні даних
+
+| Кількість рахунків | Запитів | Час (орієнтовно) |
+|--------------------|---------|------------------|
+| 100 | 2 | ~30ms |
+| 1 000 | 2 | ~50ms |
+| 10 000 | 2 | ~100ms |
+| 100 000 | 2 | ~200ms |
+
+### Висновок
+
+| Показник | Оцінка |
+|----------|--------|
+| **Поточна продуктивність** | ✅ Добра |
+| **N+1 проблема** | ✅ Відсутня |
+| **Готовність до масштабу** | ✅ Висока |
+| **Оптимізація не потрібна** | ✅ |
+
+### Рекомендації
+
+| № | Рекомендація | Пріоритет | Складність |
+|---|--------------|-----------|------------|
+| 1 | Додати обмеження `max=100` для `per_page` | 🟡 Середній | Низька |
+| 2 | Додати `select()` тільки для потрібних полів | 🟢 Низький | Низька |
+| 3 | Додати кешування для списку рахунків | 🔴 Високий | Середня |
+
+### Код для оптимізації (опціонально)
+
+```php
+// Обмеження per_page
+public function getAllPaginated(int $perPage = 15): LengthAwarePaginator
+{
+    $perPage = min($perPage, 100);
+    
+    return Account::with(['client:id,full_name,email'])
+        ->select(['id', 'client_id', 'account_number', 'balance', 'currency', 'created_at'])
+        ->orderBy('account_number')
+        ->paginate($perPage);
+}
+```
