@@ -26,6 +26,7 @@ use Modules\Dashboard\src\Providers\DashboardServiceProvider;
 use Modules\Invoice\src\Providers\InvoiceServiceProvider;
 use Modules\Service\src\Providers\ServiceServiceProvider;
 use Modules\Shared\src\Infrastructure\Middleware\AddCorrelationId;
+use Modules\Shared\src\Providers\TelescopeServiceProvider;
 use Modules\Transaction\src\Domain\Exceptions\InsufficientBalanceException;
 use Modules\Transaction\src\Domain\Exceptions\SameAccountTransferException;
 use Modules\Transaction\src\Providers\EventServiceProvider as TransactionEventServiceProvider;
@@ -54,6 +55,7 @@ return Application::configure(basePath: dirname(__DIR__))
         InvoiceServiceProvider::class,
         InvoiceEventServiceProvider::class,
         ServiceServiceProvider::class,
+        TelescopeServiceProvider::class
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append([HandleCors::class]);
